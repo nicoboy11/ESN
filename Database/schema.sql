@@ -40,6 +40,7 @@ CREATE TABLE user (
     secondLastName varchar(255),
     dateOfBirth date,
     email varchar(255),
+    phone varchar(255),
     password varchar(255),
     startDate datetime,
     endDate datetime,
@@ -48,15 +49,27 @@ CREATE TABLE user (
     avatar varchar(255),
     description text,
     job varchar(255),
-    roleId int,
+    roleId int,/* check if it is the best way*/
+    CONSTRAINT FOREIGN KEY (higherUserId) REFERENCES user(id),
+    CONSTRAINT FOREIGN KEY (roleId) REFERENCES role(id)
+);
+
+CREATE TABLE userSettings(
+	userId int,
+    isAdmin bool,/* check if is the best way*/
+    theme varchar(255),
+    token varchar(255),
     isIosSync bool,
     isAndroidSync bool,
     os_android varchar(255),
     os_ios varchar(255),
     os_chrome varchar(255),
-    os_safari varchar(255),
-    CONSTRAINT FOREIGN KEY (higherUserId) REFERENCES user(id),
-    CONSTRAINT FOREIGN KEY (roleId) REFERENCES role(id)
+    os_safari varchar(255)    
+);
+
+CREATE TABLE userHabilities(
+	userId int,
+    hability varchar(255)  
 );
 
 CREATE TABLE userFollowers(
@@ -109,11 +122,13 @@ CREATE TABLE post(
     userId int,
     message text,
     attachment varchar(255),
+    attachmentTypeId int,
     date datetime,
-    scopeTypeId int,
-    scopeId int,
+    scopeTypeId int, /* tells if the post is intended for a group, or a project or general */
+    scopeId int, /* depending on the scopeType this can be a group id or a project id, if null anyone who follows will see it */
 	CONSTRAINT FOREIGN KEY (userId) REFERENCES user(id),
-    CONSTRAINT FOREIGN KEY (scopeTypeId) REFERENCES scopeType(id)    
+    CONSTRAINT FOREIGN KEY (scopeTypeId) REFERENCES scopeType(id),
+    CONSTRAINT FOREIGN KEY (attachmentTypeId) REFERENCES attachmentType(id)  
 );
 
 CREATE TABLE postUser(
