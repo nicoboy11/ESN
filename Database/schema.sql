@@ -9,52 +9,55 @@ USE esn;
 /* MISC TABLES */
 CREATE TABLE scopeType(
 	id int PRIMARY KEY AUTO_INCREMENT,
-    scopeType varchar(255)
+    description varchar(255)
 );
 
-CREATE TABLE role(
+CREATE TABLE roleType(
 	id int PRIMARY KEY AUTO_INCREMENT,
-    role varchar(255)
+    description varchar(255)
 );
 
-CREATE TABLE state(
+CREATE TABLE stateType(
 	id int PRIMARY KEY AUTO_INCREMENT,
-    state varchar(255)
+    description varchar(255)
 );
 
 CREATE TABLE attachmentType(
 	id int PRIMARY KEY AUTO_INCREMENT,
-    attachmentType varchar(255)
+    description varchar(255)
 );
 
 CREATE TABLE messageType(
 	id int PRIMARY KEY AUTO_INCREMENT,
-    messageType varchar(255)
+    description varchar(255)
 );
 
-/* --------------------------- USER -----------------------------*/
-CREATE TABLE user (
+/* --------------------------- Person -----------------------------*/
+DROP TABLE IF EXISTS person;
+CREATE TABLE person (
 	id int PRIMARY KEY AUTO_INCREMENT,
-    names varchar(255),
-    firstLastName varchar(255),
+    names varchar(255) NOT NULL,
+    firstLastName varchar(255) NOT NULL,
     secondLastName varchar(255),
     dateOfBirth date,
-    email varchar(255),
+    email varchar(255) NOT NULL,
     phone varchar(255),
-    password varchar(255),
-    startDate datetime,
+    ext varchar(255),
+    password varchar(255) NOT NULL,
+    startDate datetime NOT NULL,
     endDate datetime,
-    higherUserId int NULL,
+    higherUserId int,
     lastLogin datetime,
     avatar varchar(255),
+    abbr varchar(3),
     description text,
     job varchar(255),
     roleId int,/* check if it is the best way*/
-    CONSTRAINT FOREIGN KEY (higherUserId) REFERENCES user(id),
-    CONSTRAINT FOREIGN KEY (roleId) REFERENCES role(id)
+    CONSTRAINT FOREIGN KEY (higherUserId) REFERENCES person(id),
+    CONSTRAINT FOREIGN KEY (roleId) REFERENCES roleType(id)
 );
 
-CREATE TABLE userSettings(
+CREATE TABLE settings(
 	userId int,
     isAdmin bool,/* check if is the best way*/
     theme varchar(255),
@@ -67,17 +70,17 @@ CREATE TABLE userSettings(
     os_safari varchar(255)    
 );
 
-CREATE TABLE userHabilities(
+CREATE TABLE habilities(
 	userId int,
     hability varchar(255)  
 );
 
-CREATE TABLE userFollowers(
+CREATE TABLE followers(
 	userId int,
     followerId int,
 	date datetime,
-    CONSTRAINT FOREIGN KEY (userId) REFERENCES user(id),
-    CONSTRAINT FOREIGN KEY (followerId) REFERENCES user(id)
+    CONSTRAINT FOREIGN KEY (userId) REFERENCES person(id),
+    CONSTRAINT FOREIGN KEY (followerId) REFERENCES person(id)
 );
 
 /* TEAMS */
@@ -102,17 +105,17 @@ CREATE TABLE team(
     date datetime,
     userId int,    
     CONSTRAINT FOREIGN KEY (parentTeam) REFERENCES team(id),
-    CONSTRAINT FOREIGN KEY (userId) REFERENCES user(id)
+    CONSTRAINT FOREIGN KEY (userId) REFERENCES person(id)
 );
 
-CREATE TABLE teamUsers(
+CREATE TABLE teamMembers(
 	teamId int,
     userId int,
     lastSeen datetime,
     startDate datetime,
     endDate datetime,
     CONSTRAINT FOREIGN KEY (teamId) REFERENCES team(id),
-    CONSTRAINT FOREIGN KEY (userId) REFERENCES user(id)
+    CONSTRAINT FOREIGN KEY (userId) REFERENCES person(id)
 );
 
 
@@ -126,12 +129,12 @@ CREATE TABLE post(
     date datetime,
     scopeTypeId int, /* tells if the post is intended for a group, or a project or general */
     scopeId int, /* depending on the scopeType this can be a group id or a project id, if null anyone who follows will see it */
-	CONSTRAINT FOREIGN KEY (userId) REFERENCES user(id),
+	CONSTRAINT FOREIGN KEY (userId) REFERENCES person(id),
     CONSTRAINT FOREIGN KEY (scopeTypeId) REFERENCES scopeType(id),
     CONSTRAINT FOREIGN KEY (attachmentTypeId) REFERENCES attachmentType(id)  
 );
 
-CREATE TABLE postUser(
+CREATE TABLE postMembers(
 	postId int,
     userId int,
     isSaved int,
@@ -149,7 +152,7 @@ CREATE TABLE postMessages(
     attachment varchar(255),
     attachmentTypeId int,
     date datetime,
-    CONSTRAINT FOREIGN KEY (userId) REFERENCES user(id),
+    CONSTRAINT FOREIGN KEY (userId) REFERENCES person(id),
     CONSTRAINT FOREIGN KEY (postId) REFERENCES post(id),
     CONSTRAINT FOREIGN KEY (messageTypeId) REFERENCES messageType(id),
     CONSTRAINT FOREIGN KEY (attachmentTypeId) REFERENCES attachmentType(id)
@@ -164,7 +167,7 @@ CREATE TABLE project(
     creatorId int,
 	dueDate date,
     logo varchar(255),
-    CONSTRAINT FOREIGN KEY (creatorId) REFERENCES user(id)
+    CONSTRAINT FOREIGN KEY (creatorId) REFERENCES person(id)
 );
 
 CREATE TABLE projectGroups(
@@ -176,7 +179,7 @@ CREATE TABLE projectGroups(
     CONSTRAINT FOREIGN KEY (teamId) REFERENCES team(id)
 );
 
-CREATE TABLE projectUsers(
+CREATE TABLE projectMembers(
 	projectId int,
     userId int,
     roleId int,
@@ -184,8 +187,8 @@ CREATE TABLE projectUsers(
     startDate datetime,
     endDate datetime,
     CONSTRAINT FOREIGN KEY (projectId) REFERENCES project(id),
-    CONSTRAINT FOREIGN KEY (userId) REFERENCES user(id),
-    CONSTRAINT FOREIGN KEY (roleId) REFERENCES role(id)
+    CONSTRAINT FOREIGN KEY (userId) REFERENCES person(id),
+    CONSTRAINT FOREIGN KEY (roleId) REFERENCES roleType(id)
 );
 
 /* Tasks */
@@ -201,11 +204,11 @@ CREATE TABLE task(
     stateId int,
     calendarId int,/*investigar que se ocupa para google calendar*/
     CONSTRAINT FOREIGN KEY (projectId) REFERENCES project(id),
-	CONSTRAINT FOREIGN KEY (creatorId) REFERENCES user(id),    
-    CONSTRAINT FOREIGN KEY (stateId) REFERENCES state(id)
+	CONSTRAINT FOREIGN KEY (creatorId) REFERENCES person(id),    
+    CONSTRAINT FOREIGN KEY (stateId) REFERENCES stateType(id)
 );
 
-CREATE TABLE taskUsers(
+CREATE TABLE taskMembers(
 	taskId int,
     userId int,
     roleId int,
@@ -213,8 +216,8 @@ CREATE TABLE taskUsers(
     startDate datetime,
     endDate datetime,
     CONSTRAINT FOREIGN KEY (taskId) REFERENCES task(id),
-    CONSTRAINT FOREIGN KEY (userId) REFERENCES user(id),
-    CONSTRAINT FOREIGN KEY (roleId) REFERENCES role(id)
+    CONSTRAINT FOREIGN KEY (userId) REFERENCES person(id),
+    CONSTRAINT FOREIGN KEY (roleId) REFERENCES roleType(id)
 );
 
 CREATE TABLE taskMessages(
@@ -227,12 +230,12 @@ CREATE TABLE taskMessages(
     attachmentTypeId int,
     date datetime,
     CONSTRAINT FOREIGN KEY (taskId) REFERENCES task(id),
-    CONSTRAINT FOREIGN KEY (userId) REFERENCES user(id),
+    CONSTRAINT FOREIGN KEY (userId) REFERENCES person(id),
     CONSTRAINT FOREIGN KEY (attachmentTypeId) REFERENCES attachmentType(id)
     
 );
 
-CREATE TABLE taskCheckList(
+CREATE TABLE checkList(
 	id int PRIMARY KEY AUTO_INCREMENT,
     taskId int ,
     title varchar(255),
@@ -240,10 +243,10 @@ CREATE TABLE taskCheckList(
     dateCreated datetime,
     userId int,
     CONSTRAINT FOREIGN KEY (taskId) REFERENCES task(id),
-    CONSTRAINT FOREIGN KEY (userId) REFERENCES user(id)
+    CONSTRAINT FOREIGN KEY (userId) REFERENCES person(id)
 );
 
-CREATE TABLE taskCheckListItems(
+CREATE TABLE checkListItems(
 	checkListId int,
     item varchar(255),
     dueDate datetime,
@@ -251,9 +254,9 @@ CREATE TABLE taskCheckListItems(
     creatorId int,
     terminatorId int,
     terminationDate datetime,
-    CONSTRAINT FOREIGN KEY (checkListId) REFERENCES taskCheckList(id),
-    CONSTRAINT FOREIGN KEY (creatorId) REFERENCES user(id),
-    CONSTRAINT FOREIGN KEY (terminatorId) REFERENCES user(id)
+    CONSTRAINT FOREIGN KEY (checkListId) REFERENCES checkList(id),
+    CONSTRAINT FOREIGN KEY (creatorId) REFERENCES person(id),
+    CONSTRAINT FOREIGN KEY (terminatorId) REFERENCES person(id)
 );
 
 
