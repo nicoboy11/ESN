@@ -46,20 +46,13 @@ CREATE TABLE person (
     password varchar(255) NOT NULL,
     startDate datetime NOT NULL,
     endDate datetime,
-    higherUserId int,
+    higherPersonId int,
     lastLogin datetime,
     avatar varchar(255),
     abbr varchar(3),
     description text,
     job varchar(255),
     roleId int,/* check if it is the best way*/
-    CONSTRAINT FOREIGN KEY (higherUserId) REFERENCES person(id),
-    CONSTRAINT FOREIGN KEY (roleId) REFERENCES roleType(id)
-);
-
-CREATE TABLE settings(
-	userId int,
-    isAdmin bool,/* check if is the best way*/
     theme varchar(255),
     token varchar(255),
     isIosSync bool,
@@ -67,21 +60,67 @@ CREATE TABLE settings(
     os_android varchar(255),
     os_ios varchar(255),
     os_chrome varchar(255),
-    os_safari varchar(255)    
+    os_safari varchar(255),    
+    CONSTRAINT FOREIGN KEY (higherPersonId) REFERENCES person(id),
+    CONSTRAINT FOREIGN KEY (roleId) REFERENCES roleType(id)
 );
 
-CREATE TABLE habilities(
-	userId int,
-    hability varchar(255)  
-);
-
+DROP TABLE IF EXISTS followers;
 CREATE TABLE followers(
-	userId int,
+	personId int,
     followerId int,
-	date datetime,
-    CONSTRAINT FOREIGN KEY (userId) REFERENCES person(id),
-    CONSTRAINT FOREIGN KEY (followerId) REFERENCES person(id)
+	startDate datetime,
+    CONSTRAINT FOREIGN KEY (personId) REFERENCES person(id),
+    CONSTRAINT FOREIGN KEY (followerId) REFERENCES person(id),
+    CONSTRAINT UNIQUE KEY (personId,followerId)
 );
+
+/* POSTS posts can be done within people, teams, proyects or the whole company */
+DROP TABLE IF EXISTS post;
+CREATE TABLE post(
+	id int PRIMARY KEY AUTO_INCREMENT,
+    personId int,
+    message text,
+    messageTypeId int,
+    attachment varchar(255),
+    attachmentTypeId int,
+    creationDate datetime,
+    scopeTypeId int, /* tells if the post is intended for a group, or a project or general */
+    scopeId int, /* depending on the scopeType this can be a group id or a project id, if null anyone who follows will see it */
+	CONSTRAINT FOREIGN KEY (personId) REFERENCES person(id),
+    CONSTRAINT FOREIGN KEY (messageTypeId) REFERENCES messageType(id),
+    CONSTRAINT FOREIGN KEY (scopeTypeId) REFERENCES scopeType(id),
+    CONSTRAINT FOREIGN KEY (attachmentTypeId) REFERENCES attachmentType(id)  
+);
+
+DROP TABLE IF EXISTS postMessage;
+CREATE TABLE postMessage(
+	id int PRIMARY KEY AUTO_INCREMENT,
+    postId int,
+    personId int,
+    message text,
+    messageTypeId int,    
+    attachment varchar(255),
+    attachmentTypeId int,
+    messageDate datetime,
+    CONSTRAINT FOREIGN KEY (personId) REFERENCES person(id),
+    CONSTRAINT FOREIGN KEY (postId) REFERENCES post(id),
+    CONSTRAINT FOREIGN KEY (messageTypeId) REFERENCES messageType(id),
+    CONSTRAINT FOREIGN KEY (attachmentTypeId) REFERENCES attachmentType(id)
+);
+
+DROP TABLE IF EXISTS postMember;
+CREATE TABLE postMember(
+	postId int,
+    personId int,
+    isSaved bool,
+    isLiked bool,
+    lastSeen datetime,
+	CONSTRAINT FOREIGN KEY (personId) REFERENCES person(id),    
+    CONSTRAINT FOREIGN KEY (postId) REFERENCES post(id)
+);
+
+
 
 /* TEAMS */
 CREATE TABLE team(
@@ -116,46 +155,6 @@ CREATE TABLE teamMembers(
     endDate datetime,
     CONSTRAINT FOREIGN KEY (teamId) REFERENCES team(id),
     CONSTRAINT FOREIGN KEY (userId) REFERENCES person(id)
-);
-
-
-/* POSTS posts can be done within people, teams, proyects or the whole company */
-CREATE TABLE post(
-	id int PRIMARY KEY AUTO_INCREMENT,
-    userId int,
-    message text,
-    attachment varchar(255),
-    attachmentTypeId int,
-    date datetime,
-    scopeTypeId int, /* tells if the post is intended for a group, or a project or general */
-    scopeId int, /* depending on the scopeType this can be a group id or a project id, if null anyone who follows will see it */
-	CONSTRAINT FOREIGN KEY (userId) REFERENCES person(id),
-    CONSTRAINT FOREIGN KEY (scopeTypeId) REFERENCES scopeType(id),
-    CONSTRAINT FOREIGN KEY (attachmentTypeId) REFERENCES attachmentType(id)  
-);
-
-CREATE TABLE postMembers(
-	postId int,
-    userId int,
-    isSaved int,
-    isLiked int,
-    lastSeen datetime,
-    CONSTRAINT FOREIGN KEY (postId) REFERENCES post(id)
-);
-
-CREATE TABLE postMessages(
-	id int PRIMARY KEY AUTO_INCREMENT,
-    postId int,
-    userId int,
-    message text,
-    messageTypeId int,    
-    attachment varchar(255),
-    attachmentTypeId int,
-    date datetime,
-    CONSTRAINT FOREIGN KEY (userId) REFERENCES person(id),
-    CONSTRAINT FOREIGN KEY (postId) REFERENCES post(id),
-    CONSTRAINT FOREIGN KEY (messageTypeId) REFERENCES messageType(id),
-    CONSTRAINT FOREIGN KEY (attachmentTypeId) REFERENCES attachmentType(id)
 );
 
 /*PROJECTS*/

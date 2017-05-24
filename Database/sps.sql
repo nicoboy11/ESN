@@ -192,13 +192,23 @@ DELIMITER $$
 DROP procedure IF EXISTS `CreatePerson`$$
 CREATE PROCEDURE `CreatePerson` (	IN _names varchar(255),IN _firstLastName varchar(255), IN _secondLastName varchar(255), 
 									IN _dateOfBirth date, IN _email varchar(255),IN _phone varchar(255),IN _ext varchar(255),
-                                    IN _password VARCHAR(255),IN _higherUserId int, IN _avatar varchar(255), _roleId int)
+                                    IN _password VARCHAR(255),IN _higherPersonId int, IN _avatar varchar(255),_token varchar(255), _roleId int)
 BEGIN
 	
-    SET @abbr = getAbbr(_names,_firstLastName);
+	DECLARE _existsMessage varchar(255);
+    DECLARE _abbr varchar(3); 
+    
+    SET _existsMessage = validatePersonExists(_email,_names,_firstLastName,_secondLastName,_dateOfBirth);
+    
+    IF _existsMessage <> '' THEN
+		SIGNAL sqlstate 'ERROR' SET message_text = _existsMessage;
+    END IF;
+    
+    SET _abbr = getAbbr(_names,_firstLastName);
+    
 
-    INSERT INTO person (names,firstLastName,secondLastName,dateOfBirth,email,phone,ext,password,higherUserId,avatar,abbr,roleId,startDate)
-    VALUES(_names,_firstLastName,_secondLastName,_dateOfBirth,_email,_phone,_ext,_password,_higherUserId,_avatar,@abbr,_roleId,NOW());
+    INSERT INTO person (names,firstLastName,secondLastName,dateOfBirth,email,phone,ext,password,higherPersonId,avatar,token,abbr,roleId,startDate)
+    VALUES(_names,_firstLastName,_secondLastName,_dateOfBirth,_email,_phone,_ext,_password,_higherPersonId,_avatar,_token,_abbr,_roleId,NOW());
     
 END$$
 
@@ -208,38 +218,62 @@ CREATE PROCEDURE `EditPerson` (	IN _id int,
 								IN _names varchar(255),		IN _firstLastName varchar(255), IN _secondLastName varchar(255), 
 								IN _dateOfBirth date, 		IN _email varchar(255),			IN _phone varchar(255),			
                                 IN _ext varchar(255),		IN _password VARCHAR(255),		IN _startDate varchar(255),		
-                                IN _endDate varchar(255),	IN _higherUserId int,           IN _lastLogin datetime, 	
+                                IN _endDate varchar(255),	IN _higherPersonId int,         IN _lastLogin datetime, 	
                                 IN _avatar varchar(255),	IN _description varchar(255),	IN _job varchar(255), 
-                                IN _roleId int	)
+                                IN _roleId int,				IN _theme varchar(255),	    	IN _token varchar(255),
+								IN _isIosSync bool,    		IN _isAndroidSync bool,    		IN _os_android varchar(255),
+								IN _os_ios varchar(255),    IN _os_chrome varchar(255),		IN _os_safari varchar(255)	)
 BEGIN
 	
-    SET @abbr = getAbbr(_names,_firstLastName);
+	DECLARE _abbr varchar(3); 
+	DECLARE _isLoop int; 
+    
+    SET _abbr = getAbbr(_names,_firstLastName);
+    SET _isLoop = 0;
+    
+    SELECT validateLevelLoop(_id,_higherPersonId) INTO @isLoop;
 
-    UPDATE person
-    SET	names = coalesce(_names,names),	
-		firstLastName = coalesce(_firstLastName,firstLastName),
-        secondLastName = coalesce(_secondLastName,secondLastName),
-        dateOfBirth = coalesce(_dateOfBirth,dateOfBirth),
-        email = coalesce(_email,email),
-        phone = coalesce(_phone,phone),
-        ext = coalesce(_ext,ext),
-        password = coalesce(_password,password),
-        startDate = coalesce(_startDate,startDate),
-        endDate = coalesceForceDate(_endDate,endDate,1),
-        higherUserId = coalesce(_higherUserId,higherUserId),
-        lastLogin = coalesce(_lastLogin,lastLogin),
-        avatar = coalesce(_avatar,avatar),
-        description = coalesce(_description,description),
-        job = coalesce(_job,job),
-        roleId = coalesce(_roleId,roleId),
-        abbr = coalesce(@abbr,abbr)
-	WHERE id = _id;
+	IF _isLoop = 0 THEN
+    
+		UPDATE person
+		SET	names = coalesce(_names,names),	
+			firstLastName = coalesce(_firstLastName,firstLastName),
+			secondLastName = coalesce(_secondLastName,secondLastName),
+			dateOfBirth = coalesce(_dateOfBirth,dateOfBirth),
+			email = coalesce(_email,email),
+			phone = coalesce(_phone,phone),
+			ext = coalesce(_ext,ext),
+			password = coalesce(_password,password),
+			startDate = coalesce(_startDate,startDate),
+			endDate = coalesceForceDate(_endDate,endDate,1),
+			higherPersonId = coalesce(_higherPersonId,higherPersonId),
+			lastLogin = coalesce(_lastLogin,lastLogin),
+			avatar = coalesce(_avatar,avatar),
+			description = coalesce(_description,description),
+			job = coalesce(_job,job),
+			roleId = coalesce(_roleId,roleId),
+			abbr = coalesce(_abbr,abbr),
+			theme = coalesce(_theme,theme),
+            token = coalesce(_token,token),
+			isIosSync = coalesce(_isIosSync,isIosSync),
+            isAndroidSync = coalesce(_isAndroidSync,isAndroidSync),
+            os_android = coalesce(_os_android,os_android),
+			os_ios = coalesce(_os_ios,os_ios),
+            os_chrome = coalesce(_os_chrome,os_chrome),
+            os_safari = coalesce(_os_safari,os_safari)
+		WHERE id = _id;
+        
+    ELSE
+    
+		SIGNAL sqlstate 'ERROR' SET message_text = 'A hierarchical loop was found.';
+    
+    END IF;
+
+
     
 END$$
 
-/* CALL EditPerson(1,NULL,NULL,NULL,NULL,'esosarodriguez1@sheffield.ac.uk',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL) */    
-
-
+/* CALL EditPerson(4,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,4,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL) */    
 DELIMITER $$
 DROP procedure IF EXISTS `GetPerson`$$
 CREATE PROCEDURE `GetPerson` (IN _id int)
@@ -254,14 +288,255 @@ BEGIN
 			ext,
 			startDate,
 			endDate,
-			higherUserId,
+			higherPersonId,
 			lastLogin,
 			avatar,
 			description,
 			job,
 			roleId,
-			abbr
+			abbr,
+            getLevelKey(_id) as levelKey
     FROM person
     WHERE id = _id;
     
 END$$
+
+DELIMITER $$
+DROP procedure IF EXISTS `GetLogin`$$
+CREATE PROCEDURE `GetLogin` (IN _email varchar(255), IN _password varchar(255))
+BEGIN
+
+	DECLARE _id int;
+
+	SELECT id INTO _id
+    FROM person
+    WHERE email = _email AND password = _password;
+    
+    CALL GetPerson(_id);
+
+END$$
+
+/*CALL GetLogin('even.sosa@gmail.com','passwerd');*/
+
+/*================Followers===========================*/
+
+DELIMITER $$
+DROP procedure IF EXISTS `CreateFollower`$$
+CREATE PROCEDURE `CreateFollower` (IN _followerId varchar(255), IN _personId varchar(255))
+BEGIN
+
+	INSERT INTO followers (personId,followerId,startDate) VALUES(_personId,_followerId,NOW());
+
+END$$
+
+DELIMITER $$
+DROP procedure IF EXISTS `DeleteFollower`$$
+CREATE PROCEDURE `DeleteFollower` (IN _followerId varchar(255), IN _personId varchar(255))
+BEGIN
+
+	DELETE FROM followers 
+    WHERE 	personId = _personId AND 
+			followerId = _followerId;
+
+END$$
+
+DELIMITER $$
+DROP procedure IF EXISTS `GetFollows`$$
+CREATE PROCEDURE `GetFollows` (IN _followerId varchar(255))
+BEGIN
+
+	SELECT 	p.id,
+			concat(	p.names,' ',p.firstLastName,ifnull(concat(' ',p.secondLastName),'')	) as person,
+            p.email,
+            isFollowing(f.followerId,f.personId) as isFollowing
+	FROM followers as f
+    INNER JOIN person as p on p.id = f.personId
+    WHERE followerId = _followerId;
+
+END$$
+
+
+DELIMITER $$
+DROP procedure IF EXISTS `GetFollowers`$$
+CREATE PROCEDURE `GetFollowers` (IN _personId varchar(255))
+BEGIN
+
+	SELECT 	p.id,
+			concat(	p.names,' ',p.firstLastName,ifnull(concat(' ',p.secondLastName),'')	) as person,
+            p.email,
+            isFollowing(f.followerId,f.personId) as isFollowing
+	FROM followers as f
+    INNER JOIN person as p on p.id = f.followerId
+    WHERE f.personId = _personId;
+
+END$$
+
+
+
+DELIMITER $$
+DROP procedure IF EXISTS `GetHierarchy`$$
+CREATE PROCEDURE `GetHierarchy` (IN _personId varchar(255))
+BEGIN
+
+	SELECT 	id,
+			getFullName(id) as person,
+			email,
+            getLevelKey(id) as levelKey,
+            getAvatar(id) as avatar
+    FROM person
+	WHERE getLevelKey(id) like concat('%',getLevelKey(_personId),'%')
+    ORDER BY levelKey,person;
+
+
+END$$
+
+
+/*===================================================================================================*/
+/*===================================================================================================*/
+/*=========================================POSTS ============================================*/
+
+DELIMITER $$
+DROP procedure IF EXISTS `CreatePost`$$
+CREATE PROCEDURE `CreatePost` (	IN _personId int,			IN _message text,			IN _messageTypeId int,
+								IN _attachment varchar(255),IN _attachmentTypeId int,  	IN _scopeTypeId int,        
+                                IN _scopeId int	)
+BEGIN
+
+	INSERT INTO post (personId,message,messageTypeId,attachment,attachmentTypeId,scopeTypeId,scopeId,creationDate)
+	VALUES(_personId,_message,_messageTypeId,_attachment,_attachmentTypeId,_scopeTypeId,_scopeId,NOW());
+
+END$$
+
+DELIMITER $$
+DROP procedure IF EXISTS `GetPost`$$
+CREATE PROCEDURE `GetPost` (	IN _postId int	)
+BEGIN
+
+	SELECT 	pst.id,
+			pst.personId,
+			getFullName(pe.id) as person,
+			pst.message,
+            pst.messageTypeId,
+            ifnull(attachment,'') as attachment,
+            attachmentTypeId,
+            scopeTypeId,
+            scopeId,
+            creationDate
+    FROM post as pst
+    INNER JOIN person as pe on pe.id = pst.personId
+    WHERE pst.id = _postId;
+
+END$$
+
+DELIMITER $$
+DROP procedure IF EXISTS `EditPost`$$
+CREATE PROCEDURE `EditPost` (	IN _postId int,				IN _message text,		IN _attachment varchar(255),
+								IN _attachmentTypeId int,  	IN _scopeTypeId int,    IN _scopeId int	)
+BEGIN
+
+	UPDATE post
+    SET	message = 			coalesce(_message,message),
+		attachment = 		coalesceForceVarchar(_attachment,attachment,true),
+        attachmentTypeId = 	coalesceForceInt(_attachmentTypeId,attachmentTypeId,true),
+        scopeTypeId = 		coalesceForceInt(_scopeTypeId,scopeTypeId,true),
+        scopeId = 			coalesceForceInt(_scopeId,scopeId,true)
+    WHERE id = 	_postId;
+
+END$$
+
+DELIMITER $$
+DROP procedure IF EXISTS `CreatePostMessage`$$
+CREATE PROCEDURE `CreatePostMessage` (	IN _postId int,			IN _personId int,				IN _message text,		
+										IN _messageTypeId int,	IN _attachment varchar(255),  	IN _attachmentTypeId int)
+BEGIN
+
+	INSERT INTO postMessage (postId,personId,message,messageTypeId,attachment,attachmentTypeId,messageDate)
+    VALUES(_postId,_personId,_message,_messageTypeId,_attachment,_attachmentTypeId,NOW());
+
+END$$
+
+DELIMITER $$
+DROP procedure IF EXISTS `DeletePostMessage`$$
+CREATE PROCEDURE `DeletePostMessage` (	IN _id int )
+BEGIN
+
+	DELETE FROM postMessage
+    WHERE id = _id;
+
+END$$
+
+
+
+DELIMITER $$
+DROP procedure IF EXISTS `CreatePostMember`$$
+CREATE PROCEDURE `CreatePostMember` (	IN _postId int,		IN _personId int,		IN _isSaved bool,		
+										IN _isliked bool  )
+BEGIN
+
+	INSERT INTO postMember (postId,personId,isSaved,isLiked,lastSeen)
+    VALUES(_postId,_personId,_isSaved,_isLiked,NOW());
+
+END$$
+
+
+DELIMITER $$
+DROP procedure IF EXISTS `EditPostMember`$$
+CREATE PROCEDURE `EditPostMember` (	IN _postId int,		IN _personId int,		IN _isSaved bool,		
+									IN _isliked bool  )
+BEGIN
+
+	IF (	SELECT count(*) 
+			FROM postMember
+            WHERE 	postId = _postId AND
+					personId = _personId	) > 0 
+	THEN
+		
+        UPDATE	postMember
+        SET	isSaved = _isSaved,
+			isLiked = _isLiked,
+            lastSeen = NOW()
+        WHERE 	postId = _postId AND
+				personId = _personId;
+        
+	ELSE
+		CALL CreatePostMember(_postId,_personId,_isSaved,_isliked);
+	END IF;
+
+END$$
+
+/*--------------FEED--------------*/
+DELIMITER $$
+DROP procedure IF EXISTS `GetFeed`$$
+CREATE PROCEDURE `GetFeed` (	IN _personId int,	IN _scopeTypeId int, IN _scopeId int  )
+BEGIN
+
+
+	/*REGLAS:
+		Lost post pueden ser visto por:
+			-Si es scope Type 1 (all)
+				-seguidores
+			-Si es scope Type 2 (Team)
+				-Todas las personas de un grupo
+			-Si es scopeType 3 (Project)
+				-Todas las personas de un proyecto
+			-Si es scopeType 4 (Person)
+				-Todas las personas dentro de una conversación
+	*/
+
+	SELECT 	pst.id,
+			pst.personId,
+			pst.message,
+			pst.messageTypeId,
+			getFullName(pst.personId) as person,
+			messageTypeId,
+			attachment,
+			attachmentTypeId,
+			creationDate
+	FROM post as pst
+	INNER JOIN followers as f on pst.personId = f.personId
+	WHERE f.followerId = _personId and pst.scopeTypeId = _scopeTypeId
+    ORDER BY creationDate desc;
+    
+END$$
+
+
