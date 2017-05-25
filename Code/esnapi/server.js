@@ -1,63 +1,193 @@
 var express = require('express'),
     app = express(),
     bodyParser = require('body-parser'),
+    mysql = require('mysql'),
     server = app.listen(3001);
 
+var config = require('./config.json');
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded());
 
+var conn = mysql.createConnection({
+    host: config.db.host,
+    por: config.db.port,
+    database: config.db.database,
+    user: config.db.user,
+    password: config.db.password
+});
+
+
+function db(sql,conn,callback){
+    try{
+        conn.connect(function(err){
+
+            if(err) console.log(err.message);
+
+            console.log("Executing: " + sql);
+            console.log("conected!");
+
+            conn.query(sql,callback);
+
+        });
+    }
+    catch(err){
+        console.log(err.message);
+    }
+}
+
+/** Error Handling */
+function handle(error,res,show){
+    if(error){
+        var message = error.message.replace(error.code,"").replace(":","").trim();
+
+        console.log("Error" + message);
+
+        if(show){
+            res.status(422).end( responseMsg(message) );
+        }
+    }
+}
+
+function responseMsg(mensaje){
+    return JSON.stringify({"message":mensaje});
+}
+
+function handleResponse(result,res,errorMessage){
+
+    if(errorMessage == undefined) errorMessage = "";
+
+    if(result != undefined && result[0] != undefined ){
+        if(result[0].length == 0){
+            res.status(401).end( responseMsg(errorMessage) );
+        }
+        else{
+            res.status(200).end( JSON.stringify(result[0]) );
+        }
+    }
+    else{
+        res.status(200).end( responseMsg("Ok") );
+    }
+
+}
+
+/**
+ * Filter parameters
+ */
+function fpVarchar(param){
+
+    if(param == undefined)  return "NULL";
+
+    return "'" + param + "'";
+}
+
+function fpDate(param){
+
+    if(param == undefined)  return "NULL";
+    if(param == "") return "NULL";
+
+    return "'" + param + "'";
+}
+
+function fpInt(param){
+
+    if(param == undefined)  return "NULL";
+    if(param == "") return "NULL";
+
+    return param;
+}
+
+function fpBool(param){
+
+    if(param == undefined)  return "NULL";
+    if(param == "") return "NULL";
+
+    return param;
+}
 /**
  * USER RELATED ROUTES
  */
-app.get('/user/:id',function(req,res){
-    /*CALL GetPerson(12)*/
-    res.send('This is the user: ' + req.params.id );
+app.get('/person/:id',function(req,res){
+
+    db("CALL GetPerson(" + req.params.id + ")",conn,function(error,result){
+        handle(error,res,true);
+        res.status(200).end(result[0][0]);
+    });
+
 });
 
-app.post('/user',function(req,res){
-    /*CALL CreatePerson('Even','Sosa','Rodríguez','1985-10-23','even.sosa@gmail.com','07731917608','','password',NULL,'',1); */
-    res.send('This creates a new user');
+app.post('/person',function(req,res){
+
+    db("CALL CreatePerson(" + fpVarchar(req.body.names) + "," + fpVarchar(req.body.firstLastName) + "," + fpVarchar(req.body.secondLastName) + 
+                        "," + fpDate(req.body.dateOfBirth) + "," + fpVarchar(req.body.email) + "," + fpVarchar(req.body.phone) + "," + fpVarchar(req.body.ext) + 
+                        "," + fpVarchar(req.body.password) + "," + fpInt(req.body.genderId) + "," + fpInt(req.body.highestPersonId) + 
+                        "," + fpVarchar(req.body.avatar) + "," + fpVarchar(req.body.token) + "," + fpInt(req.body.roleId) + ");",
+
+    conn,function(error,result){
+        handle(error,res,true);
+        res.status(200).end(JSON.stringify(result[0]));
+    });
+
 });
 
-app.put('/user/:id',function(req,res){
-    res.send('This edits user' + req.params.id);
-    /*  CALL EditPerson(4,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,4,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL)
-        --error 1644 = a hierichal loop was found
-    */
+app.put('/person/:id',function(req,res){
+
+    db("CALL EditPerson(" + fpInt(req.body.id) +
+                        "," + fpVarchar(req.body.names) + "," + fpVarchar(req.body.firstLastName) + "," + fpVarchar(req.body.secondLastName) + 
+                        "," + fpDate(req.body.dateOfBirth) + "," + fpVarchar(req.body.email) + "," + fpVarchar(req.body.phone) + 
+                        "," + fpVarchar(req.body.ext) + "," + fpVarchar(req.body.password) + "," + fpInt(req.body.genderId) + 
+                        "," + fpDate(req.body.startDate) + "," + fpDate(req.body.endDate) + "," + fpInt(req.body.higherPersonId) + 
+                        "," + fpDate(req.body.lastLogin) + "," + fpVarchar(req.body.avatar) + "," + fpVarchar(req.body.description) + 
+                        "," + fpVarchar(req.body.job) + "," + fpInt(req.body.roleId) + "," + fpInt(req.body.theme) + 
+                        "," + fpVarchar(req.body.token) + "," + fpBool(req.body.isIosSync) + "," + fpBool(req.body.isAndroidSync) + 
+                        "," + fpVarchar(req.body.os_android) + "," + fpVarchar(req.body.os_ios) + "," + fpVarchar(req.body.os_chrome) + "," + fpVarchar(req.body.os_safari) + ");",
+    conn,function(error,result){
+        handle(error,res,true);
+        res.status(200).end( responseMsg("Updated") );
+    });
+
 });
 
 app.get('/loginUser',function(req,res){
-    /*CALL GetLogin('even.sosa@gmail.com','passwerd');*/
-    res.send('Logs the user in ' + JSON.stringify(req.query));
+    db("CALL GetLogin(" + fpVarchar(req.query.email) + "," + fpVarchar(req.query.password) + ")",conn,function(error,result){
+        handle(error,res,true);
+        handleResponse(result,res,"Login Failed!");
+    });    
 });
 
 app.get('/hierarchy/:id',function(req,res){
-    /*CALL GetHierarchy(5) */
-    res.send('The hierarchy for user ' + req.params.id + ' is... ' );
+    db("CALL GetHierarchy(" + fpInt(req.params.id) + ")",conn,function(error,result){
+        handle(error,res,true);
+        handleResponse(result,res);
+    });       
 });
-
 /**------------------------------------------------------------------------ */
 app.post('/user/:a/follows/:b',function(req,res){
-    /*CALL CreateFollower(2,1); 
-        --error 1062 = Duplicate entry
-    */
-    res.send('User ' + req.params.a + ' starts following user ' + req.params.b);
+    db("CALL CreateFollower(" + fpInt(req.params.a) + "," + fpInt(req.params.b) + ")",conn,function(error,result){
+        handle(error,res,true);
+        handleResponse(result,res);
+    });     
 });
 
 app.delete('/user/:a/follows/:b',function(req,res){
-    /*CALL DeleteFolloweR(2,1);*/
-    res.send('User ' + req.params.a + ' stops following user ' + req.params.b);
+    db("CALL DeleteFollower(" + fpInt(req.params.a) + "," + fpInt(req.params.b) + ")",conn,function(error,result){
+        handle(error,res,true);
+        handleResponse(result,res);
+    });        
 });
 
 app.get('/user/:a/follows',function(req,res){
-    /*CALL GetFollows(3);*/
-    res.send('User ' + req.params.a + ' follows this people' );
+    db("CALL GetFollows(" + fpInt(req.params.a) + ")",conn,function(error,result){
+        handle(error,res,true);
+        handleResponse(result,res);
+    });       
 });
 
 app.get('/user/:a/followers',function(req,res){
-    /*CALL GetFollowers(1);*/
-    res.send('Users that follow ' + req.params.a);
+    db("CALL GetFollowers(" + fpInt(req.params.a) + ")",conn,function(error,result){
+        handle(error,res,true);
+        handleResponse(result,res);
+    });       
 });
 
 /**

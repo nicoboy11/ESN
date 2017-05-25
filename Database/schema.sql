@@ -32,6 +32,33 @@ CREATE TABLE messageType(
     description varchar(255)
 );
 
+CREATE TABLE gender(
+	id int PRIMARY KEY AUTO_INCREMENT,
+    description varchar(255)
+);
+
+DROP TABLE IF EXISTS country;
+CREATE TABLE country(
+	id int PRIMARY KEY AUTO_INCREMENT,
+    description varchar(255)
+);
+
+DROP TABLE IF EXISTS province;
+CREATE TABLE province(
+	id int PRIMARY KEY AUTO_INCREMENT,
+    description varchar(255),
+    countryId int,
+    CONSTRAINT FOREIGN KEY (countryId) REFERENCES country(id)
+);
+
+DROP TABLE IF EXISTS city;
+CREATE TABLE city(
+	id int PRIMARY KEY AUTO_INCREMENT,
+    description varchar(255),
+    provinceId int,
+    CONSTRAINT FOREIGN KEY (provinceId) REFERENCES province(id)
+);
+
 /* --------------------------- Person -----------------------------*/
 DROP TABLE IF EXISTS person;
 CREATE TABLE person (
@@ -44,6 +71,7 @@ CREATE TABLE person (
     phone varchar(255),
     ext varchar(255),
     password varchar(255) NOT NULL,
+    genderId int NOT NULL,
     startDate datetime NOT NULL,
     endDate datetime,
     higherPersonId int,
@@ -62,7 +90,8 @@ CREATE TABLE person (
     os_chrome varchar(255),
     os_safari varchar(255),    
     CONSTRAINT FOREIGN KEY (higherPersonId) REFERENCES person(id),
-    CONSTRAINT FOREIGN KEY (roleId) REFERENCES roleType(id)
+    CONSTRAINT FOREIGN KEY (roleId) REFERENCES roleType(id),
+    CONSTRAINT FOREIGN KEY (genderId) REFERENCES gender(id)
 );
 
 DROP TABLE IF EXISTS followers;
@@ -117,22 +146,24 @@ CREATE TABLE postMember(
     isLiked bool,
     lastSeen datetime,
 	CONSTRAINT FOREIGN KEY (personId) REFERENCES person(id),    
-    CONSTRAINT FOREIGN KEY (postId) REFERENCES post(id)
+    CONSTRAINT FOREIGN KEY (postId) REFERENCES post(id),
+    CONSTRAINT UNIQUE KEY (postId,personId)
 );
 
 
 
 /* TEAMS */
+DROP TABLE IF EXISTS team;
 CREATE TABLE team(
 	id int PRIMARY KEY AUTO_INCREMENT,
     name varchar(255),
     abbr varchar(10),
     teamGoal text,
-    parentTeam int NULL,
+    parentTeamId int NULL,
     email varchar(255),
     address text,
-    city varchar(255),
-    country varchar(255),
+    postCode varchar(10),
+    cityId int,
     phone1 varchar(255),
     ext1 varchar(255),
     phone2 varchar(255),
@@ -141,20 +172,27 @@ CREATE TABLE team(
     longitude varchar(255),
     logo varchar(255),
     isActive bool,
-    date datetime,
-    userId int,    
-    CONSTRAINT FOREIGN KEY (parentTeam) REFERENCES team(id),
-    CONSTRAINT FOREIGN KEY (userId) REFERENCES person(id)
+    creationDate datetime,
+    personId int,    
+    stateTypeId int, /* public or private group */
+    CONSTRAINT FOREIGN KEY (parentTeamId) REFERENCES team(id),
+    CONSTRAINT FOREIGN KEY (cityId) REFERENCES city(id),
+    CONSTRAINT FOREIGN KEY (personId) REFERENCES person(id),
+    CONSTRAINT FOREIGN KEY (stateTypeId) REFERENCES stateType(id)
 );
 
-CREATE TABLE teamMembers(
+DROP TABLE IF EXISTS teamMember;
+CREATE TABLE teamMember(
 	teamId int,
-    userId int,
+    personId int,
     lastSeen datetime,
     startDate datetime,
     endDate datetime,
+    roleId int,
     CONSTRAINT FOREIGN KEY (teamId) REFERENCES team(id),
-    CONSTRAINT FOREIGN KEY (userId) REFERENCES person(id)
+    CONSTRAINT FOREIGN KEY (personId) REFERENCES person(id),
+    CONSTRAINT FOREIGN KEY (roleId) REFERENCES roleType(id),
+    CONSTRAINT UNIQUE KEY (teamId,personId)
 );
 
 /*PROJECTS*/

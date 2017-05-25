@@ -1,15 +1,16 @@
-DROP FUNCTION IF EXISTS getAbbr;
-DELIMITER $$;
+
+DELIMITER $$
+DROP FUNCTION IF EXISTS getAbbr$$
 CREATE FUNCTION `getAbbr` (name varchar(255),lastName varchar(255))
 RETURNS VARCHAR(3)
 BEGIN
 
 	RETURN CONCAT(LEFT(name,1),LEFT(lastName,1));
     
-END;
+END$$
 
-DROP FUNCTION IF EXISTS coalesceForceVarchar;
-DELIMITER $$;
+DELIMITER $$
+DROP FUNCTION IF EXISTS coalesceForceVarchar$$
 CREATE FUNCTION `coalesceForceVarchar` (field1 varchar(255),field2 varchar(255),forceNull bool)
 RETURNS VARCHAR(255)
 BEGIN
@@ -24,10 +25,11 @@ BEGIN
 		RETURN field1;
     END IF;
     
-END;
+END$$
 
-DROP FUNCTION IF EXISTS coalesceForceDate;
-DELIMITER $$;
+
+DELIMITER $$
+DROP FUNCTION IF EXISTS coalesceForceDate$$
 CREATE FUNCTION `coalesceForceDate` (field1 datetime,field2 datetime,forceNull bool)
 RETURNS datetime
 BEGIN
@@ -42,10 +44,10 @@ BEGIN
 		RETURN field1;
     END IF;
     
-END;
+END$$
 
-DROP FUNCTION IF EXISTS coalesceForceInt;
-DELIMITER $$;
+DELIMITER $$
+DROP FUNCTION IF EXISTS coalesceForceInt$$
 CREATE FUNCTION `coalesceForceInt` (_field1 int,_field2 int,_forceNull bool)
 RETURNS int
 BEGIN
@@ -60,11 +62,10 @@ BEGIN
 		RETURN _field1;
     END IF;
     
-END;
+END$$
 
-
-DROP FUNCTION IF EXISTS validatePersonExists;
-DELIMITER $$;
+DELIMITER $$
+DROP FUNCTION IF EXISTS validatePersonExists$$
 CREATE FUNCTION validatePersonExists(_email varchar(255),_names varchar(255), _firstLastName varchar(255), _secondLastName varchar(255), _dateOfBirth date) RETURNS varchar(255)
 BEGIN
 	
@@ -72,7 +73,7 @@ BEGIN
     IF (	SELECT count(*) FROM person
 			WHERE 	email = _email	) = 1 THEN
             
-		RETURN 'email match';
+		RETURN 'Email is in use.';
         
 	END IF;        
     
@@ -83,18 +84,17 @@ BEGIN
 					names = _names AND 
 					dateOfBirth = _dateOfBirth	) = 1 THEN
     
-		RETURN 'name match';
+		RETURN 'Person already signed up.';
     
 	END IF;    
 
     RETURN '';
     
-END;
+END$$
 
 
-
-DROP FUNCTION IF EXISTS validateLevelLoop;
-DELIMITER $$;
+DELIMITER $$
+DROP FUNCTION IF EXISTS validateLevelLoop$$
 CREATE FUNCTION validateLevelLoop(_id int,_newHigherPersonId int) RETURNS int
 BEGIN
 
@@ -108,11 +108,11 @@ BEGIN
 
 	RETURN @loopFound;
     
-END;
+END$$
 
 
-DROP FUNCTION IF EXISTS getLevelKey;
-DELIMITER $$;
+DELIMITER $$
+DROP FUNCTION IF EXISTS getLevelKey$$
 CREATE FUNCTION getLevelKey(_id int) RETURNS varchar(1000) CHARSET utf8
 BEGIN
 
@@ -146,11 +146,11 @@ BEGIN
     
 	RETURN _key;
     
-END;
+END$$
 
 
-DROP FUNCTION IF EXISTS isFollowing;
-DELIMITER $$;
+DELIMITER $$
+DROP FUNCTION IF EXISTS isFollowing$$
 CREATE FUNCTION isFollowing(_followerId int,_personId int) RETURNS bool
 BEGIN
 
@@ -166,11 +166,11 @@ BEGIN
 		RETURN true;
 	END IF;
 
-END;
+END$$
 
 
-DROP FUNCTION IF EXISTS getFullName;
-DELIMITER $$;
+DELIMITER $$
+DROP FUNCTION IF EXISTS getFullName$$
 CREATE FUNCTION getFullName(_personId int) RETURNS varchar(255)
 BEGIN
 
@@ -182,11 +182,11 @@ BEGIN
 
 	RETURN fullName;
 
-END;    
+END$$
 
 
-DROP FUNCTION IF EXISTS getAvatar;
-DELIMITER $$;
+DELIMITER $$
+DROP FUNCTION IF EXISTS getAvatar$$
 CREATE FUNCTION getAvatar(_personId int) RETURNS varchar(255)
 BEGIN
 
@@ -198,6 +198,6 @@ BEGIN
 
 	RETURN _avatar;
 
-END;  
+END$$
 
 

@@ -1,5 +1,49 @@
 USE `esn`;
+/*================GENDER==============================*/
+DELIMITER $$
+DROP procedure IF EXISTS `CreateGender`$$
+CREATE PROCEDURE `CreateGender` (IN _description varchar(255))
+BEGIN
 
+	INSERT INTO gender(description) VALUES(_description);
+
+    SELECT LAST_INSERT_ID() as id;
+    
+END$$
+
+/*================PROVINCE==============================*/
+DELIMITER $$
+DROP procedure IF EXISTS `CreateProvince`$$
+CREATE PROCEDURE `CreateProvince` (IN _countryId int, IN _description varchar(255))
+BEGIN
+
+	INSERT INTO province(description) VALUES(_description);
+
+    SELECT LAST_INSERT_ID() as id;
+    
+END$$
+/*================CITY==============================*/
+DELIMITER $$
+DROP procedure IF EXISTS `CreateCity`$$
+CREATE PROCEDURE `CreateCity` (IN _provinceId int, IN _description varchar(255))
+BEGIN
+
+	INSERT INTO city(description) VALUES(_description);
+
+    SELECT LAST_INSERT_ID() as id;
+    
+END$$
+/*================CONTRIES==============================*/
+DELIMITER $$
+DROP procedure IF EXISTS `CreateCountry`$$
+CREATE PROCEDURE `CreateCountry` (IN _description varchar(255))
+BEGIN
+
+	INSERT INTO country(description) VALUES(_description);
+
+    SELECT LAST_INSERT_ID() as id;
+    
+END$$
 /*================SCOPE TYPE===========================*/
 DELIMITER $$
 DROP procedure IF EXISTS `CreateScopeType`$$
@@ -192,7 +236,8 @@ DELIMITER $$
 DROP procedure IF EXISTS `CreatePerson`$$
 CREATE PROCEDURE `CreatePerson` (	IN _names varchar(255),IN _firstLastName varchar(255), IN _secondLastName varchar(255), 
 									IN _dateOfBirth date, IN _email varchar(255),IN _phone varchar(255),IN _ext varchar(255),
-                                    IN _password VARCHAR(255),IN _higherPersonId int, IN _avatar varchar(255),_token varchar(255), _roleId int)
+                                    IN _password VARCHAR(255),IN _genderId int,IN _higherPersonId int, 
+                                    IN _avatar varchar(255),_token varchar(255), _roleId int)
 BEGIN
 	
 	DECLARE _existsMessage varchar(255);
@@ -207,8 +252,10 @@ BEGIN
     SET _abbr = getAbbr(_names,_firstLastName);
     
 
-    INSERT INTO person (names,firstLastName,secondLastName,dateOfBirth,email,phone,ext,password,higherPersonId,avatar,token,abbr,roleId,startDate)
-    VALUES(_names,_firstLastName,_secondLastName,_dateOfBirth,_email,_phone,_ext,_password,_higherPersonId,_avatar,_token,_abbr,_roleId,NOW());
+    INSERT INTO person (names,firstLastName,secondLastName,dateOfBirth,email,phone,ext,password,genderId,higherPersonId,avatar,token,abbr,roleId,startDate)
+    VALUES(_names,_firstLastName,_secondLastName,_dateOfBirth,_email,_phone,_ext,_password,_genderId,_higherPersonId,_avatar,_token,_abbr,_roleId,NOW());
+    
+    SELECT LAST_INSERT_ID() as id;
     
 END$$
 
@@ -217,12 +264,13 @@ DROP procedure IF EXISTS `EditPerson`$$
 CREATE PROCEDURE `EditPerson` (	IN _id int,
 								IN _names varchar(255),		IN _firstLastName varchar(255), IN _secondLastName varchar(255), 
 								IN _dateOfBirth date, 		IN _email varchar(255),			IN _phone varchar(255),			
-                                IN _ext varchar(255),		IN _password VARCHAR(255),		IN _startDate varchar(255),		
-                                IN _endDate varchar(255),	IN _higherPersonId int,         IN _lastLogin datetime, 	
-                                IN _avatar varchar(255),	IN _description varchar(255),	IN _job varchar(255), 
-                                IN _roleId int,				IN _theme varchar(255),	    	IN _token varchar(255),
-								IN _isIosSync bool,    		IN _isAndroidSync bool,    		IN _os_android varchar(255),
-								IN _os_ios varchar(255),    IN _os_chrome varchar(255),		IN _os_safari varchar(255)	)
+                                IN _ext varchar(255),		IN _password VARCHAR(255),		IN _genderId int,
+                                IN _startDate varchar(255),	IN _endDate varchar(255),		IN _higherPersonId int,         
+                                IN _lastLogin datetime, 	IN _avatar varchar(255),		IN _description varchar(255),	
+                                IN _job varchar(255),       IN _roleId int,					IN _theme varchar(255),	    	
+                                IN _token varchar(255),		IN _isIosSync bool,    			IN _isAndroidSync bool,    		
+                                IN _os_android varchar(255),IN _os_ios varchar(255),    	IN _os_chrome varchar(255),		
+                                IN _os_safari varchar(255)	)
 BEGIN
 	
 	DECLARE _abbr varchar(3); 
@@ -244,6 +292,7 @@ BEGIN
 			phone = coalesce(_phone,phone),
 			ext = coalesce(_ext,ext),
 			password = coalesce(_password,password),
+            genderId = coalesce(_genderId,genderId),
 			startDate = coalesce(_startDate,startDate),
 			endDate = coalesceForceDate(_endDate,endDate,1),
 			higherPersonId = coalesce(_higherPersonId,higherPersonId),
@@ -279,25 +328,30 @@ DROP procedure IF EXISTS `GetPerson`$$
 CREATE PROCEDURE `GetPerson` (IN _id int)
 BEGIN
 	
-    SELECT	names,	
-			firstLastName,
-			secondLastName,
-			dateOfBirth,
-			email,
-			phone,
-			ext,
-			startDate,
-			endDate,
-			higherPersonId,
-			lastLogin,
-			avatar,
-			description,
-			job,
-			roleId,
-			abbr,
+    SELECT	p.names,	
+			p.firstLastName,
+			p.secondLastName,
+            getFullName(p.id) as person,
+			p.dateOfBirth,
+			p.email,
+            p.genderId,
+            g.description as gender,
+			p.phone,
+			p.ext,
+			p.startDate,
+			p.endDate,
+			p.higherPersonId,
+            getFullName(p.higherPersonId) as higherPerson,
+			p.lastLogin,
+			p.avatar,
+			p.description,
+			p.job,
+			p.roleId,
+			p.abbr,
             getLevelKey(_id) as levelKey
-    FROM person
-    WHERE id = _id;
+    FROM person as p
+    INNER JOIN gender as g on g.id = p.genderId
+    WHERE p.id = _id;
     
 END$$
 
@@ -346,7 +400,7 @@ CREATE PROCEDURE `GetFollows` (IN _followerId varchar(255))
 BEGIN
 
 	SELECT 	p.id,
-			concat(	p.names,' ',p.firstLastName,ifnull(concat(' ',p.secondLastName),'')	) as person,
+			getFullName(p.id) as person,
             p.email,
             isFollowing(f.followerId,f.personId) as isFollowing
 	FROM followers as f
@@ -362,7 +416,7 @@ CREATE PROCEDURE `GetFollowers` (IN _personId varchar(255))
 BEGIN
 
 	SELECT 	p.id,
-			concat(	p.names,' ',p.firstLastName,ifnull(concat(' ',p.secondLastName),'')	) as person,
+			getFullName(p.id) as person,
             p.email,
             isFollowing(f.followerId,f.personId) as isFollowing
 	FROM followers as f
@@ -404,6 +458,8 @@ BEGIN
 
 	INSERT INTO post (personId,message,messageTypeId,attachment,attachmentTypeId,scopeTypeId,scopeId,creationDate)
 	VALUES(_personId,_message,_messageTypeId,_attachment,_attachmentTypeId,_scopeTypeId,_scopeId,NOW());
+
+	SELECT LAST_INSERT_ID() as id;
 
 END$$
 
@@ -539,4 +595,142 @@ BEGIN
     
 END$$
 
+/*===================================================================================================*/
+/*===================================================================================================*/
+/*=========================================TEAMS============================================*/
 
+DELIMITER $$
+DROP procedure IF EXISTS `CreateTeam`$$
+CREATE PROCEDURE `CreateTeam` (	IN _name varchar(255),		IN _abbr varchar(10),		IN _teamGoal text,
+								IN _parentTeamId int,		IN _email varchar(255),		IN _address text,
+                                IN _postCode varchar(10),	IN _cityId int,				IN _phone1 varchar(10),
+                                IN _ext1 varchar(255),		IN _phone2 varchar(255),	IN _ext2 varchar(255),
+                                IN _latitude varchar(255),	IN _longitude varchar(255),	IN _logo varchar(255),
+								IN _personId int,			IN _stateTypeId int	)
+BEGIN
+
+	INSERT INTO team ( 	name,			abbr,			teamGoal, 
+						parentTeamId, 	email, 			address, 
+                        postCode, 		cityId, 		phone1, 
+                        ext1, 			phone2, 		ext2,
+                        latitude, 		longitude, 		logo, 
+                        personId,		stateTypeId,
+                        isActive,		creationDate	)
+	VALUES(	_name,			_abbr,			_teamGoal, 
+			_parentTeamId, 	_email, 		_address, 
+			_postCode, 		_cityId, 		_phone1, 
+			_ext1, 			_phone2, 		_ext2,
+			_latitude, 		_longitude, 	_logo, 
+			_personId,		_stateTypeId,
+			1,		NOW()	);
+                        
+	SELECT LAST_INSERT_ID() as id;
+
+END$$
+
+
+DELIMITER $$
+DROP procedure IF EXISTS `EditTeam`$$
+CREATE PROCEDURE `EditTeam` (	IN _teamId int,
+								IN _name varchar(255),		IN _abbr varchar(10),		IN _teamGoal text,
+								IN _parentTeamId int,		IN _email varchar(255),		IN _address text,
+                                IN _postCode varchar(10),	IN _cityId int,				IN _phone1 varchar(10),
+                                IN _ext1 varchar(255),		IN _phone2 varchar(255),	IN _ext2 varchar(255),
+                                IN _latitude varchar(255),	IN _longitude varchar(255),	IN _logo varchar(255),
+								IN _personId int,			IN _stateTypeId int,		IN _isActive int	)
+BEGIN
+
+	UPDATE team
+    SET name = 			coalesce(_name,name),
+		abbr = 			coalesce(_abbr,abbr),
+        teamGoal = 		coalesce(_teamGoal,teamGoal),
+        parentTeamId = 	coalesce(_parentTeamId,parentTeamId),
+        email = 		coalesce(_email,email),
+        address = 		coalesce(_address,address),
+        postCode = 		coalesce(_postCode,postCode),
+        cityId = 		coalesce(_cityId,cityId),
+        phone1 = 		coalesce(_phone1,phone1),
+        ext1 = 			coalesce(_ext1,ext1),
+        phone2 = 		coalesce(_phone2,phone2),
+        ext2 = 			coalesce(_ext2,ext2),
+        latitude = 		coalesce(_latitude,latitude),
+        longitude = 	coalesce(_longitude,longitude),
+        logo = 			coalesce(_logo,logo),
+        personID = 		coalesce(_personId,personId),
+        stateTypeId = 	coalesce(_stateTypeId,stateTypeId),
+        isActive = 		coalesce(_isActive,isActive)
+    WHERE id = _teamId;
+
+END$$
+
+
+DELIMITER $$
+DROP procedure IF EXISTS `GetTeam`$$
+CREATE PROCEDURE `GetTeam` (	IN _teamId int	)
+BEGIN
+    SELECT	name,
+			abbr,
+			teamGoal,
+			parentTeamId,
+			email,
+			address,
+			postCode,
+			cityId,
+			phone1,
+			ext1,
+			phone2,
+			ext2,
+			latitude,
+			longitude,
+			logo,
+			personID,
+			stateTypeId,
+			isActive
+	FROM team
+    WHERE id = _id;
+
+END$$
+
+/*-------------Team Members-------------------*/
+DELIMITER $$
+DROP procedure IF EXISTS `CreateTeamMember`$$
+CREATE PROCEDURE `CreateTeamMember` (	IN _teamId int, IN _personId int, IN _roleId int	)
+BEGIN
+
+	INSERT INTO teamMember(teamId,personId,roleId,startDate)
+    VALUES(_teamId,_personId,_roleId,NOW());
+
+END$$
+
+DELIMITER $$
+DROP procedure IF EXISTS `EditTeamMember`$$
+CREATE PROCEDURE `EditTeamMember` (	IN _teamId int, IN _personId int, _endDate datetime, _lastSeen datetime, _roleId int	)
+BEGIN
+
+	UPDATE teamMember
+    SET		endDate = coalesce(_endDate,endDate),
+			lastSeen = coalesce(_lastSeen,lastSeen),
+            roleId = coalesce(_roleId,roleId)
+    WHERE 	teamId = _teamId AND
+			personId = _personId;
+    
+END$$
+
+DELIMITER $$
+DROP procedure IF EXISTS `GetTeamMembers`$$
+CREATE PROCEDURE `GetTeamMembers` (	IN _teamId int	)
+BEGIN
+
+	SELECT 	tm.teamId,
+			tm.personId,
+            getFullName(tm.personId) as person,
+            getAvatar(tm.personId) as avatar,
+            tm.roleId,
+            r.description as roleType,
+            tm.lastSeen,
+            tm.startDate
+    FROM teamMember as tm
+    INNER JOIN roleType as r on r.id = tm.roleId
+    WHERE tm.teamId = _teamId;
+    
+END$$
