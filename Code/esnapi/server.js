@@ -2,9 +2,9 @@ var express = require('express'),
     app = express(),
     bodyParser = require('body-parser'),
     mysql = require('mysql'),
-    server = app.listen(3001);
-
-var config = require('./config.json');
+    server = app.listen(3001),
+    config = require('./config.json'),
+    jwt = require("jsonwebtoken");
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded());
@@ -15,6 +15,32 @@ var conn = mysql.createConnection({
     database: config.db.database,
     user: config.db.user,
     password: config.db.password
+});
+
+var apiRoutes = express.Router();
+
+apiRoutes.use(function(req,res,next){
+
+    var bearerHeader = req.headers["authorization"];
+    if(typeof bearerHeader !== undefined){
+        var bearer = bearerHeader.split(" ");
+        var token = bearer[1];
+
+        jwt.verify(token, config.auth.secret, function(err,decoded){
+            if(err){
+                return res.status(403).send({ message: "Authentication Failed" });
+            }
+            else{
+                req.decoded = decoded;
+                next();
+            }
+        });        
+
+    }
+    else{
+        return res.status(403).send({ message: "no token provided" });
+    }    
+
 });
 
 
@@ -62,13 +88,12 @@ function handleResponse(result,res,errorMessage){
             res.status(401).end( responseMsg(errorMessage) );
         }
         else{
-            res.status(200).end( JSON.stringify(result[0]) );
+            res.status(200).end( JSON.stringify(result[0][0]) );
         }
     }
     else{
         res.status(200).end( responseMsg("Ok") );
     }
-
 }
 
 /**
@@ -107,15 +132,8 @@ function fpBool(param){
 /**
  * USER RELATED ROUTES
  */
-app.get('/person/:id',function(req,res){
 
-    db("CALL GetPerson(" + req.params.id + ")",conn,function(error,result){
-        handle(error,res,true);
-        res.status(200).end(result[0][0]);
-    });
-
-});
-
+//  Register new Person
 app.post('/person',function(req,res){
 
     db("CALL CreatePerson(" + fpVarchar(req.body.names) + "," + fpVarchar(req.body.firstLastName) + "," + fpVarchar(req.body.secondLastName) + 
@@ -125,12 +143,53 @@ app.post('/person',function(req,res){
 
     conn,function(error,result){
         handle(error,res,true);
-        res.status(200).end(JSON.stringify(result[0]));
+        res.status(200).end(result[0][0]);
     });
 
 });
 
-app.put('/person/:id',function(req,res){
+//  Log In
+app.get('/loginUser',function(req,res){
+    db("CALL GetLogin(" + fpVarchar(req.query.email) + "," + fpVarchar(req.query.password) + ")",conn,function(error,result){
+        handle(error,res,true);
+        
+        var errorMessage = "Login Failed!";
+
+        if( result != undefined && result[0] != undefined ){
+            if(result[0].length == 0){
+                res.status(401).end( responseMsg(errorMessage) );
+            }
+            else{
+
+                var token = jwt.sign({ "email":req.query.email,
+                                       "password":req.query.password  },config.auth.secret,{
+                    expiresIn: 60
+                });
+
+                result[0][0]["token"] = token;
+
+                res.status(200).end( JSON.stringify(result[0]) );
+            }
+        }
+        else{
+            res.status(200).end( responseMsg("Ok") );
+        }
+
+    });    
+});
+
+//  Get Person Info
+apiRoutes.get('/person/:id',function(req,res){
+
+    db("CALL GetPerson(" + req.params.id + ")",conn,function(error,result){
+        handle(error,res,true);
+        handleResponse(result,res,"");
+    });
+
+});
+
+//  Edit Person
+apiRoutes.put('/person/:id',function(req,res){
 
     db("CALL EditPerson(" + fpInt(req.body.id) +
                         "," + fpVarchar(req.body.names) + "," + fpVarchar(req.body.firstLastName) + "," + fpVarchar(req.body.secondLastName) + 
@@ -148,42 +207,41 @@ app.put('/person/:id',function(req,res){
 
 });
 
-app.get('/loginUser',function(req,res){
-    db("CALL GetLogin(" + fpVarchar(req.query.email) + "," + fpVarchar(req.query.password) + ")",conn,function(error,result){
-        handle(error,res,true);
-        handleResponse(result,res,"Login Failed!");
-    });    
-});
-
-app.get('/hierarchy/:id',function(req,res){
+// Get Hierarchy of a Person
+apiRoutes.get('/hierarchy/:id',function(req,res){
     db("CALL GetHierarchy(" + fpInt(req.params.id) + ")",conn,function(error,result){
         handle(error,res,true);
         handleResponse(result,res);
     });       
 });
-/**------------------------------------------------------------------------ */
-app.post('/user/:a/follows/:b',function(req,res){
+
+/**
+ * Followers
+ */
+
+// Add new follower
+apiRoutes.post('/user/:a/follows/:b',function(req,res){
     db("CALL CreateFollower(" + fpInt(req.params.a) + "," + fpInt(req.params.b) + ")",conn,function(error,result){
         handle(error,res,true);
         handleResponse(result,res);
     });     
 });
 
-app.delete('/user/:a/follows/:b',function(req,res){
+apiRoutes.delete('/user/:a/follows/:b',function(req,res){
     db("CALL DeleteFollower(" + fpInt(req.params.a) + "," + fpInt(req.params.b) + ")",conn,function(error,result){
         handle(error,res,true);
         handleResponse(result,res);
     });        
 });
 
-app.get('/user/:a/follows',function(req,res){
+apiRoutes.get('/user/:a/follows',function(req,res){
     db("CALL GetFollows(" + fpInt(req.params.a) + ")",conn,function(error,result){
         handle(error,res,true);
         handleResponse(result,res);
     });       
 });
 
-app.get('/user/:a/followers',function(req,res){
+apiRoutes.get('/user/:a/followers',function(req,res){
     db("CALL GetFollowers(" + fpInt(req.params.a) + ")",conn,function(error,result){
         handle(error,res,true);
         handleResponse(result,res);
@@ -193,27 +251,27 @@ app.get('/user/:a/followers',function(req,res){
 /**
  * POSTS and FEED made by users
  */
-app.post('/post',function(req,res){
+apiRoutes.post('/post',function(req,res){
     /*CALL CreatePost(1,'This is my first post. Welcome!', 1, NULL, NULL, 1, NULL);*/
     res.send('User is creating this post: ' + req.body.userId);
 });
 
-app.get('/post/:id',function(req,res){
+apiRoutes.get('/post/:id',function(req,res){
     /* CALL GetPost(1) */
     res.send('This is the post: ' + req.params.id );
 });
 
-app.put('/post/:id',function(req,res){
+apiRoutes.put('/post/:id',function(req,res){
     /*CALL EditPost(1,'This is a corrected message','url/to/image',1,1,NULL) ***OJO coleasce esta forzado */
     res.send('This edits post ' + req.params.id);
 });
 
-app.post('/post/:id/message',function(req,res){
+apiRoutes.post('/post/:id/message',function(req,res){
     /*CALL CreatePostMessage(1,2,'cheers!',1,NULL,NULL);*/
     res.send('Creates new message for post: ' + req.params.id);
 });
 
-app.delete('/post/:id/message/:id',function(req,res){
+apiRoutes.delete('/post/:id/message/:id',function(req,res){
     /*CALL DeletePostMessage(2)*/
     res.send('Delete ' + req.params.id);
 });
@@ -225,7 +283,10 @@ app.delete('/post/:id/message/:id',function(req,res){
  */
 
 /** FEED */
-app.get('/feed/:userId',function(req,res){
+apiRoutes.get('/feed/:userId',function(req,res){
     /*CALL GetFeed(3,1,NULL)*/
     res.send('Gets feed relevant to user: ' + req.params.userId );
 });
+
+
+app.use('/',apiRoutes);

@@ -71,7 +71,7 @@ CREATE TABLE person (
     phone varchar(255),
     ext varchar(255),
     password varchar(255) NOT NULL,
-    genderId int NOT NULL,
+    genderId int,
     startDate datetime NOT NULL,
     endDate datetime,
     higherPersonId int,

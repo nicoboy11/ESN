@@ -5,6 +5,9 @@
         "database": "esn",
         "user": "root",
         "password": ""
+    },
+    "auth":{
+        "secret":"9gG5TEXCrBq698ehFn8ZbJp"
     }
     
 }
