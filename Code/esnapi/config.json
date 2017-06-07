@@ -2,12 +2,12 @@
     "db":{
         "host": "localhost",
         "port": "3306",
-        "database": "",
-        "user": "",
-        "password": ""
+        "database": "esn",
+        "user": "root",
+        "password": "evensosa"
     },
     "auth":{
-        "secret":""
+        "secret":"9gG5TEXCrBq698ehFn8ZbJp"
     }
     
 }
