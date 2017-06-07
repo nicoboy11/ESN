@@ -196,27 +196,31 @@ CREATE TABLE teamMember(
 );
 
 /*PROJECTS*/
+DROP TABLE IF EXISTS project;
 CREATE TABLE project(
 	id int PRIMARY KEY AUTO_INCREMENT,
     name varchar(250),
     abbr varchar(10),
-    date datetime,
+    startDate datetime,
     creatorId int,
-	dueDate date,
+	dueDate datetime,
     logo varchar(255),
     CONSTRAINT FOREIGN KEY (creatorId) REFERENCES person(id)
 );
 
-CREATE TABLE projectGroups(
+DROP TABLE IF EXISTS projectGroup;
+CREATE TABLE projectGroup(
 	projectId int,
     teamId int,
     startDate datetime,
     endDate datetime,
     CONSTRAINT FOREIGN KEY (projectId) REFERENCES project(id),
-    CONSTRAINT FOREIGN KEY (teamId) REFERENCES team(id)
+    CONSTRAINT FOREIGN KEY (teamId) REFERENCES team(id),
+    CONSTRAINT UNIQUE KEY (projectId,teamId)    
 );
 
-CREATE TABLE projectMembers(
+DROP TABLE IF EXISTS projectMember;
+CREATE TABLE projectMember(
 	projectId int,
     userId int,
     roleId int,
@@ -225,7 +229,8 @@ CREATE TABLE projectMembers(
     endDate datetime,
     CONSTRAINT FOREIGN KEY (projectId) REFERENCES project(id),
     CONSTRAINT FOREIGN KEY (userId) REFERENCES person(id),
-    CONSTRAINT FOREIGN KEY (roleId) REFERENCES roleType(id)
+    CONSTRAINT FOREIGN KEY (roleId) REFERENCES roleType(id),
+    CONSTRAINT UNIQUE KEY (projectId,userId)    
 );
 
 /* Tasks */

@@ -149,8 +149,8 @@ app.post('/person',function(req,res){
 });
 
 //  Log In
-app.get('/loginUser',function(req,res){
-    db("CALL GetLogin(" + fpVarchar(req.query.email) + "," + fpVarchar(req.query.password) + ")",conn,function(error,result){
+app.post('/loginUser',function(req,res){
+    db("CALL GetLogin(" + fpVarchar(req.body.email) + "," + fpVarchar(req.body.password) + ")",conn,function(error,result){
         handle(error,res,true);
         
         var errorMessage = "Login Failed!";
@@ -161,9 +161,9 @@ app.get('/loginUser',function(req,res){
             }
             else{
 
-                var token = jwt.sign({ "email":req.query.email,
-                                       "password":req.query.password  },config.auth.secret,{
-                    expiresIn: 60
+                var token = jwt.sign({ "email":req.body.email,
+                                       "password":req.body.password  },config.auth.secret,{
+                    expiresIn: 3600
                 });
 
                 result[0][0]["token"] = token;

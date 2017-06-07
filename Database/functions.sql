@@ -1,7 +1,7 @@
 
 DELIMITER $$
 DROP FUNCTION IF EXISTS getAbbr$$
-CREATE FUNCTION `getAbbr` (name varchar(255),lastName varchar(255))
+CREATE FUNCTION `getAbbr` (name varchar(255),lastName varchar(255)) 
 RETURNS VARCHAR(3)
 BEGIN
 
@@ -198,6 +198,20 @@ BEGIN
 
 	RETURN _avatar;
 
+END$$
+
+DELIMITER $$
+DROP FUNCTION IF EXISTS areValidDates$$
+CREATE FUNCTION areValidDates(_lowerDate datetime,_higherDate datetime) RETURNS bool
+BEGIN
+
+	IF (_lowerDate > _higherDate) THEN
+		RETURN FALSE;
+    END IF;
+    
+
+	RETURN TRUE;
+    
 END$$
 
 

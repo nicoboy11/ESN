@@ -734,3 +734,189 @@ BEGIN
     WHERE tm.teamId = _teamId;
     
 END$$
+
+/*--------------------Projects--------------------------*/
+
+DELIMITER $$
+DROP PROCEDURE IF EXISTS `CreateProject`$$
+CREATE PROCEDURE `CreateProject` (	IN _name varchar(250), 	IN _abbr varchar(10), 	IN _startDate datetime, 
+									IN _creatorId int, 		IN _dueDate datetime, 	IN _logo varchar(255) )
+BEGIN
+
+	IF(areValidDates(_startDate,_dueDate) = FALSE) THEN
+		SIGNAL sqlstate 'ERROR' SET message_text = 'The start date is greater than the end date.';
+    END IF;
+
+	INSERT INTO project ( name, abbr, startDate, creatorId, dueDate, logo )
+    VALUES ( _name, _abbr, _startDate, _creatorId, _dueDate, _logo );
+
+END$$
+
+DELIMITER $$
+DROP PROCEDURE IF EXISTS `EditProject`$$
+CREATE PROCEDURE `EditProject` (	IN _id int, 			IN _name varchar(250), 	IN _abbr varchar(10), 	IN _startDate datetime, 
+									IN _creatorId int, 		IN _dueDate datetime, 	IN _logo varchar(255) )
+BEGIN
+
+	IF(areValidDates(_startDate,_dueDate) = FALSE) THEN
+		SIGNAL sqlstate 'ERROR' SET message_text = 'The start date is greater than the end date.';
+    END IF;
+
+	UPDATE project 
+    SET name = _name, 
+		abbr = _abbr, 
+        startDate = _startDate, 
+        creatorId = _creatorId, 
+        dueDate = _dueDate, 
+        logo = _logo
+	WHERE id = _id;
+
+END$$
+
+DELIMITER $$
+DROP PROCEDURE IF EXISTS `GetProject`$$
+CREATE PROCEDURE `GetProject` (	IN _id int )
+BEGIN
+
+	SELECT 	name,
+			abbr,
+			startDate,
+			creatorId,
+			dueDate,
+			logo
+	FROM project
+	WHERE id = _id;
+
+END$$
+
+/*--------------------Project Groups--------------------------*/
+
+DELIMITER $$
+DROP PROCEDURE IF EXISTS `CreateProjectGroup`$$
+CREATE PROCEDURE `CreateProjectGroup` (	IN _projectId int, IN _teamId int, IN _startDate datetime, IN _endDate datetime)
+BEGIN
+
+	IF(areValidDates(_startDate,_endDate) = FALSE) THEN
+		SIGNAL sqlstate 'ERROR' SET message_text = 'The start date is greater than the end date.';
+    END IF;
+
+	INSERT INTO projectGroup ( projectId, teamId, startDate, endDate )
+    VALUES ( _projectId, _teamId, _startDate, _endDate);
+
+END$$
+
+DELIMITER $$
+DROP PROCEDURE IF EXISTS `EditProjectGroup`$$
+CREATE PROCEDURE `EditProjectGroup` ( IN _projectId int, IN _teamId int, IN _startDate datetime, IN _endDate datetime )
+BEGIN
+
+	IF(areValidDates(_startDate,_endDate) = FALSE) THEN
+		SIGNAL sqlstate 'ERROR' SET message_text = 'The start date is greater than the end date.';
+    END IF;
+
+	UPDATE projectGroup 
+    SET startDate = _startDate, 
+        endDate = _endDate
+	WHERE 	projectId = _projectId AND
+			teamId = _teamId;
+
+END$$
+
+DELIMITER $$
+DROP PROCEDURE IF EXISTS `DeleteProjectGroup`$$
+CREATE PROCEDURE `DeleteProjectGroup` ( IN _projectId int, IN _teamId int )
+BEGIN
+
+	DELETE FROM projectGroup 
+	WHERE 	projectId = _projectId AND
+			teamId = _teamId;
+
+END$$
+
+DELIMITER $$
+DROP PROCEDURE IF EXISTS `GetProjectGroup`$$
+CREATE PROCEDURE `GetProjectGroup` (	IN _projectId int, IN _teamId int )
+BEGIN
+
+	SELECT 	projectId,
+			teamId,
+			startDate,
+			endDate
+	FROM projectGroup
+	WHERE 	projectId = _projectId AND
+			teamId = coalesce(_teamId, teamId);
+
+END$$
+
+/*--------------------Project Members--------------------------*/
+	projectId int,
+    userId int,
+    roleId int,
+    lastSeen datetime,
+    startDate datetime,
+    endDate datetime,
+DELIMITER $$
+DROP PROCEDURE IF EXISTS `CreateProjectMember`$$
+CREATE PROCEDURE `CreateProjectMember` (	IN _projectId int, 		IN _userId int, 		IN _roleId int, 
+											IN _startDate datetime, IN _endDate datetime	)
+BEGIN
+
+	IF(areValidDates(_startDate,_endDate) = FALSE) THEN
+		SIGNAL sqlstate 'ERROR' SET message_text = 'The start date is greater than the end date.';
+    END IF;
+
+	INSERT INTO projectMember ( projectId, userId, roleId, startDate, endDate )
+    VALUES ( _projectId, _userId, _roleId, _startDate, _endDate );
+
+END$$
+
+DELIMITER $$
+DROP PROCEDURE IF EXISTS `EditProjectMember`$$
+CREATE PROCEDURE `EditProjectMember` (	IN _projectId int, 		IN _userId int, 		IN _roleId int, 
+										IN _lastSeen datetime,  IN _startDate datetime, IN _endDate datetime	)
+BEGIN
+
+	IF(areValidDates(_startDate,_endDate) = FALSE) THEN
+		SIGNAL sqlstate 'ERROR' SET message_text = 'The start date is greater than the end date.';
+    END IF;
+
+	UPDATE projectMember 
+    SET roleId = coalesce(_roleId,roleId),
+		lastSeen = coalesce(_lastSeen,lastSeen),
+		startDate = coalesce(_startDate,startDate), 
+        endDate = coalesce(_endDate,endDate)
+	WHERE 	projectId = _projectId AND
+			userId = _userId;
+
+END$$
+
+DELIMITER $$
+DROP PROCEDURE IF EXISTS `DeleteProjectMember`$$
+CREATE PROCEDURE `DeleteProjectMember` ( IN _projectId int, IN _userId int )
+BEGIN
+
+	DELETE FROM projectMember 
+	WHERE 	projectId = _projectId AND
+			userId = _userId;
+
+END$$
+
+
+
+DELIMITER $$
+DROP PROCEDURE IF EXISTS `GetProjectMember`$$
+CREATE PROCEDURE `GetProjectMember` (	IN _projectId int, IN _userId int )
+BEGIN
+
+	SELECT 	projectId,
+			userId,
+            roleId,
+            lastSeen,
+			startDate,
+			endDate
+	FROM projectMember
+	WHERE 	projectId = coalesce(_projectId,projectId) AND
+			userId = coalesce(_userId, userId);
+
+END$$
+

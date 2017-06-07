@@ -73,6 +73,7 @@ CALL CreatePostMessage(1,3,'cool!',1,NULL,NULL);
 
 CALL CreatePost(2,'I am posting too!', 1, NULL, NULL, 1, NULL);
 
+/*---------------------HASTA AQUI ALCANZA---------------------------------*/
 
 CALL CreateTeam('Test Corp','TC','Be at the service of the software.',NULL,	'main@testcorp.com','13 Main Street',
 				'S1 4ET',1,'055-030302','1010','','',
@@ -97,8 +98,15 @@ CALL CreateTeamMember(2,12,3);
 CALL CreateTeamMember(2,13,3);
 CALL CreateTeamMember(2,14,3);
 
-SELECT * FROM teamMember
+CALL CreateProject('Secretaría de Seguridad Pública', 'SSP', '2017-01-01', 1, '2017-02-01', 'ssp.png');
+CALL EditProject(1,'Secretaría de Seguridad Pública', 'SSP', '2017-02-01', 1, '2017-03-30', 'ssp.png');
 
+CALL CreateProjectGroup(1,1,'2016-01-01','2016-05-05');
+CALL CreateProjectGroup(1,2,'2016-05-05','2016-08-01');
+CALL EditProjectGroup(1,2,'2016-05-05','2016-10-01');
 
+CALL CreateProjectMember(1,1,1,NOW(),'2018-01-01');
+CALL CreateProjectMember(1,2,1,NOW(),'2018-01-01');
 
-SELECT * FROM team
+CALL EditProjectMember(1,2,1,NOW(),'2016-01-01','2018-01-01');
+
