@@ -22,7 +22,7 @@ var apiRoutes = express.Router();
 apiRoutes.use(function(req,res,next){
 
     var bearerHeader = req.headers["authorization"];
-    if(typeof bearerHeader !== undefined){
+    if(bearerHeader !== undefined){
         var bearer = bearerHeader.split(" ");
         var token = bearer[1];
 
@@ -153,7 +153,7 @@ app.post('/loginUser',function(req,res){
     db("CALL GetLogin(" + fpVarchar(req.body.email) + "," + fpVarchar(req.body.password) + ")",conn,function(error,result){
         handle(error,res,true);
         
-        var errorMessage = "Login Failed!";
+        var errorMessage = "Login Failed! The password or email address is incorrect.";
 
         if( result != undefined && result[0] != undefined ){
             if(result[0].length == 0){
