@@ -19,16 +19,15 @@ class Input extends Component {
     onTextChanged(text) {
         this.setState({ text });
         this.validateInput(text);
+        this.props.onChangeText(text);
     }
 
     onFocus() {
         this.setState({ isFocused: true });
-        console.log(this.state.isFocused);
     }
 
     onBlur() {
         this.setState({ isFocused: false });
-        console.log(this.state.isFocused);
     }
 
     setInputConfig() {
@@ -100,7 +99,8 @@ class Input extends Component {
         return (
             <View style={viewStyle}>
                 <Text 
-                    style={[labelTextStyle, this.state.isFocused ? activeLabelStyle : inactiveLabelStyle]}
+                    style={[labelTextStyle, 
+                            this.state.isFocused ? activeLabelStyle : inactiveLabelStyle]}
                 >{this.renderLabel()}
                 </Text>
                 <TextInput 
@@ -116,7 +116,8 @@ class Input extends Component {
                     onFocus={this.onFocus.bind(this)}
                     autoCapitalize={this.props.autoCapitalize}
                     returnKeyType={this.props.returnKeyType}
-                    placeholder={this.props.label}                     
+                    placeholder={this.props.label}   
+                    value={this.props.value}                  
                 />
                 <Text style={styles.errorTextStyle} >{this.renderError()}</Text>
             </View>
@@ -127,14 +128,14 @@ class Input extends Component {
 
 const styles = StyleSheet.create({
     viewStyle: {
-        height: 54,
+        height: 56,
         paddingLeft: 10,
         paddingRight: 10,
         backgroundColor: 'transparent',
     },
     labelTextStyle: {
-        fontSize: 10,
-        height: 12,
+        fontSize: 12,
+        height: 15,
     },
     activeLabelStyle: {
         color: colors.main,
@@ -145,13 +146,14 @@ const styles = StyleSheet.create({
     },    
     errorTextStyle: {
         color: colors.error,
-        fontSize: 10,
-        height: 12
+        fontSize: 12,
+        height: 15
     },
     inputStyle: {
         height: 24,
         lineHeight: 24,
-        padding: 0
+        padding: 0,
+        fontSize: 18
     },
     validInputStyle: {
         borderBottomColor: colors.lightText,

@@ -11,7 +11,7 @@ app.use(bodyParser.urlencoded());
 
 var conn = mysql.createConnection({
     host: config.db.host,
-    por: config.db.port,
+    port: config.db.port,
     database: config.db.database,
     user: config.db.user,
     password: config.db.password

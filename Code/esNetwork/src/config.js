@@ -7,7 +7,12 @@ export const colors = {
     lightText: '#CED3D9',
     main: '#3D68EB',
     error: '#EF9C7A',
-    inactive: '#828486'
+    inactive: '#828486',
+    mainText: '#FFF'
+};
+
+export const network = {
+    server: 'http://143.167.71.24:3001/'
 };
 
 const lang = {
@@ -39,4 +44,3 @@ const lang = {
              };
 
 export const texts = lang.es;
-    

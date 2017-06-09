@@ -2,12 +2,12 @@
     "db":{
         "host": "localhost",
         "port": "3306",
-        "database": "",
-        "user": "",
+        "database": "esn",
+        "user": "root",
         "password": ""
     },
     "auth":{
-        "secret":""
+        "secret":"H3rtr4dScotch"
     }
     
 }
