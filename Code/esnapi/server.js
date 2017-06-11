@@ -72,7 +72,11 @@ function handle(error,res,show){
         if(show){
             res.status(422).end( responseMsg(message) );
         }
+        console.log("is returning")
+        return false;
     }
+
+    return true;
 }
 
 function responseMsg(mensaje){
@@ -142,8 +146,12 @@ app.post('/person',function(req,res){
                         "," + fpVarchar(req.body.avatar) + "," + fpVarchar(req.body.token) + "," + fpInt(req.body.roleId) + ");",
 
     conn,function(error,result){
-        handle(error,res,true);
-        res.status(200).end(result[0][0]);
+        if(handle(error,res,true)){
+            console.log(result[0]);
+            console.log(result[0][0]);
+            res.status(200).end( JSON.stringify(result[0]) );
+        }
+        
     });
 
 });
@@ -151,30 +159,31 @@ app.post('/person',function(req,res){
 //  Log In
 app.post('/loginUser',function(req,res){
     db("CALL GetLogin(" + fpVarchar(req.body.email) + "," + fpVarchar(req.body.password) + ")",conn,function(error,result){
-        handle(error,res,true);
         
-        var errorMessage = "Login Failed! The password or email address is incorrect.";
+        if(handle(error,res,true)){
+        
+            var errorMessage = "Login Failed! The password or email address is incorrect.";
 
-        if( result != undefined && result[0] != undefined ){
-            if(result[0].length == 0){
-                res.status(401).end( responseMsg(errorMessage) );
+            if( result != undefined && result[0] != undefined ){
+                if(result[0].length == 0){
+                    res.status(401).end( responseMsg(errorMessage) );
+                }
+                else{
+
+                    var token = jwt.sign({ "email":req.body.email,
+                                        "password":req.body.password  },config.auth.secret,{
+                        expiresIn: 3600
+                    });
+
+                    result[0][0]["token"] = token;
+
+                    res.status(200).end( JSON.stringify(result[0]) );
+                }
             }
             else{
-
-                var token = jwt.sign({ "email":req.body.email,
-                                       "password":req.body.password  },config.auth.secret,{
-                    expiresIn: 3600
-                });
-
-                result[0][0]["token"] = token;
-
-                res.status(200).end( JSON.stringify(result[0]) );
+                res.status(200).end( responseMsg("Ok") );
             }
         }
-        else{
-            res.status(200).end( responseMsg("Ok") );
-        }
-
     });    
 });
 
@@ -182,8 +191,9 @@ app.post('/loginUser',function(req,res){
 apiRoutes.get('/person/:id',function(req,res){
 
     db("CALL GetPerson(" + req.params.id + ")",conn,function(error,result){
-        handle(error,res,true);
-        handleResponse(result,res,"");
+        if(handle(error,res,true)){
+            handleResponse(result,res,"");
+        }
     });
 
 });
@@ -201,8 +211,9 @@ apiRoutes.put('/person/:id',function(req,res){
                         "," + fpVarchar(req.body.token) + "," + fpBool(req.body.isIosSync) + "," + fpBool(req.body.isAndroidSync) + 
                         "," + fpVarchar(req.body.os_android) + "," + fpVarchar(req.body.os_ios) + "," + fpVarchar(req.body.os_chrome) + "," + fpVarchar(req.body.os_safari) + ");",
     conn,function(error,result){
-        handle(error,res,true);
-        res.status(200).end( responseMsg("Updated") );
+        if(handle(error,res,true)){
+            res.status(200).end( responseMsg("Updated") );
+        }
     });
 
 });
@@ -210,8 +221,9 @@ apiRoutes.put('/person/:id',function(req,res){
 // Get Hierarchy of a Person
 apiRoutes.get('/hierarchy/:id',function(req,res){
     db("CALL GetHierarchy(" + fpInt(req.params.id) + ")",conn,function(error,result){
-        handle(error,res,true);
-        handleResponse(result,res);
+        if(handle(error,res,true)){
+            handleResponse(result,res);
+        }
     });       
 });
 
@@ -222,29 +234,33 @@ apiRoutes.get('/hierarchy/:id',function(req,res){
 // Add new follower
 apiRoutes.post('/user/:a/follows/:b',function(req,res){
     db("CALL CreateFollower(" + fpInt(req.params.a) + "," + fpInt(req.params.b) + ")",conn,function(error,result){
-        handle(error,res,true);
-        handleResponse(result,res);
+        if(handle(error,res,true)){
+            handleResponse(result,res);
+        }
     });     
 });
 
 apiRoutes.delete('/user/:a/follows/:b',function(req,res){
     db("CALL DeleteFollower(" + fpInt(req.params.a) + "," + fpInt(req.params.b) + ")",conn,function(error,result){
-        handle(error,res,true);
-        handleResponse(result,res);
+        if(handle(error,res,true)){
+            handleResponse(result,res);
+        }
     });        
 });
 
 apiRoutes.get('/user/:a/follows',function(req,res){
     db("CALL GetFollows(" + fpInt(req.params.a) + ")",conn,function(error,result){
-        handle(error,res,true);
-        handleResponse(result,res);
+        if(handle(error,res,true)){
+            handleResponse(result,res);
+        }
     });       
 });
 
 apiRoutes.get('/user/:a/followers',function(req,res){
     db("CALL GetFollowers(" + fpInt(req.params.a) + ")",conn,function(error,result){
-        handle(error,res,true);
-        handleResponse(result,res);
+        if(handle(error,res,true)){
+            handleResponse(result,res);
+        }
     });       
 });
 

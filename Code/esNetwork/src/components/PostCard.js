@@ -1,14 +1,14 @@
 import React, { Component } from 'react';
-import { View, Image, Text, StyleSheet } from 'react-native';
+import { View, Image, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { LinkButton } from './';
 import { colors } from '../config';
 
 class PostCard extends Component {
 
     render() {
-
         const { containerStyle, 
                 imageStyle,
+                menuImageStyle,
                 topContainerStyle,
                 bottomContainerStyle,
                 titleViewStyle,
@@ -31,7 +31,9 @@ class PostCard extends Component {
                         <Text style={dateStyle} >Today</Text>
                     </View>
                     <View style={unfollowViewStyle} >
-                        <LinkButton style={{ fontSize: 10 }} title='UNFOLLOW' />
+                        <TouchableOpacity>
+                            <Image style={menuImageStyle} source={require('../img/chevronDown.png')} />
+                        </TouchableOpacity>
                     </View>
                 </View>
                 <View>
@@ -40,9 +42,9 @@ class PostCard extends Component {
                     </Text>
                 </View>
                 <View style={bottomContainerStyle}>
-                    <LinkButton style={bottomLinksStyles} title='LIKE' />
+                    <LinkButton style={bottomLinksStyles} title='Like' />
                     <Text style={bottomLinksStyles}>|</Text>
-                    <LinkButton style={bottomLinksStyles} title='COMMENT' />
+                    <LinkButton style={bottomLinksStyles} title='Comment' />
                 </View>
             </View>
         );
@@ -52,11 +54,11 @@ class PostCard extends Component {
 
 const styles = StyleSheet.create({
     containerStyle: {
-        borderWidth: 1,
+        borderWidth: StyleSheet.hairlineWidth,
         borderColor: colors.lightText,
         padding: 10,
-        marginTop: 10
-
+        marginTop: 5,
+        backgroundColor: colors.elementBackground
     },
     imageStyle: {
         width: 40,
@@ -73,7 +75,8 @@ const styles = StyleSheet.create({
         justifyContent: 'flex-end'
     },
     titleStyle: {
-        fontSize: 14
+        fontSize: 14,
+        fontWeight: 'bold'
     },
     dateStyle: {
         fontSize: 12
@@ -85,7 +88,9 @@ const styles = StyleSheet.create({
         flex: 4
     },
     unfollowViewStyle: {
-        flex: 1
+        flex: 1,
+        flexDirection: 'row',
+        justifyContent: 'flex-end'
     },
     mainText: {
         fontSize: 18,
@@ -94,6 +99,10 @@ const styles = StyleSheet.create({
     bottomLinksStyles: {
         fontSize: 12,
         marginLeft: 5
+    },
+    menuImageStyle: {
+        height: 14,
+        width: 14
     }
 });
 

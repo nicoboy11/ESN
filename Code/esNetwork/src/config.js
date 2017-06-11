@@ -8,7 +8,9 @@ export const colors = {
     main: '#3D68EB',
     error: '#EF9C7A',
     inactive: '#828486',
-    mainText: '#FFF'
+    mainText: '#FFF',
+    elementBackground: '#FFF',
+    alternateColor: '#08C2A5'
 };
 
 export const network = {
@@ -16,7 +18,7 @@ export const network = {
 };
 
 const lang = {
-                en: {
+                en: {   //Login Page
                         email: 'Email',
                         email_ph: 'Enter your email',
                         password: 'Password',
@@ -24,11 +26,15 @@ const lang = {
                         login: 'Log in',
                         forgot: 'Forgot password',
                         signup: 'Sign up',
-                        name: 'Name',
-                        lastName: 'Last name',
-                        invalidEmail: 'Invalid email address'
+                        invalidEmail: 'Invalid email address',
+                        loginFailed: 'Login failed. ',
+                        //Register Page
+                        names: 'Name(s)',
+                        firstLastName: 'Last name',    
+                        secondLastName: 'Second last name',
+                        dateOfBirth: 'Date of birth'
                 },
-                es: {
+                es: {   //Login page
                         email: 'Email',
                         email_ph: 'Ingrese su email',
                         password: 'Contraseña',
@@ -36,9 +42,13 @@ const lang = {
                         login: 'Entrar',
                         forgot: 'Olvidé mi contraseña',
                         signup: 'Crear cuenta',
-                        name: 'Nombre',
-                        lastName: 'Apellido',
-                        invalidEmail: 'El email es inválido'
+                        invalidEmail: 'El email es inválido',
+                        loginFailed: 'Error de inicio de sesión.',
+                        //Register PAge
+                        names: 'Nombre(s)',
+                        firstLastName: 'Apellido Paterno',      
+                        secondLastName: 'Apellido Materno',
+                        dateOfBirth: 'Fecha de nacimiento'                        
                 }
 
              };

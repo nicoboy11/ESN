@@ -2,7 +2,10 @@ import React, { Component } from 'react';
 import { View, Image, Alert, Keyboard } from 'react-native';
 import { Actions } from 'react-native-router-flux';
 import { Input, LinkButton, Button } from '../components';
-import { texts, network } from '../config';
+import { texts } from '../config';
+
+let database = require('../database.js');
+let db = new database();
 
 export default class LoginForm extends Component {
 
@@ -12,7 +15,7 @@ export default class LoginForm extends Component {
         const { status } = this.state;
         console.log('Response');
         if (status > 399) {
-            Alert.alert('Login failed.', responseData.message);
+            Alert.alert(texts.loginFailed, responseData.message);
         } else {
             Actions.main();
         }
@@ -22,7 +25,6 @@ export default class LoginForm extends Component {
 
     onError(error) {
         console.log(error);
-        console.log('something wrong happened');
         this.refresh();
     }
 
@@ -31,20 +33,9 @@ export default class LoginForm extends Component {
         this.setState({ loading: 1 });  
         Keyboard.dismiss();
          
-        fetch(network.server + 'loginUser', { 
-            method: 'POST', 
-            headers: {
-                Accept: 'application/json',
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                email, 
-                password 
-            }) 
-        })
-        .then(this.handleResponse.bind(this))
-        .then(this.onLoginResponse.bind(this))
-        .catch(this.onError.bind(this));                
+        db.request('POST', 'loginUser', { email, password }, 
+            this.handleResponse.bind(this), this.onLoginResponse.bind(this), 
+            this.onError.bind(this));
     }
 
     refresh() {
@@ -86,13 +77,17 @@ export default class LoginForm extends Component {
                                 value={this.state.password}
                             />
                             <Button 
-                                title="Log In" 
+                                title={texts.login} 
                                 animating={this.state.loading}
                                 onPress={this.onLoginPress.bind(this)} 
                             />                             
                         </View>  
                         <View style={bottomInputStyle}>
-                            <LinkButton title="Sign Up" onPress={() => console.log(this.state.email)} />
+                            <LinkButton 
+                                style={{ textAlign: 'center', marginBottom: 10 }} 
+                                title={texts.signup} 
+                                onPress={() => Actions.register()} 
+                            />
                         </View>                              
                     </View>            
             </View>

@@ -1,16 +1,27 @@
 import React from 'react';
-import { StyleSheet } from 'react-native';
-import { Input } from './components/Input';
+import { StyleSheet, Modal } from 'react-native';
 import { Scene, Router, Actions } from 'react-native-router-flux';
+import { Input, PostCardMenu } from './components';
 import LoginForm from './pages/LoginForm';
+import RegisterForm from './pages/RegisterForm';
 import MainForm from './pages/MainForm';
 import { colors } from './config';
 
 const RouterComponent = () => {
     return (
-        <Router> 
+        <Router 
+            navigationBarStyle={styles.navBarStyle}
+            leftButtonIconStyle={{ tintColor: 'white' }}
+            titleStyle={styles.textStyle}
+        > 
             <Scene initial key='authentication'>
-                <Scene hideNavBar key='login' component={LoginForm} />
+                <Scene key='login' navigationBarStyle={{ opacity: 0 }} component={LoginForm} />
+                <Scene 
+                    hideNaveBar={false} 
+                    key='register' 
+                    component={RegisterForm} 
+                    title='Register'
+                />                 
             </Scene>   
             <Scene key='main'>
                 <Scene 
@@ -18,15 +29,14 @@ const RouterComponent = () => {
                     component={MainForm} 
                     leftButtonImage={require('./img/wmnu.png')} 
                     leftButtonIconStyle={styles.imageStyle}
-                    onLeft={() => console.log('openMenu')}
+                    onLeft={() => Actions.statusModal()}
                     rightButtonImage={require('./img/wsearch.png')}
                     rightButtonIconStyle={styles.imageStyle}
                     onRight={() => console.log('openSearch')}
                     title='Feed'
-                    navigationBarStyle={styles.navBarStyle}
-                    titleStyle={styles.textStyle}
                 />
-            </Scene>               
+            </Scene>    
+            {/*<Scene key="statusModal" component={PostCardMenu} direction='vertical' hideNavBar />     */}
         </Router>
     );
 };
