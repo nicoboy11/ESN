@@ -343,7 +343,7 @@ BEGIN
 			p.endDate,
 			p.higherPersonId,
             getFullName(p.higherPersonId) as higherPerson,
-			p.lastLogin,
+			formatDate(p.lastLogin) as lastLogin,
 			p.avatar,
 			p.description,
 			p.job,
@@ -478,7 +478,7 @@ BEGIN
             attachmentTypeId,
             scopeTypeId,
             scopeId,
-            creationDate
+            formatDate(creationDate) as creationDate
     FROM post as pst
     INNER JOIN person as pe on pe.id = pst.personId
     WHERE pst.id = _postId;
@@ -579,7 +579,6 @@ BEGIN
 			-Si es scopeType 4 (Person)
 				-Todas las personas dentro de una conversación
 	*/
-
 	SELECT 	pst.id,
 			pst.personId,
 			pst.message,
@@ -588,11 +587,25 @@ BEGIN
 			messageTypeId,
 			attachment,
 			attachmentTypeId,
-			creationDate
+			formatDate(creationDate) as creationDate
+	FROM post as pst
+	WHERE pst.personId = _personId and pst.scopeTypeId = _scopeTypeId
+	UNION ALL
+	SELECT 	pst.id,
+			pst.personId,
+			pst.message,
+			pst.messageTypeId,
+			getFullName(pst.personId) as person,
+			messageTypeId,
+			attachment,
+			attachmentTypeId,
+			formatDate(creationDate) as creationDate
 	FROM post as pst
 	INNER JOIN followers as f on pst.personId = f.personId
 	WHERE f.followerId = _personId and pst.scopeTypeId = _scopeTypeId
     ORDER BY creationDate desc;
+    
+
     
 END$$
 

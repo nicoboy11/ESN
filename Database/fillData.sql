@@ -70,10 +70,11 @@ CALL CreateFollower(3,2);
 
 CALL CreatePostMessage(1,2,'cheers!',1,NULL,NULL);
 CALL CreatePostMessage(1,3,'cool!',1,NULL,NULL);
+/*---------------------HASTA AQUI ALCANZA---------------------------------*/
 
 CALL CreatePost(2,'I am posting too!', 1, NULL, NULL, 1, NULL);
 
-/*---------------------HASTA AQUI ALCANZA---------------------------------*/
+
 
 CALL CreateTeam('Test Corp','TC','Be at the service of the software.',NULL,	'main@testcorp.com','13 Main Street',
 				'S1 4ET',1,'055-030302','1010','','',

@@ -214,4 +214,9 @@ BEGIN
     
 END$$
 
-
+DELIMITER $$
+DROP FUNCTION IF EXISTS formatDate$$
+CREATE FUNCTION formatDate(_date datetime) RETURNS varchar(20)
+BEGIN
+	RETURN date_format(_date,'%Y-%m-%d %T');
+END$$

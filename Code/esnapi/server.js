@@ -92,7 +92,7 @@ function handleResponse(result,res,errorMessage){
             res.status(401).end( responseMsg(errorMessage) );
         }
         else{
-            res.status(200).end( JSON.stringify(result[0][0]) );
+            res.status(200).end( JSON.stringify(result[0]) );
         }
     }
     else{
@@ -297,8 +297,8 @@ apiRoutes.delete('/post/:id/message/:id',function(req,res){
  */
 
 /** FEED */
-apiRoutes.get('/feed/:userId',function(req,res){
-    db("CALL GetFeed(" + fpInt(req.params.userId) + ",1,1)",conn,function(error,result){
+apiRoutes.get('/feed/:userId/:scopeTypeId',function(req,res){
+    db("CALL GetFeed(" + fpInt(req.params.userId) + "," + fpInt(req.params.scopeTypeId) + ",1)",conn,function(error,result){
         if(handle(error,res,true)){
             handleResponse(result,res);
         }
