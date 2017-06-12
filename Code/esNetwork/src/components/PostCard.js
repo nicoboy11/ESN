@@ -1,7 +1,9 @@
 import React, { Component } from 'react';
 import { View, Image, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { LinkButton } from './';
-import { colors } from '../config';
+import { Config } from '../settings';
+
+const { colors } = Config;
 
 class PostCard extends Component {
 

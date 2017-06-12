@@ -1,6 +1,8 @@
 import React, { Component } from 'react';
 import { View, Text, TextInput, StyleSheet } from 'react-native';
-import { regex, colors, texts } from '../config';
+import { Config, Helper } from '../settings';
+
+const { colors, texts, regex } = Config;
 
 class Input extends Component {
 
@@ -13,13 +15,15 @@ class Input extends Component {
             };
 
     componentWillMount() {
+        console.log(Helper);
         this.setInputConfig();
     }
 
     onTextChanged(text) {
-        this.setState({ text });
-        this.validateInput(text);
-        this.props.onChangeText(text);
+        const newText = this.validateInput(text);
+        this.setState({ text: newText });
+        this.props.onChangeText(newText);
+        console.log(newText);
     }
 
     onFocus() {
@@ -43,30 +47,22 @@ class Input extends Component {
         }
     }
 
-    isValidText(text) {
-        const re = regex.textOnly;
-        return !re.test(text);
-    }
-
-    isValidEmail(email) {
-        const re = regex.email;
-        return !re.test(email);
-    }
-
     validateInput(text) {
+        let newText = text;
         switch (this.props.type) {
             case 'email':
-                this.setState({ isError: this.isValidEmail(text) });
+                this.setState({ isError: Helper.isValidEmail(text) });
                 this.setState({ errorText: texts.invalidEmail });
                 break;
             case 'text':
-                if (!this.isValidText(text)) {
-                    this.setState({ text: text.replace(regex.textOnly, '') });
+                if (!Helper.isValidText(text)) {
+                    newText = text.replace(regex.textOnly, '');
                 }
                 break;
             default:
                 this.setState({ keyboardType: 'default' });
-        }        
+        }
+        return newText;
     }
 
     renderLabel() {
@@ -116,8 +112,7 @@ class Input extends Component {
                     onFocus={this.onFocus.bind(this)}
                     autoCapitalize={this.props.autoCapitalize}
                     returnKeyType={this.props.returnKeyType}
-                    placeholder={this.props.label}   
-                    value={this.props.value}                  
+                    placeholder={this.props.label}                
                 />
                 <Text style={styles.errorTextStyle} >{this.renderError()}</Text>
             </View>

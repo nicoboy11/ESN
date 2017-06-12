@@ -7,7 +7,9 @@ import {
     StyleSheet 
 } from 'react-native';
 import { LinkButton } from './';
-import { colors } from '../config';
+import { Config } from '../settings';
+
+const { colors } = Config;
 
 class TaskCard extends Component {
 

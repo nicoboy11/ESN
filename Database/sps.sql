@@ -328,7 +328,8 @@ DROP procedure IF EXISTS `GetPerson`$$
 CREATE PROCEDURE `GetPerson` (IN _id int)
 BEGIN
 	
-    SELECT	p.names,	
+    SELECT	p.id as personId,
+			p.names,	
 			p.firstLastName,
 			p.secondLastName,
             getFullName(p.id) as person,

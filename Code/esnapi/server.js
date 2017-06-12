@@ -147,8 +147,6 @@ app.post('/person',function(req,res){
 
     conn,function(error,result){
         if(handle(error,res,true)){
-            console.log(result[0]);
-            console.log(result[0][0]);
             res.status(200).end( JSON.stringify(result[0]) );
         }
         
@@ -300,8 +298,11 @@ apiRoutes.delete('/post/:id/message/:id',function(req,res){
 
 /** FEED */
 apiRoutes.get('/feed/:userId',function(req,res){
-    /*CALL GetFeed(3,1,NULL)*/
-    res.send('Gets feed relevant to user: ' + req.params.userId );
+    db("CALL GetFeed(" + fpInt(req.params.userId) + ",1,1)",conn,function(error,result){
+        if(handle(error,res,true)){
+            handleResponse(result,res);
+        }
+    }); 
 });
 
 

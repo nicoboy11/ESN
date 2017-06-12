@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { ListView, Text } from 'react-native';
+import { ListView } from 'react-native';
 import { PostCard, TaskCard } from './';
 
 class CardList extends Component {

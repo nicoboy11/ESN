@@ -1,6 +1,8 @@
 import React from 'react';
 import { Text, TouchableOpacity } from 'react-native';
-import { colors } from '../config';
+import { Config } from '../settings';
+
+const { colors } = Config;
 
 const LinkButton = ({ title, onPress, style }) => {
     const { touchableStyle, textStyle } = styles;

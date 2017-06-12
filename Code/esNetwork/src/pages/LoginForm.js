@@ -2,10 +2,9 @@ import React, { Component } from 'react';
 import { View, Image, Alert, Keyboard } from 'react-native';
 import { Actions } from 'react-native-router-flux';
 import { Input, LinkButton, Button } from '../components';
-import { texts } from '../config';
+import { Config, Database } from '../settings';
 
-let database = require('../database.js');
-let db = new database();
+const { texts } = Config;
 
 export default class LoginForm extends Component {
 
@@ -17,6 +16,11 @@ export default class LoginForm extends Component {
         if (status > 399) {
             Alert.alert(texts.loginFailed, responseData.message);
         } else {
+            /**
+             * Create DataBase object for user
+             */
+             const token = Database.realm('Session', { token: responseData[0].token }, 'create', '');
+            /** Go to main screen */
             Actions.main();
         }
 
@@ -33,7 +37,7 @@ export default class LoginForm extends Component {
         this.setState({ loading: 1 });  
         Keyboard.dismiss();
          
-        db.request('POST', 'loginUser', { email, password }, 
+        Database.request('POST', 'loginUser', { email, password }, 
             this.handleResponse.bind(this), this.onLoginResponse.bind(this), 
             this.onError.bind(this));
     }
@@ -52,6 +56,7 @@ export default class LoginForm extends Component {
     render() {
         const { mainContainerStyle, logoContainerStyle, inputContainerStyle, imageStyle,
                 topInputStyle, bottomInputStyle } = styles;
+        
         return (
             <View style={mainContainerStyle}>
                     <View style={logoContainerStyle}>
@@ -80,7 +85,7 @@ export default class LoginForm extends Component {
                                 title={texts.login} 
                                 animating={this.state.loading}
                                 onPress={this.onLoginPress.bind(this)} 
-                            />                             
+                            />                  
                         </View>  
                         <View style={bottomInputStyle}>
                             <LinkButton 

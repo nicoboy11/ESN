@@ -2,10 +2,9 @@ import React, { Component } from 'react';
 import { ScrollView, StyleSheet, Keyboard, Alert } from 'react-native';
 import { Actions } from 'react-native-router-flux';
 import { Input, DatePicker, Button } from '../components';
-import { texts } from '../config';
+import { Config, Database } from '../settings';
 
-let database = require('../database.js');
-let db = new database();
+const { texts } = Config;
 
 export default class RegisterForm extends Component {
     state = { 
@@ -40,7 +39,7 @@ export default class RegisterForm extends Component {
             Alert.alert('Incomplete form', 'A password must be provided');
         }
          
-        db.request(
+        Database.request(
             'POST', 
             'person', 
             { dateOfBirth, 

@@ -8,7 +8,9 @@ import {
     View,
     StyleSheet
 } from 'react-native';
-import { texts, colors } from '../config';
+import { Config, helper } from '../settings';
+
+const { colors } = Config;
 
 class DatePicker extends Component {
 
@@ -20,12 +22,8 @@ class DatePicker extends Component {
                 date: new Date()
             });
             if (action !== DatePickerAndroid.dismissedAction) {
-                
                 const date = new Date(year, month, day);
-                const dateISO = 
-                    year.toString() + '-' + 
-                    ('00' + (month + 1).toString()).slice(-2) + '-' + 
-                    ('00' + day.toString()).slice(-2);
+                const dateISO = helper.getDateISO(year, month, day);
                 this.setState({ date: date.toLocaleDateString() });
                 //Back to the parent component
                 this.props.onChangeDate(dateISO);

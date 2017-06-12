@@ -1,9 +1,10 @@
-export const regex = {
+class Config {}
+Config.regex = {
     email: /^[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$/i,
     textOnly: /[^a-zA-Z0-9\s]/g
 };
 
-export const colors = {
+Config.colors = {
     lightText: '#CED3D9',
     main: '#3D68EB',
     error: '#EF9C7A',
@@ -13,7 +14,7 @@ export const colors = {
     alternateColor: '#08C2A5'
 };
 
-export const network = {
+Config.network = {
     server: 'http://143.167.71.24:3001/'
 };
 
@@ -53,4 +54,6 @@ const lang = {
 
              };
 
-export const texts = lang.es;
+Config.texts = lang.es;
+
+export { Config };

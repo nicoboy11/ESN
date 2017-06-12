@@ -5,7 +5,9 @@ import { Input, PostCardMenu } from './components';
 import LoginForm from './pages/LoginForm';
 import RegisterForm from './pages/RegisterForm';
 import MainForm from './pages/MainForm';
-import { colors } from './config';
+import { Config } from './settings';
+
+const { colors } = Config;
 
 const RouterComponent = () => {
     return (
