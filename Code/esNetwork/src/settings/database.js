@@ -28,7 +28,10 @@ class Database {
     }
 
     static realm(table, fields, action, filter) {
-        const realm = new Realm({ schema: [Session] });
+        const realm = new Realm({ 
+            schema: [Session]   
+        });
+
         let data = realm.objects(table);
 
         switch (action) {

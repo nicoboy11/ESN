@@ -19,7 +19,7 @@ export default class LoginForm extends Component {
             /**
              * Create DataBase object for user
              */
-             const token = Database.realm('Session', { token: responseData[0].token }, 'create', '');
+             const token = Database.realm('Session', responseData[0], 'create', '');
             /** Go to main screen */
             Actions.main();
         }
