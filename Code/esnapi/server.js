@@ -4,8 +4,10 @@ var express = require('express'),
     mysql = require('mysql'),
     server = app.listen(3001),
     config = require('./config.json'),
-    jwt = require("jsonwebtoken");
+    jwt = require("jsonwebtoken"),
+    formidable = require("formidable");
 
+app.use(bodyParser({limit: '50mb'}));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded());
 
@@ -133,6 +135,68 @@ function fpBool(param){
 
     return param;
 }
+
+/**
+ * 
+ * @param {The http request} req 
+ * @param {What is the file for? (avatar, post, post message, group, Task, Task Message, Chat)} type 
+ * @param {What field needs to be read to name the uploaded file} field 
+ * @param {Callback function} callback
+ */
+function reqUpload(req, type, field, callback){
+    /**
+
+    file structure
+
+    uploads/
+
+        avatars: avt_[personId]
+        
+        photo in post: ph_pst_[postId]
+        file in post:  fl_pst_[postId]
+
+        photo in post message: ph_pstm_[postMessageId]
+        file in post message:  fl_pstm_[postMessageId]
+
+        photo in group: ph_grp_[groupId]
+        file in group: fl_grp_[groupId]
+        photo in task: ph_tk_[taskMessageId]
+        file in task: fl_tk_[taskMessageId]
+        photo in chat: ph_ch_[postId]
+        file in task: fl_ch_[postId]
+    */
+
+    var form = new formidable.IncomingForm();
+    var fileName = config.prefixes[type] + field;
+    var uniq = new Date().getTime() / 1000;
+
+    form.parse(req);
+
+    form.on('field', function(name, value){
+        console.log(fileName);
+    }) 
+    .on('fileBegin',function(name, file){
+        fileName = fileName + '_' + uniq + '.' + file.type.split('/')[1];
+        file.path = './uploads/' + fileName;
+        console.log('file created!');
+    })
+    .on('progress',function(bytesReceived, bytesExpected){
+        console.log(bytesReceived + ' : ' + bytesExpected);
+    })        
+    .on('end',function(){
+        callback(fileName);
+    })
+    .on('error', function(err){
+        console.log(err.message);
+        callback();
+    })
+}
+
+app.post('/test',function(req,res){
+
+    reqUpload(req, res, 'avatar', 'personId');
+    
+});
 /**
  * USER RELATED ROUTES
  */
@@ -199,21 +263,22 @@ apiRoutes.get('/person/:id',function(req,res){
 //  Edit Person
 apiRoutes.put('/person/:id',function(req,res){
 
-    db("CALL EditPerson(" + fpInt(req.body.id) +
-                        "," + fpVarchar(req.body.names) + "," + fpVarchar(req.body.firstLastName) + "," + fpVarchar(req.body.secondLastName) + 
-                        "," + fpDate(req.body.dateOfBirth) + "," + fpVarchar(req.body.email) + "," + fpVarchar(req.body.phone) + 
-                        "," + fpVarchar(req.body.ext) + "," + fpVarchar(req.body.password) + "," + fpInt(req.body.genderId) + 
-                        "," + fpDate(req.body.startDate) + "," + fpDate(req.body.endDate) + "," + fpInt(req.body.higherPersonId) + 
-                        "," + fpDate(req.body.lastLogin) + "," + fpVarchar(req.body.avatar) + "," + fpVarchar(req.body.description) + 
-                        "," + fpVarchar(req.body.job) + "," + fpInt(req.body.roleId) + "," + fpInt(req.body.theme) + 
-                        "," + fpVarchar(req.body.token) + "," + fpBool(req.body.isIosSync) + "," + fpBool(req.body.isAndroidSync) + 
-                        "," + fpVarchar(req.body.os_android) + "," + fpVarchar(req.body.os_ios) + "," + fpVarchar(req.body.os_chrome) + "," + fpVarchar(req.body.os_safari) + ");",
-    conn,function(error,result){
-        if(handle(error,res,true)){
-            res.status(200).end( responseMsg("Updated") );
-        }
+    reqUpload(req,'avatar', fpInt(req.params.id), function(fileName){
+        db("CALL EditPerson(" + fpInt(req.params.id) +
+                            "," + fpVarchar(req.body.names) + "," + fpVarchar(req.body.firstLastName) + "," + fpVarchar(req.body.secondLastName) + 
+                            "," + fpDate(req.body.dateOfBirth) + "," + fpVarchar(req.body.email) + "," + fpVarchar(req.body.mobile) + "," + fpVarchar(req.body.phone) + 
+                            "," + fpVarchar(req.body.ext) + "," + fpVarchar(req.body.password) + "," + fpInt(req.body.genderId) + 
+                            "," + fpDate(req.body.startDate) + "," + fpDate(req.body.endDate) + "," + fpInt(req.body.higherPersonId) + 
+                            "," + fpDate(req.body.lastLogin) + "," + fpVarchar(fileName) + "," + fpVarchar(req.body.description) + 
+                            "," + fpVarchar(req.body.job) + "," + fpInt(req.body.roleId) + "," + fpInt(req.body.theme) + 
+                            "," + fpVarchar(req.body.token) + "," + fpBool(req.body.isIosSync) + "," + fpBool(req.body.isAndroidSync) + 
+                            "," + fpVarchar(req.body.os_android) + "," + fpVarchar(req.body.os_ios) + "," + fpVarchar(req.body.os_chrome) + "," + fpVarchar(req.body.os_safari) + ");",
+        conn,function(error,result){
+            if(handle(error,res,true)){
+                res.status(200).end( responseMsg("Updated") );
+            }
+        });
     });
-
 });
 
 // Get Hierarchy of a Person

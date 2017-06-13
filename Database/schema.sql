@@ -68,6 +68,7 @@ CREATE TABLE person (
     secondLastName varchar(255),
     dateOfBirth date,
     email varchar(255) NOT NULL,
+    mobile varchar(255) NOT NULL,
     phone varchar(255),
     ext varchar(255),
     password varchar(255) NOT NULL,
@@ -222,73 +223,80 @@ CREATE TABLE projectGroup(
 DROP TABLE IF EXISTS projectMember;
 CREATE TABLE projectMember(
 	projectId int,
-    userId int,
+    personId int,
     roleId int,
     lastSeen datetime,
     startDate datetime,
     endDate datetime,
     CONSTRAINT FOREIGN KEY (projectId) REFERENCES project(id),
-    CONSTRAINT FOREIGN KEY (userId) REFERENCES person(id),
+    CONSTRAINT FOREIGN KEY (personId) REFERENCES person(id),
     CONSTRAINT FOREIGN KEY (roleId) REFERENCES roleType(id),
-    CONSTRAINT UNIQUE KEY (projectId,userId)    
+    CONSTRAINT UNIQUE KEY (projectId,personId)    
 );
 
 /* Tasks */
+DROP TABLE IF EXISTS task;
 CREATE TABLE task(
 	id int PRIMARY KEY AUTO_INCREMENT,
     name varchar(255),
-    description varchar(255),
+    description text,
     startDate datetime,
     dueDate datetime,
     creationDate datetime,
     creatorId int,
     projectId int,
     stateId int,
-    calendarId int,/*investigar que se ocupa para google calendar*/
+    calendarId varchar(255),/*investigar que se ocupa para google calendar*/
     CONSTRAINT FOREIGN KEY (projectId) REFERENCES project(id),
 	CONSTRAINT FOREIGN KEY (creatorId) REFERENCES person(id),    
-    CONSTRAINT FOREIGN KEY (stateId) REFERENCES stateType(id)
+    CONSTRAINT FOREIGN KEY (stateId) REFERENCES stateType(id)    
 );
 
-CREATE TABLE taskMembers(
+DROP TABLE IF EXISTS taskMember;
+CREATE TABLE taskMember(
 	taskId int,
-    userId int,
+    personId int,
     roleId int,
     lastSeen datetime,
     startDate datetime,
     endDate datetime,
     CONSTRAINT FOREIGN KEY (taskId) REFERENCES task(id),
-    CONSTRAINT FOREIGN KEY (userId) REFERENCES person(id),
-    CONSTRAINT FOREIGN KEY (roleId) REFERENCES roleType(id)
+    CONSTRAINT FOREIGN KEY (personId) REFERENCES person(id),
+    CONSTRAINT FOREIGN KEY (roleId) REFERENCES roleType(id),
+    CONSTRAINT UNIQUE KEY (taskId,personId)    
 );
 
-CREATE TABLE taskMessages(
+/*----------TASK MESSAGES----------------*/
+DROP TABLE IF EXISTS taskMessage;
+CREATE TABLE taskMessage(
 	id int PRIMARY KEY AUTO_INCREMENT,
     taskId int,
-    userId int,
+    personId int,
     message text,
     messageType int,
     attachment varchar(255), /*que se ocupa google drive?*/
     attachmentTypeId int,
     date datetime,
     CONSTRAINT FOREIGN KEY (taskId) REFERENCES task(id),
-    CONSTRAINT FOREIGN KEY (userId) REFERENCES person(id),
+    CONSTRAINT FOREIGN KEY (personId) REFERENCES person(id),
     CONSTRAINT FOREIGN KEY (attachmentTypeId) REFERENCES attachmentType(id)
     
 );
 
+DROP TABLE IF EXISTS checkList;
 CREATE TABLE checkList(
 	id int PRIMARY KEY AUTO_INCREMENT,
     taskId int ,
     title varchar(255),
     dueDate datetime,
     dateCreated datetime,
-    userId int,
+    personId int,
     CONSTRAINT FOREIGN KEY (taskId) REFERENCES task(id),
-    CONSTRAINT FOREIGN KEY (userId) REFERENCES person(id)
+    CONSTRAINT FOREIGN KEY (personId) REFERENCES person(id)
 );
 
-CREATE TABLE checkListItems(
+DROP TABLE IF EXISTS checkListItem;
+CREATE TABLE checkListItem(
 	checkListId int,
     item varchar(255),
     dueDate datetime,

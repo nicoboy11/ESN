@@ -235,7 +235,7 @@ END$$
 DELIMITER $$
 DROP procedure IF EXISTS `CreatePerson`$$
 CREATE PROCEDURE `CreatePerson` (	IN _names varchar(255),IN _firstLastName varchar(255), IN _secondLastName varchar(255), 
-									IN _dateOfBirth date, IN _email varchar(255),IN _phone varchar(255),IN _ext varchar(255),
+									IN _dateOfBirth date, IN _email varchar(255), IN _mobile varchar(255),IN _phone varchar(255),IN _ext varchar(255),
                                     IN _password VARCHAR(255),IN _genderId int,IN _higherPersonId int, 
                                     IN _avatar varchar(255),_token varchar(255), _roleId int)
 BEGIN
@@ -252,8 +252,8 @@ BEGIN
     SET _abbr = getAbbr(_names,_firstLastName);
     
 
-    INSERT INTO person (names,firstLastName,secondLastName,dateOfBirth,email,phone,ext,password,genderId,higherPersonId,avatar,token,abbr,roleId,startDate)
-    VALUES(_names,_firstLastName,_secondLastName,_dateOfBirth,_email,_phone,_ext,_password,_genderId,_higherPersonId,_avatar,_token,_abbr,_roleId,NOW());
+    INSERT INTO person (names,firstLastName,secondLastName,dateOfBirth,email,mobile,phone,ext,password,genderId,higherPersonId,avatar,token,abbr,roleId,startDate)
+    VALUES(_names,_firstLastName,_secondLastName,_dateOfBirth,_email,_mobile,_phone,_ext,_password,_genderId,_higherPersonId,_avatar,_token,_abbr,_roleId,NOW());
     
     SELECT LAST_INSERT_ID() as id;
     
@@ -263,7 +263,7 @@ DELIMITER $$
 DROP procedure IF EXISTS `EditPerson`$$
 CREATE PROCEDURE `EditPerson` (	IN _id int,
 								IN _names varchar(255),		IN _firstLastName varchar(255), IN _secondLastName varchar(255), 
-								IN _dateOfBirth date, 		IN _email varchar(255),			IN _phone varchar(255),			
+								IN _dateOfBirth date, 		IN _email varchar(255),			IN _mobile varchar(255),		IN _phone varchar(255),			
                                 IN _ext varchar(255),		IN _password VARCHAR(255),		IN _genderId int,
                                 IN _startDate varchar(255),	IN _endDate varchar(255),		IN _higherPersonId int,         
                                 IN _lastLogin datetime, 	IN _avatar varchar(255),		IN _description varchar(255),	
@@ -289,6 +289,7 @@ BEGIN
 			secondLastName = coalesce(_secondLastName,secondLastName),
 			dateOfBirth = coalesce(_dateOfBirth,dateOfBirth),
 			email = coalesce(_email,email),
+            mobile = coalesce(_mobile,mobile),
 			phone = coalesce(_phone,phone),
 			ext = coalesce(_ext,ext),
 			password = coalesce(_password,password),
@@ -335,6 +336,7 @@ BEGIN
             getFullName(p.id) as person,
 			p.dateOfBirth,
 			p.email,
+            p.mobile,
             p.genderId,
             g.description as gender,
 			p.phone,
@@ -804,7 +806,6 @@ BEGIN
 END$$
 
 /*--------------------Project Groups--------------------------*/
-
 DELIMITER $$
 DROP PROCEDURE IF EXISTS `CreateProjectGroup`$$
 CREATE PROCEDURE `CreateProjectGroup` (	IN _projectId int, IN _teamId int, IN _startDate datetime, IN _endDate datetime)
@@ -863,15 +864,9 @@ BEGIN
 END$$
 
 /*--------------------Project Members--------------------------*/
-	projectId int,
-    userId int,
-    roleId int,
-    lastSeen datetime,
-    startDate datetime,
-    endDate datetime,
 DELIMITER $$
 DROP PROCEDURE IF EXISTS `CreateProjectMember`$$
-CREATE PROCEDURE `CreateProjectMember` (	IN _projectId int, 		IN _userId int, 		IN _roleId int, 
+CREATE PROCEDURE `CreateProjectMember` (	IN _projectId int, 		IN _personId int, 		IN _roleId int, 
 											IN _startDate datetime, IN _endDate datetime	)
 BEGIN
 
@@ -879,14 +874,14 @@ BEGIN
 		SIGNAL sqlstate 'ERROR' SET message_text = 'The start date is greater than the end date.';
     END IF;
 
-	INSERT INTO projectMember ( projectId, userId, roleId, startDate, endDate )
-    VALUES ( _projectId, _userId, _roleId, _startDate, _endDate );
+	INSERT INTO projectMember ( projectId, personId, roleId, startDate, endDate )
+    VALUES ( _projectId, _personId, _roleId, _startDate, _endDate );
 
 END$$
 
 DELIMITER $$
 DROP PROCEDURE IF EXISTS `EditProjectMember`$$
-CREATE PROCEDURE `EditProjectMember` (	IN _projectId int, 		IN _userId int, 		IN _roleId int, 
+CREATE PROCEDURE `EditProjectMember` (	IN _projectId int, 		IN _personId int, 		IN _roleId int, 
 										IN _lastSeen datetime,  IN _startDate datetime, IN _endDate datetime	)
 BEGIN
 
@@ -900,18 +895,18 @@ BEGIN
 		startDate = coalesce(_startDate,startDate), 
         endDate = coalesce(_endDate,endDate)
 	WHERE 	projectId = _projectId AND
-			userId = _userId;
+			personId = _personId;
 
 END$$
 
 DELIMITER $$
 DROP PROCEDURE IF EXISTS `DeleteProjectMember`$$
-CREATE PROCEDURE `DeleteProjectMember` ( IN _projectId int, IN _userId int )
+CREATE PROCEDURE `DeleteProjectMember` ( IN _projectId int, IN _personId int )
 BEGIN
 
 	DELETE FROM projectMember 
 	WHERE 	projectId = _projectId AND
-			userId = _userId;
+			personId = _personId;
 
 END$$
 
@@ -919,18 +914,147 @@ END$$
 
 DELIMITER $$
 DROP PROCEDURE IF EXISTS `GetProjectMember`$$
-CREATE PROCEDURE `GetProjectMember` (	IN _projectId int, IN _userId int )
+CREATE PROCEDURE `GetProjectMember` (	IN _projectId int, IN _personId int )
 BEGIN
 
 	SELECT 	projectId,
-			userId,
+			personId,
             roleId,
             lastSeen,
 			startDate,
 			endDate
 	FROM projectMember
 	WHERE 	projectId = coalesce(_projectId,projectId) AND
-			userId = coalesce(_userId, userId);
+			userId = coalesce(_personId, personId);
 
 END$$
 
+/*--------------------TASKS-----------------------*/
+
+DELIMITER $$
+DROP PROCEDURE IF EXISTS `CreateTask`$$
+CREATE PROCEDURE `CreateTask` (	IN _name varchar(255), 	IN _description text, 		IN _startDate datetime, 
+								IN _dueDate datetime, 	IN _creationDate datetime,	IN _creatorId int, 		
+                                IN _projectId int,		IN _calendarId varchar(255) )
+BEGIN
+
+	IF(areValidDates(_startDate,_dueDate) = FALSE) THEN
+		SIGNAL sqlstate 'ERROR' SET message_text = 'The start date is greater than the end date.';
+    END IF;
+
+	INSERT INTO task ( name, description, startDate, dueDate, creationDate, creatorId, projectId, calendarId )
+    VALUES ( _name, _description, _startDate, _dueDate, _creationDate, _creatorId, _projectId, _calendarId );
+
+END$$
+
+DELIMITER $$
+DROP PROCEDURE IF EXISTS `EditTask`$$
+CREATE PROCEDURE `EditTask` (	IN _taskId int, 		IN _name varchar(255), 		IN _description text, 		IN _startDate datetime, 
+								IN _dueDate datetime, 	IN _creationDate datetime,	IN _creatorId int, 		
+                                IN _projectId int,		IN _stateId int,			IN _calendarId varchar(255) )
+BEGIN
+
+	IF(areValidDates(_startDate,_dueDate) = FALSE) THEN
+		SIGNAL sqlstate 'ERROR' SET message_text = 'The start date is greater than the end date.';
+    END IF;
+
+	UPDATE task
+    SET name = 	coalesce(_name,name),
+		description = coalesce(_description, description),
+        startDate = coalesce(_startDate, startDate),
+        dueDate = coalesce(_dueDate, dueDate),
+        projectId = coalesce(_projectId, projectId),
+        stateId = coalesce(_stateId, stateId),
+        calendarId = coalesce(_calendarId, calendarId)
+	WHERE id = _taskId;
+
+
+END$$
+
+DELIMITER $$
+DROP PROCEDURE IF EXISTS `GetTask`$$
+CREATE PROCEDURE `GetTask` ( IN _taskId int )
+BEGIN
+
+	SELECT 	name,
+			description,
+            formatDate(startDate) as startDate,
+            formatDate(dueDate) as dueDate,
+            formatDate(creationDate) as creationDate,
+            creatorId,
+            getAvatar(creatorId),
+            getFullName(creatorId),
+            getPersonAbbr(creatorId),
+            projectId,
+            stateId,
+            calendarId
+	FROM task
+    WHERE id = _taskId;
+
+END$$
+
+/*------Task Member----------*/
+    
+DELIMITER $$
+DROP PROCEDURE IF EXISTS `CreateTaskMember`$$
+CREATE PROCEDURE `CreateTaskMember` (	IN _taskId int, 		IN _personId int, 		IN _roleId int, 
+										IN _startDate datetime, IN _endDate datetime	)
+BEGIN
+
+	IF(areValidDates(_startDate,_endDate) = FALSE) THEN
+		SIGNAL sqlstate 'ERROR' SET message_text = 'The start date is greater than the end date.';
+    END IF;
+
+	INSERT INTO taskMember ( taskId, personId, roleId, startDate, endDate )
+    VALUES ( _taskId, _personId, _roleId, _startDate, _endDate );
+
+END$$
+    
+DELIMITER $$
+DROP PROCEDURE IF EXISTS `EditTaskMember`$$
+CREATE PROCEDURE `EditTaskMember` (	IN _taskId int, 		IN _personId int, 		IN _roleId int, 
+									IN _lastSeen datetime,	IN _startDate datetime, IN _endDate datetime	)
+BEGIN
+
+	IF(areValidDates(_startDate,_endDate) = FALSE) THEN
+		SIGNAL sqlstate 'ERROR' SET message_text = 'The start date is greater than the end date.';
+    END IF;
+
+	UPDATE taskMember 
+    SET roleId = coalesce(_roleId,roleId),
+		lastSeen = coalesce(_lastSeen,lastSeen),
+		startDate = coalesce(_startDate,startDate), 
+        endDate = coalesce(_endDate,endDate)
+	WHERE 	taskId = _taskId AND
+			personId = _personId;
+
+END$$
+
+DELIMITER $$
+DROP PROCEDURE IF EXISTS `DeleteTaskMember`$$
+CREATE PROCEDURE `DeleteTaskMember` ( IN _taskId int, IN _personId int )
+BEGIN
+
+	DELETE FROM taskMember 
+	WHERE 	taskId = _taskId AND
+			personId = _personId;
+
+END$$
+
+DELIMITER $$
+DROP PROCEDURE IF EXISTS `GetTaskMember`$$
+CREATE PROCEDURE `GetTaskMember` (	IN _taskId int, IN _personId int )
+BEGIN
+
+	SELECT 	taskId,
+			personId,
+            roleId,
+            lastSeen,
+			startDate,
+			endDate
+	FROM taskMember
+	WHERE 	taskId = coalesce(_taskId,taskId) AND
+			personId = coalesce(_personId, personId)
+	ORDER BY roleId, startDate, endDate;
+
+END$$    

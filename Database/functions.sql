@@ -1,12 +1,24 @@
 
 DELIMITER $$
 DROP FUNCTION IF EXISTS getAbbr$$
-CREATE FUNCTION `getAbbr` (name varchar(255),lastName varchar(255)) 
+CREATE FUNCTION `getAbbr` (_name varchar(255),_lastName varchar(255)) 
 RETURNS VARCHAR(3)
 BEGIN
 
-	RETURN CONCAT(LEFT(name,1),LEFT(lastName,1));
+	RETURN CONCAT(LEFT(_name,1),LEFT(_lastName,1));
     
+END$$
+
+DELIMITER $$
+DROP FUNCTION IF EXISTS getPersonAbbr$$
+CREATE FUNCTION `getPersonAbbr` (_personId int) 
+RETURNS VARCHAR(3)
+BEGIN
+
+	SET @abbr = (	SELECT getAbbr(names, firstLastName)
+					FROM person
+					WHERE id = _personId	);
+    RETURN @abbr;
 END$$
 
 DELIMITER $$
