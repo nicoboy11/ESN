@@ -62,7 +62,7 @@ CALL CreatePerson('Erick','Green','','1982-09-09','erick@testcorp.com','555-3333
 CALL CreatePerson('Amanda','Washington','','1990-05-01','amanda@testcorp.com','555-4444','','1210','password',2,10,'avt/xjalkd11.png','token123',3);
 CALL CreatePerson('Erik','Davis','','1985-10-29','erick.davis@testcorp.com','555-5555','','1210','password',1,10,'avt/xjalkd11.png','token123',3);
 
-
+/*---------------------HASTA AQUI ALCANZA---------------------------------*/
 
 CALL CreatePost(1,'This is my first post. Welcome!', 1, NULL, NULL, 1, NULL);
 
@@ -72,10 +72,26 @@ CALL CreateFollower(3,1);
 CALL CreateFollower(3,2);
 
 
-/*---------------------HASTA AQUI ALCANZA---------------------------------*/
+
 CALL CreatePostMessage(1,2,'cheers!',1,NULL,NULL);
 CALL CreatePostMessage(1,3,'cool!',1,NULL,NULL);
 CALL CreatePost(2,'I am posting too!', 1, NULL, NULL, 1, NULL);
+
+CALL CreatePost(5,'This is my new post', 1, NULL, NULL, 1, NULL);
+CALL CreatePost(7,'Here is a link: http://bit.ly/2sxuVam interpret it', 1, NULL, NULL, 1, NULL);
+CALL CreatePost(23,'There are many things I could be sharing here to help the rest of the team. You can help to! post something', 1, NULL, NULL, 1, NULL);
+CALL CreatePost(12,'Un post en español par aprobar la inovación teconlógica', 1, NULL, NULL, 1, NULL);
+CALL CreatePost(6,'We need to upload something', 1, NULL, NULL, 1, NULL);
+CALL CreatePost(6,'Upload stuff', 1, NULL, NULL, 1, NULL);
+CALL CreatePost(8,'Great changes', 1, NULL, NULL, 1, NULL);
+CALL CreatePost(1,'This is the new schedule', 1, NULL, NULL, 1, NULL);
+CALL CreatePost(4,'Tomorrow the annual party at 3:30 in...', 1, NULL, NULL, 1, NULL);
+CALL CreatePost(5,'Does anyone has the phone for HHRR', 1, NULL, NULL, 1, NULL);
+CALL CreatePost(9,'this is my phone you should be able to call me 8341263004', 1, NULL, NULL, 1, NULL);
+CALL CreatePost(12,'Hello', 1, NULL, NULL, 1, NULL);
+CALL CreatePost(10,'Posting more posts', 1, NULL, NULL, 1, NULL);
+CALL CreatePost(11,'Help me post this more', 1, NULL, NULL, 1, NULL);
+CALL CreatePost(16,'You should pin this', 1, NULL, NULL, 1, NULL);
 
 
 
@@ -103,21 +119,40 @@ CALL CreateTeamMember(2,13,3);
 CALL CreateTeamMember(2,14,3);
 
 CALL CreateProject('Secretaría de Seguridad Pública', 'SSP', '2017-01-01', 1, '2017-02-01', 'ssp.png');
+CALL CreateProject('Human resources stuff', 'HRS', '2017-01-01', 1, '2017-02-01', 'hrs.png');
 CALL EditProject(1,'Secretaría de Seguridad Pública', 'SSP', '2017-02-01', 1, '2017-03-30', 'ssp.png');
 
-CALL CreateProjectGroup(1,1,'2016-01-01','2016-05-05');
-CALL CreateProjectGroup(1,2,'2016-05-05','2016-08-01');
-CALL EditProjectGroup(1,2,'2016-05-05','2016-10-01');
+CALL CreateProjectTeam(1,1,'2016-01-01','2016-05-05');
+CALL CreateProjectTeam(1,2,'2016-05-05','2016-08-01');
+CALL EditProjectTeam(1,2,'2016-05-05','2016-10-01');
+CALL CreateProjectTeam(2,2,'2016-05-05','2016-08-01');
 
 CALL CreateProjectMember(1,1,1,NOW(),'2018-01-01');
 CALL CreateProjectMember(1,2,1,NOW(),'2018-01-01');
+
+CALL CreateProjectMember(2,1,1,NOW(),'2018-01-01');
+CALL CreateProjectMember(2,2,1,NOW(),'2018-01-01');
 
 CALL EditProjectMember(1,2,1,NOW(),'2016-01-01','2018-01-01');
 
 CALL CreateTask('Prepare ESN App', 'Write requirements and Design database', '2016-12-21', '2017-06-21', NOW(), 1, NULL, NULL);
 /*CALL CreateTask('Prepare ESN App', 'Write requirements and Design database', '2017-12-21', '2017-06-21', NOW(), 1, NULL, NULL); --Date Error*/
+CALL CreateTask('Get new people', 'Advertise company to get new employees', '2016-12-21', '2017-06-21', NOW(), 1, 2, NULL);
+CALL CreateTask('Training on IOS', 'Preparation for the IOS training', '2016-12-21', '2017-06-21', NOW(), 1, 2, NULL);
+CALL CreateTask('Training on Android', 'Preparation for the Android training', '2016-12-21', '2017-06-21', NOW(), 1, 2, NULL);
+CALL CreateTask('September Conference', 'Review everything wrt the conference', '2016-12-21', '2017-06-21', NOW(), 1, 2, NULL);
+CALL CreateTask('Organizing data', 'Organize all data in folders', '2016-12-21', '2017-06-21', NOW(), 1, 2, NULL);
 
 CALL EditTask(1, 'Prepare Enterprise Social Network', 'Write requirements, design database and application', NULL, NULL, NULL, NULL, NULL, NULL, NULL);
 
 CALL CreateTaskMember(1, 2, 2, NOW(), '2017-09-01');
 CALL CreateTaskMember(1, 3, 3, NOW(), '2017-09-01');
+
+CALL CreateTaskMember(1, 6, 3, NOW(), '2017-09-01');
+CALL CreateTaskMember(1, 7, 3, NOW(), '2017-09-01');
+CALL CreateTaskMember(1, 8, 3, NOW(), '2017-09-01');
+
+CALL CreateTaskMessage(1, 1, 'Welcome everyone', 1, NULL, NULL);
+CALL CreateTaskMessage(1, 2, 'Hi', 1, NULL, NULL);
+CALL CreateTaskMessage(1, 3, 'Hi', 1, NULL, NULL);
+CALL CreateTaskMessage(1, 4, 'Hi', 1, NULL, NULL); /* Should Fail */

@@ -95,6 +95,13 @@ CREATE TABLE person (
     CONSTRAINT FOREIGN KEY (genderId) REFERENCES gender(id)
 );
 
+DROP TABLE IF EXISTS personSettings;
+CREATE TABLE personSettings(
+	personId int,
+    isFullFeed bool, /* If the user wants to be everyones feed or just peple he follows */
+    CONSTRAINT FOREIGN KEY (personId) REFERENCES person(id)
+);
+
 DROP TABLE IF EXISTS followers;
 CREATE TABLE followers(
 	personId int,
@@ -209,8 +216,8 @@ CREATE TABLE project(
     CONSTRAINT FOREIGN KEY (creatorId) REFERENCES person(id)
 );
 
-DROP TABLE IF EXISTS projectGroup;
-CREATE TABLE projectGroup(
+DROP TABLE IF EXISTS projectTeam;
+CREATE TABLE projectTeam(
 	projectId int,
     teamId int,
     startDate datetime,
@@ -273,12 +280,13 @@ CREATE TABLE taskMessage(
     taskId int,
     personId int,
     message text,
-    messageType int,
+    messageTypeId int,
     attachment varchar(255), /*que se ocupa google drive?*/
     attachmentTypeId int,
-    date datetime,
+    messageDate datetime,
     CONSTRAINT FOREIGN KEY (taskId) REFERENCES task(id),
     CONSTRAINT FOREIGN KEY (personId) REFERENCES person(id),
+    CONSTRAINT FOREIGN KEY (messageTypeId) REFERENCES messageType(id),    
     CONSTRAINT FOREIGN KEY (attachmentTypeId) REFERENCES attachmentType(id)
     
 );

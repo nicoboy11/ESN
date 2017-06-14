@@ -11,6 +11,30 @@ app.use(bodyParser({limit: '50mb'}));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded());
 
+
+
+var WebSocket = require('ws');
+var wss = new WebSocket.Server({ port: 9998 })
+
+wss.on('connection', function connection(ws){
+
+    ws.on('message', function incoming(message){
+        var i = 0;
+        wss.clients.forEach(function each(client){
+            if(client !== ws && client.readyState === WebSocket.OPEN){
+                console.log(i++);
+                client.send(message);
+            }
+        })
+    })
+
+});
+
+
+
+
+
+
 var conn = mysql.createConnection({
     host: config.db.host,
     port: config.db.port,
@@ -167,24 +191,30 @@ function reqUpload(req, type, field, callback){
     */
 
     var form = new formidable.IncomingForm();
-    var fileName = config.prefixes[type] + field;
+    var fileName = '';
     var uniq = new Date().getTime() / 1000;
+    var params = {};
 
     form.parse(req);
 
     form.on('field', function(name, value){
-        console.log(fileName);
+        params[name] = value;
     }) 
     .on('fileBegin',function(name, file){
-        fileName = fileName + '_' + uniq + '.' + file.type.split('/')[1];
+        fileName = config.prefixes[type]
+        fileName = fileName + (isNaN(field)?params[field]:field) + '_' + uniq + '.' + file.type.split('/')[1];
         file.path = './uploads/' + fileName;
+        params['fileName'] = fileName;
         console.log('file created!');
     })
     .on('progress',function(bytesReceived, bytesExpected){
         console.log(bytesReceived + ' : ' + bytesExpected);
     })        
     .on('end',function(){
-        callback(fileName);
+        if(fileName === ''){
+            fileName = undefined;
+        }
+        callback(fileName, params);
     })
     .on('error', function(err){
         console.log(err.message);
@@ -192,11 +222,6 @@ function reqUpload(req, type, field, callback){
     })
 }
 
-app.post('/test',function(req,res){
-
-    reqUpload(req, res, 'avatar', 'personId');
-    
-});
 /**
  * USER RELATED ROUTES
  */
@@ -205,7 +230,7 @@ app.post('/test',function(req,res){
 app.post('/person',function(req,res){
 
     db("CALL CreatePerson(" + fpVarchar(req.body.names) + "," + fpVarchar(req.body.firstLastName) + "," + fpVarchar(req.body.secondLastName) + 
-                        "," + fpDate(req.body.dateOfBirth) + "," + fpVarchar(req.body.email) + "," + fpVarchar(req.body.phone) + "," + fpVarchar(req.body.ext) + 
+                        "," + fpDate(req.body.dateOfBirth) + "," + fpVarchar(req.body.email) + "," + fpVarchar(req.body.mobile) + "," + fpVarchar(req.body.phone) + "," + fpVarchar(req.body.ext) + 
                         "," + fpVarchar(req.body.password) + "," + fpInt(req.body.genderId) + "," + fpInt(req.body.highestPersonId) + 
                         "," + fpVarchar(req.body.avatar) + "," + fpVarchar(req.body.token) + "," + fpInt(req.body.roleId) + ");",
 
@@ -263,16 +288,16 @@ apiRoutes.get('/person/:id',function(req,res){
 //  Edit Person
 apiRoutes.put('/person/:id',function(req,res){
 
-    reqUpload(req,'avatar', fpInt(req.params.id), function(fileName){
+    reqUpload(req,'avatar', fpInt(req.params.id), function(fileName,params){
         db("CALL EditPerson(" + fpInt(req.params.id) +
-                            "," + fpVarchar(req.body.names) + "," + fpVarchar(req.body.firstLastName) + "," + fpVarchar(req.body.secondLastName) + 
-                            "," + fpDate(req.body.dateOfBirth) + "," + fpVarchar(req.body.email) + "," + fpVarchar(req.body.mobile) + "," + fpVarchar(req.body.phone) + 
-                            "," + fpVarchar(req.body.ext) + "," + fpVarchar(req.body.password) + "," + fpInt(req.body.genderId) + 
-                            "," + fpDate(req.body.startDate) + "," + fpDate(req.body.endDate) + "," + fpInt(req.body.higherPersonId) + 
-                            "," + fpDate(req.body.lastLogin) + "," + fpVarchar(fileName) + "," + fpVarchar(req.body.description) + 
-                            "," + fpVarchar(req.body.job) + "," + fpInt(req.body.roleId) + "," + fpInt(req.body.theme) + 
-                            "," + fpVarchar(req.body.token) + "," + fpBool(req.body.isIosSync) + "," + fpBool(req.body.isAndroidSync) + 
-                            "," + fpVarchar(req.body.os_android) + "," + fpVarchar(req.body.os_ios) + "," + fpVarchar(req.body.os_chrome) + "," + fpVarchar(req.body.os_safari) + ");",
+                            "," + fpVarchar(params.names) + "," + fpVarchar(params.firstLastName) + "," + fpVarchar(params.secondLastName) + 
+                            "," + fpDate(params.dateOfBirth) + "," + fpVarchar(params.email) + "," + fpVarchar(params.mobile) + "," + fpVarchar(params.phone) + 
+                            "," + fpVarchar(params.ext) + "," + fpVarchar(params.password) + "," + fpInt(params.genderId) + 
+                            "," + fpDate(params.startDate) + "," + fpDate(params.endDate) + "," + fpInt(params.higherPersonId) + 
+                            "," + fpDate(params.lastLogin) + "," + fpVarchar(params.fileName) + "," + fpVarchar(params.description) + 
+                            "," + fpVarchar(params.job) + "," + fpInt(params.roleId) + "," + fpInt(params.theme) + 
+                            "," + fpVarchar(params.token) + "," + fpBool(params.isIosSync) + "," + fpBool(params.isAndroidSync) + 
+                            "," + fpVarchar(params.os_android) + "," + fpVarchar(params.os_ios) + "," + fpVarchar(params.os_chrome) + "," + fpVarchar(params.os_safari) + ");",
         conn,function(error,result){
             if(handle(error,res,true)){
                 res.status(200).end( responseMsg("Updated") );
@@ -331,19 +356,84 @@ apiRoutes.get('/user/:a/followers',function(req,res){
  * POSTS and FEED made by users
  */
 apiRoutes.post('/post',function(req,res){
-    /*CALL CreatePost(1,'This is my first post. Welcome!', 1, NULL, NULL, 1, NULL);*/
-    res.send('User is creating this post: ' + req.body.userId);
+    reqUpload(req,'postatt','personId', function(fileName, params){
+        db("CALL CreatePost(" + fpInt(params.personId) + "," + fpVarchar(params.message) + "," + fpInt(params.messageTypeId) +
+                            "," + fpVarchar(params.fileName) + "," + fpInt(params.attachmentTypeId) + "," + fpInt(params.scopeTypeId) +
+                            "," + fpInt(params.scopeId) + ");",
+        conn, function(error, result){
+            if(handle(error,res,true)){
+                res.status(200).end( JSON.stringify(result[0]) );
+            }
+        });
+    });
+
 });
 
 apiRoutes.get('/post/:id',function(req,res){
-    /* CALL GetPost(1) */
-    res.send('This is the post: ' + req.params.id );
+    db("CALL GetPost(" + req.params.id + ");",conn,function(error,result){
+        if(handle(error,res,true)){
+            handleResponse(result,res,"");
+        }
+    });
 });
 
 apiRoutes.put('/post/:id',function(req,res){
-    /*CALL EditPost(1,'This is a corrected message','url/to/image',1,1,NULL) ***OJO coleasce esta forzado */
-    res.send('This edits post ' + req.params.id);
+    reqUpload(req,'postatt',req.params.id, function(fileName, params){
+        db("CALL EditPost(" + fpInt(req.params.id) + "," + fpVarchar(params.message) + "," + fpVarchar(params.fileName) + "," +
+                            fpInt(params.attachmentTypeId) + "," + fpInt(params.scopeTypeId) + "," + fpInt(params.scopeId) + ");",
+        conn,function(error,result){
+            if(handle(error,res,true)){
+                res.status(200).end( responseMsg("Updated") );
+            }
+        });
+    });
 });
+
+/**
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ */
+/**
+ * TASKS
+ */
+ apiRoutes.get('/task/:userId', function(req,res){
+
+ });
+
+/** FEED */
+apiRoutes.get('/feed/:userId/:scopeTypeId',function(req,res){
+    db("CALL GetFeed(" + fpInt(req.params.userId) + "," + fpInt(req.params.scopeTypeId) + ",1)",conn,function(error,result){
+        if(handle(error,res,true)){
+            handleResponse(result,res);
+        }
+    }); 
+});
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 apiRoutes.post('/post/:id/message',function(req,res){
     /*CALL CreatePostMessage(1,2,'cheers!',1,NULL,NULL);*/
@@ -361,14 +451,6 @@ apiRoutes.delete('/post/:id/message/:id',function(req,res){
  * 
  */
 
-/** FEED */
-apiRoutes.get('/feed/:userId/:scopeTypeId',function(req,res){
-    db("CALL GetFeed(" + fpInt(req.params.userId) + "," + fpInt(req.params.scopeTypeId) + ",1)",conn,function(error,result){
-        if(handle(error,res,true)){
-            handleResponse(result,res);
-        }
-    }); 
-});
 
 
 app.use('/',apiRoutes);

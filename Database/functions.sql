@@ -232,3 +232,46 @@ CREATE FUNCTION formatDate(_date datetime) RETURNS varchar(20)
 BEGIN
 	RETURN date_format(_date,'%Y-%m-%d %T');
 END$$
+
+
+DELIMITER $$
+DROP FUNCTION IF EXISTS isValidMessenger$$
+CREATE FUNCTION isValidMessenger(_taskId int,_personId int) RETURNS bool
+BEGIN
+
+	DECLARE _isValid bool;
+    
+    /*If the user is an active member of the task*/
+	SELECT CASE WHEN count(*) = 0 THEN FALSE ELSE TRUE END INTO _isValid
+	FROM task as t
+	INNER JOIN taskMember as tm on t.id = tm.taskId
+	WHERE	tm.taskId = _taskId AND
+			tm.personId = _personId AND
+			endDate > NOW();
+
+	RETURN _isValid;
+    
+END$$
+
+
+DELIMITER $$
+DROP FUNCTION IF EXISTS getJsonMembers$$
+CREATE FUNCTION getJsonMembers(_taskId int, _roleId int) RETURNS text
+BEGIN
+
+	DECLARE _members text;
+
+    SELECT concat('{',
+					group_concat( concat(personId, 
+                    ':{','avatar:"',getAvatar(personId),'",',
+						'abbr:"',getPersonAbbr(personId),'"',
+						'person:"',getFullName(personId),'"',
+                    '}') separator ','),
+				  '}') INTO _members
+    FROM taskMember
+    WHERE taskId = _taskId and roleId = _roleId;
+    
+    RETURN _members;
+
+END$$
+

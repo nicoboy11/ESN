@@ -805,31 +805,31 @@ BEGIN
 
 END$$
 
-/*--------------------Project Groups--------------------------*/
+/*--------------------Project Teams--------------------------*/
 DELIMITER $$
-DROP PROCEDURE IF EXISTS `CreateProjectGroup`$$
-CREATE PROCEDURE `CreateProjectGroup` (	IN _projectId int, IN _teamId int, IN _startDate datetime, IN _endDate datetime)
+DROP PROCEDURE IF EXISTS `CreateProjectTeam`$$
+CREATE PROCEDURE `CreateProjectTeam` (	IN _projectId int, IN _teamId int, IN _startDate datetime, IN _endDate datetime)
 BEGIN
 
 	IF(areValidDates(_startDate,_endDate) = FALSE) THEN
 		SIGNAL sqlstate 'ERROR' SET message_text = 'The start date is greater than the end date.';
     END IF;
 
-	INSERT INTO projectGroup ( projectId, teamId, startDate, endDate )
+	INSERT INTO projectTeam ( projectId, teamId, startDate, endDate )
     VALUES ( _projectId, _teamId, _startDate, _endDate);
 
 END$$
 
 DELIMITER $$
-DROP PROCEDURE IF EXISTS `EditProjectGroup`$$
-CREATE PROCEDURE `EditProjectGroup` ( IN _projectId int, IN _teamId int, IN _startDate datetime, IN _endDate datetime )
+DROP PROCEDURE IF EXISTS `EditProjectTeam`$$
+CREATE PROCEDURE `EditProjectTeam` ( IN _projectId int, IN _teamId int, IN _startDate datetime, IN _endDate datetime )
 BEGIN
 
 	IF(areValidDates(_startDate,_endDate) = FALSE) THEN
 		SIGNAL sqlstate 'ERROR' SET message_text = 'The start date is greater than the end date.';
     END IF;
 
-	UPDATE projectGroup 
+	UPDATE projectTeam 
     SET startDate = _startDate, 
         endDate = _endDate
 	WHERE 	projectId = _projectId AND
@@ -838,26 +838,26 @@ BEGIN
 END$$
 
 DELIMITER $$
-DROP PROCEDURE IF EXISTS `DeleteProjectGroup`$$
-CREATE PROCEDURE `DeleteProjectGroup` ( IN _projectId int, IN _teamId int )
+DROP PROCEDURE IF EXISTS `DeleteProjectTeam`$$
+CREATE PROCEDURE `DeleteProjectTeam` ( IN _projectId int, IN _teamId int )
 BEGIN
 
-	DELETE FROM projectGroup 
+	DELETE FROM projectTeam 
 	WHERE 	projectId = _projectId AND
 			teamId = _teamId;
 
 END$$
 
 DELIMITER $$
-DROP PROCEDURE IF EXISTS `GetProjectGroup`$$
-CREATE PROCEDURE `GetProjectGroup` (	IN _projectId int, IN _teamId int )
+DROP PROCEDURE IF EXISTS `GetProjectTeam`$$
+CREATE PROCEDURE `GetProjectTeam` (	IN _projectId int, IN _teamId int )
 BEGIN
 
 	SELECT 	projectId,
 			teamId,
 			startDate,
 			endDate
-	FROM projectGroup
+	FROM projectTeam
 	WHERE 	projectId = _projectId AND
 			teamId = coalesce(_teamId, teamId);
 
@@ -944,6 +944,8 @@ BEGIN
 
 	INSERT INTO task ( name, description, startDate, dueDate, creationDate, creatorId, projectId, calendarId )
     VALUES ( _name, _description, _startDate, _dueDate, _creationDate, _creatorId, _projectId, _calendarId );
+    
+	CALL CreateTaskMember(LAST_INSERT_ID(), _creatorId, 1, NOW(), NULL);    
 
 END$$
 
@@ -982,9 +984,9 @@ BEGIN
             formatDate(dueDate) as dueDate,
             formatDate(creationDate) as creationDate,
             creatorId,
-            getAvatar(creatorId),
-            getFullName(creatorId),
-            getPersonAbbr(creatorId),
+            getAvatar(creatorId) as avatar,
+            getFullName(creatorId) as person,
+            getPersonAbbr(creatorId) as abbr,
             projectId,
             stateId,
             calendarId
@@ -1058,3 +1060,79 @@ BEGIN
 	ORDER BY roleId, startDate, endDate;
 
 END$$    
+/*
+DELIMITER $$
+DROP PROCEDURE IF EXISTS `GetPersonTasks`$$
+CREATE PROCEDURE `GetTaskMember` (	IN _personId int )
+BEGIN
+
+
+   -- Tengo que pivotear para que regrese un solo row por cada tarea
+    
+    SELECT	t.id as taskId,
+			t.name,
+            t.description,
+            formatDate(t.startDate) as startDate,
+            formatDate(t.dueDate) as dueDate,
+            t.creatorId,
+            getFullName(t.creatorId) as creator,
+            getPersonAbbr(t.creatorId) as creatorAbbr,
+            getAvatar(t.creatorId) as creatorAvatar,
+            p.id as projectId,
+            p.name as projectName,
+            p.abbr as projectabbr,
+            te.id as teamId,
+            te.name as teamName,
+            te.abbr as teamAbbr,
+            getJsonMembers(t.id,3) as collaborators,
+            getJsonMembers(t.id,2) as leader
+    FROM task as t
+    LEFT JOIN project as p on p.id = t.projectId
+    LEFT JOIN projectTeam as pte on pte.projectId = p.id
+    LEFT JOIN team as te on te.id = pte.teamId
+
+END$$   
+*/
+/*---------Task Messages----------*/
+DELIMITER $$
+DROP PROCEDURE IF EXISTS `CreateTaskMessage`$$
+CREATE PROCEDURE `CreateTaskMessage` (	IN _taskId int,			IN _personId int,				IN _message text, 
+										IN _messageTypeId int,	IN _attachment varchar(255),	IN _attachmentTypeId int	)
+BEGIN
+
+	if(isValidMessenger(_taskId, _personId) = FALSE) THEN
+		SIGNAL sqlstate 'ERROR' SET message_text = 'You cannot send messages in this task.';
+    END IF;
+
+	INSERT INTO taskMessage (taskId, personId, message, messageTypeId, attachment, attachmentTypeId, messageDate)
+    VALUES(_taskId, _personId, _message, _messageTypeId, _attachment, _attachmentTypeId, NOW() );
+
+END$$
+
+
+DELIMITER $$
+DROP PROCEDURE IF EXISTS `GetMessage`$$
+CREATE PROCEDURE `GetMessage` (	IN _taskId int,	IN _personId int	)
+BEGIN
+
+	SELECT 	tmsg.id as taskMessageId,
+			tmsg.taskId,
+			tmsg.personId,
+            getAvatar(tmsg.personId) as avatar,
+            getFullName(tmsg.personId) as person,
+            getPersonAbbr(tmsg.personId) as abbr,
+            message,
+            messageTypeId,
+            attachment,
+			attachmentTypeId,
+            messageDate
+    FROM task as t
+    INNER JOIN taskMessage as tmsg on tmsg.taskId = t.id
+    LEFT JOIN taskMember as tm on tm.taskId = t.id
+	WHERE 	t.id = _taskId AND
+			tm.personId = _personId AND
+            tmsg.messageDate < ifnull(tm.endDate,NOW())
+	ORDER BY messageDate asc;
+    
+END$$
+

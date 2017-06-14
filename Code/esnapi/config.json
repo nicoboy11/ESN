@@ -10,7 +10,8 @@
         "secret":"H3rtr4dScotch"
     },
     "prefixes":{
-        "avatar":"avt_"
+        "avatar":"avt_",
+        "postatt": "pst_"
     }
     
 }
