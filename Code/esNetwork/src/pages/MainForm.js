@@ -6,7 +6,7 @@ import { Database, Config } from '../settings';
 
 export default class MainForm extends Component {
 
-    state = { elements: [], isLoading: false, showMenu: false };
+    state = { elements: [], isLoading: false, showMenu: false, offset: 0 };
 
     componentWillMount() {
         this.setState({ isLoading: true });
@@ -39,9 +39,13 @@ export default class MainForm extends Component {
         this.setState({ showMenu: !showMenu });
     }
 
+    closeMenu() {
+        this.setState({ showMenu: false });
+    }
+
     showMenu() {
         if (this.state.showMenu) {
-            return <Menu />;
+            return <Menu closeMenu={this.closeMenu.bind(this)} />;
         }
 
         return;
@@ -72,7 +76,12 @@ export default class MainForm extends Component {
     render() {
         return (
             <View style={{ flex: 1 }}>
-                <Header onPress={this.onLeft.bind(this)} />
+                <Header 
+                    onPress={this.onLeft.bind(this)}
+                    rightIcon='search'
+                    leftIcon='menu'
+                    title='Feed'
+                />
                 <ScrollView style={{ backgroundColor: '#EFEFEF' }}>
                     {this.renderList()}    
                 </ScrollView>

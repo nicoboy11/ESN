@@ -14,7 +14,6 @@ Session.schema = {
 class Database {
 
     static request(type, sp, params, onStart, onSuccess, onError) {
-
         const data = Database.realm('Session', { }, 'select', '');
 
         fetch(Config.network.server + sp, { 

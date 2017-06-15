@@ -5,6 +5,7 @@ import { Menu } from './components';
 import LoginForm from './pages/LoginForm';
 import RegisterForm from './pages/RegisterForm';
 import MainForm from './pages/MainForm';
+import AccountForm from './pages/AccountForm';
 import { Config } from './settings';
 
 const { colors } = Config;
@@ -18,7 +19,7 @@ class RouterComponent extends Component {
                 leftButtonIconStyle={{ tintColor: 'white' }}
                 titleStyle={styles.textStyle}
             > 
-                <Scene key='authentication'>
+                <Scene initial key='authentication'>
                     <Scene key='login' navigationBarStyle={{ opacity: 0 }} component={LoginForm} />
                     <Scene 
                         hideNaveBar={false} 
@@ -27,12 +28,13 @@ class RouterComponent extends Component {
                         title='Register'
                     />                 
                 </Scene>   
-                <Scene initial key='main'>
+                <Scene key='main'>
                     <Scene 
                         key='mainForm' 
                         component={MainForm} 
                         hideNavBar
                     />   
+                    <Scene key='account' component={AccountForm} hideNavBar />
                 </Scene>    
                 {/*<Scene key="statusModal" component={PostCardMenu} direction='vertical' hideNavBar />     */}
             </Router>
@@ -46,10 +48,6 @@ const styles = StyleSheet.create({
     },
     textStyle: {
         color: colors.mainText
-    },
-    imageStyle: {
-        width: 24,
-        height: 24
     }
 });
 
