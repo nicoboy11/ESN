@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { ListView } from 'react-native';
+import { ListView, Alert } from 'react-native';
 import { PostCard, TaskCard } from './';
 
 class CardList extends Component {
@@ -16,7 +16,15 @@ class CardList extends Component {
             return <TaskCard />;
         }
 
-        return <PostCard />;
+        return ( 
+                <PostCard 
+                    avatar={data.avatar} 
+                    theme={data.theme} 
+                    creationDate={data.creationDate}
+                    message={data.message}
+                    person={data.person}
+                />
+        );
     }
 
     render() {
@@ -24,6 +32,7 @@ class CardList extends Component {
             <ListView 
                 dataSource={this.dataSource} 
                 renderRow={this.renderRow}
+                enableEmptySections
             />
         );
     }

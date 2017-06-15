@@ -7,9 +7,23 @@ const { colors } = Config;
 
 class PostCard extends Component {
 
+    renderAvatar() {
+        const { avatarStyle, avatarTextStyle } = styles;
+        const { avatar, theme } = this.props;
+
+        if (avatar.length === 2) {
+            return (
+                <View style={[avatarStyle, { backgroundColor: theme }]} >
+                    <Text style={avatarTextStyle}>{avatar}</Text>
+                </View>
+            );
+        }
+
+        return <Image style={avatarStyle} source={{ uri: { avatar } }} />;
+    }
+
     render() {
         const { containerStyle, 
-                imageStyle,
                 menuImageStyle,
                 topContainerStyle,
                 bottomContainerStyle,
@@ -19,18 +33,23 @@ class PostCard extends Component {
                 titleStyle,
                 dateStyle,
                 mainText,
-                bottomLinksStyles
+                bottomLinksStyles,
+                middleContainerStyle
             } = styles;
+
+            const { person, 
+                    creationDate,
+                    message } = this.props;
 
         return (
             <View style={containerStyle} >
                 <View style={topContainerStyle} >
                     <View style={imageViewStyle} >
-                        <Image style={imageStyle} source={require('../img/12.jpg')} />
+                        {this.renderAvatar()}
                     </View>
                     <View style={titleViewStyle} >
-                        <LinkButton style={titleStyle} title='Even Sosa' />
-                        <Text style={dateStyle} >Today</Text>
+                        <LinkButton style={titleStyle} title={person} />
+                        <Text style={dateStyle} >{creationDate}</Text>
                     </View>
                     <View style={unfollowViewStyle} >
                         <TouchableOpacity>
@@ -38,9 +57,9 @@ class PostCard extends Component {
                         </TouchableOpacity>
                     </View>
                 </View>
-                <View>
+                <View style={middleContainerStyle}>
                     <Text style={mainText}>
-                        Hoy celebramos el día de nuestra independencia, debemos estar concientes de el cambio.
+                        {message}
                     </Text>
                 </View>
                 <View style={bottomContainerStyle}>
@@ -62,15 +81,25 @@ const styles = StyleSheet.create({
         marginTop: 5,
         backgroundColor: colors.elementBackground
     },
-    imageStyle: {
+    avatarTextStyle: {
+        color: colors.mainText,
+        fontSize: 18
+    },
+    avatarStyle: {
         width: 40,
         height: 40,
-        borderRadius: 20
+        borderRadius: 20,
+        justifyContent: 'center',
+        alignItems: 'center'    
     },
     topContainerStyle: {
         flexDirection: 'row',
         flex: 1,
         justifyContent: 'space-between'
+    },
+    middleContainerStyle: {
+        marginTop: 10,
+        marginBottom: 5
     },
     bottomContainerStyle: {
         flexDirection: 'row',

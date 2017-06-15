@@ -589,8 +589,11 @@ BEGIN
 			messageTypeId,
 			attachment,
 			attachmentTypeId,
-			formatDate(creationDate) as creationDate
+			formatDate(creationDate) as creationDate,
+            getAvatar(pst.personId) as avatar,
+            p.theme
 	FROM post as pst
+    INNER JOIN person as p on pst.personId = p.id
 	WHERE pst.personId = _personId and pst.scopeTypeId = _scopeTypeId
 	UNION ALL
 	SELECT 	pst.id,
@@ -601,14 +604,15 @@ BEGIN
 			messageTypeId,
 			attachment,
 			attachmentTypeId,
-			formatDate(creationDate) as creationDate
+			formatDate(creationDate) as creationDate,
+            getAvatar(pst.personId) as avatar,
+            p.theme
 	FROM post as pst
 	INNER JOIN followers as f on pst.personId = f.personId
+    INNER JOIN person as p on pst.personId = p.id    
 	WHERE f.followerId = _personId and pst.scopeTypeId = _scopeTypeId
     ORDER BY creationDate desc;
-    
 
-    
 END$$
 
 /*===================================================================================================*/

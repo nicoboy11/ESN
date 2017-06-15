@@ -259,7 +259,7 @@ app.post('/loginUser',function(req,res){
 
                     var token = jwt.sign({ "email":req.body.email,
                                         "password":req.body.password  },config.auth.secret,{
-                        expiresIn: 3600
+                        expiresIn: 36000
                     });
 
                     result[0][0]["token"] = token;
@@ -295,7 +295,7 @@ apiRoutes.put('/person/:id',function(req,res){
                             "," + fpVarchar(params.ext) + "," + fpVarchar(params.password) + "," + fpInt(params.genderId) + 
                             "," + fpDate(params.startDate) + "," + fpDate(params.endDate) + "," + fpInt(params.higherPersonId) + 
                             "," + fpDate(params.lastLogin) + "," + fpVarchar(params.fileName) + "," + fpVarchar(params.description) + 
-                            "," + fpVarchar(params.job) + "," + fpInt(params.roleId) + "," + fpInt(params.theme) + 
+                            "," + fpVarchar(params.job) + "," + fpInt(params.roleId) + "," + fpVarchar(params.theme) + 
                             "," + fpVarchar(params.token) + "," + fpBool(params.isIosSync) + "," + fpBool(params.isAndroidSync) + 
                             "," + fpVarchar(params.os_android) + "," + fpVarchar(params.os_ios) + "," + fpVarchar(params.os_chrome) + "," + fpVarchar(params.os_safari) + ");",
         conn,function(error,result){

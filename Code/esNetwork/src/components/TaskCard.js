@@ -54,7 +54,7 @@ class TaskCard extends Component {
                             <LinkButton style={[linkStyle, { color: colors.error }]} title='Mañana' />
                         </View>
                         <View style={creatorStyle} >
-                            <Image style={imageStyle} source={require('../img/12.jpg')} />
+                            <Image style={imageStyle} source={{ uri: 'avt_12' }} />
                             <Text style={creatorTextStyle} >Even Sosa</Text>
                         </View> 
                     </View>
@@ -67,11 +67,11 @@ class TaskCard extends Component {
                 <View style={bottomViewStyle} >
                     <View style={bottomLeftStyle} >
                         <View style={peopleStyle} >
-                            <Image style={[smallImageStyle, { marginRight: 5 }]} source={require('../img/13.jpg')} />
+                            <Image style={[smallImageStyle, { marginRight: 5 }]} source={{ uri: 'avt_12' }} />
                             <View style={contributorsStyle}>
-                                <Image style={smallImageStyle} source={require('../img/228.jpg')} />
-                                <Image style={smallImageStyle} source={require('../img/226.jpg')} />
-                                <Image style={smallImageStyle} source={require('../img/1.jpg')} />
+                                <Image style={smallImageStyle} source={{ uri: 'avt_12' }} />
+                                <Image style={smallImageStyle} source={{ uri: 'avt_12' }} />
+                                <Image style={smallImageStyle} source={{ uri: 'avt_12' }} />
                             </View>
                         </View>                        
                     </View>

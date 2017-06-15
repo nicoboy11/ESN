@@ -6,3 +6,5 @@ export * from './CardList';
 export * from './PostCardMenu';
 export * from './TaskCard';
 export * from './DatePicker';
+export * from './Menu';
+export * from './Header';

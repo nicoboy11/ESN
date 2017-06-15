@@ -14,13 +14,17 @@ Session.schema = {
 class Database {
 
     static request(type, sp, params, onStart, onSuccess, onError) {
+
+        const data = Database.realm('Session', { }, 'select', '');
+
         fetch(Config.network.server + sp, { 
             method: type, 
             headers: {
                 Accept: 'application/json',
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${data[0].token}`
             },
-            body: JSON.stringify(params) 
+            body: (Object.keys(params).length === 0) ? null : JSON.stringify(params)
         })
         .then(onStart)
         .then(onSuccess)
@@ -37,10 +41,11 @@ class Database {
         switch (action) {
             case 'create':
                 realm.write(() => {
-                    if (data.length === 0) {
+                    if (data[0].length === 0) {
                         realm.create(table, { token: fields.token, personId: fields.personId });
                     } else {
-                        data.token = fields.token;
+                        data[0].token = fields.token;
+                        data[0].personId = fields.personId;
                     }
                 });
 
