@@ -13,16 +13,26 @@ Session.schema = {
 
 class Database {
 
-    static request(type, sp, params, onStart, onSuccess, onError) {
-        const data = Database.realm('Session', { }, 'select', '');
+    static getHeader(needsAuth) {
+        if (needsAuth) {
+                const data = Database.realm('Session', { }, 'select', '');
+                return {
+                    Accept: 'application/json',
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${data[0].token}`
+                };
+        }
 
+        return {
+                    Accept: 'application/json',
+                    'Content-Type': 'application/json'
+                };
+    }
+
+    static request(type, sp, params, needsAuth, onStart, onSuccess, onError) {
         fetch(Config.network.server + sp, { 
             method: type, 
-            headers: {
-                Accept: 'application/json',
-                'Content-Type': 'application/json',
-                Authorization: `Bearer ${data[0].token}`
-            },
+            headers: Database.getHeader(needsAuth),
             body: (Object.keys(params).length === 0) ? null : JSON.stringify(params)
         })
         .then(onStart)
@@ -40,7 +50,7 @@ class Database {
         switch (action) {
             case 'create':
                 realm.write(() => {
-                    if (data[0].length === 0) {
+                    if (data[0] === undefined) {
                         realm.create(table, { token: fields.token, personId: fields.personId });
                     } else {
                         data[0].token = fields.token;

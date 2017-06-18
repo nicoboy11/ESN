@@ -4,6 +4,7 @@ import { Actions } from 'react-native-router-flux';
 import { Config } from '../settings';
 
 const screen = Dimensions.get('screen');
+const { texts } = Config;
 
 class Menu extends Component {
 
@@ -41,13 +42,13 @@ class Menu extends Component {
             <Animated.View style={[containerStyle, { width: this.state.width }]}>
                 <View style={listContainerStyle}>
                     <TouchableOpacity onPress={() => { this.hide(); Actions.account(); }} style={listItemContainerStyle}>
-                        <Text style={listItemStyle}>Personal Settings</Text>
+                        <Text style={listItemStyle}>{texts.accountSettings}</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity onPress={() => { this.hide(); Actions.profileImage(); }} style={listItemContainerStyle}>
+                        <Text style={listItemStyle}>{texts.profileImage}</Text>                        
                     </TouchableOpacity>
                     <TouchableOpacity style={listItemContainerStyle}>
-                        <Text style={listItemStyle}>Change profile image</Text>                        
-                    </TouchableOpacity>
-                    <TouchableOpacity style={listItemContainerStyle}>
-                        <Text style={listItemStyle}>Logout</Text>                        
+                        <Text style={listItemStyle}>{texts.logout}</Text>                        
                     </TouchableOpacity>                                        
                 </View>   
                 <View style={fadeContainerStyle} />   

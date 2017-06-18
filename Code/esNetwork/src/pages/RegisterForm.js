@@ -6,7 +6,7 @@ import { Config, Database } from '../settings';
 
 const { texts } = Config;
 
-export default class RegisterForm extends Component {
+class RegisterForm extends Component {
     state = { 
         dateOfBirth: null,
         loading: 0,
@@ -51,6 +51,7 @@ export default class RegisterForm extends Component {
               password,
               genderId
             }, 
+            false,
             this.handleResponse.bind(this), this.onLoginResponse.bind(this), 
             this.onError.bind(this));
     }    
@@ -145,3 +146,5 @@ const styles = StyleSheet.create({
         paddingTop: 60    
     }
 });
+
+export { RegisterForm };

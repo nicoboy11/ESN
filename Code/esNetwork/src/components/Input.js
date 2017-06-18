@@ -8,10 +8,11 @@ class Input extends Component {
 
     state = { isError: false, 
               errorText: '', 
-              text: '', 
+              text: this.props.value, 
               isFocused: false, 
               keyboardType: 'default', 
-              secureTextEntry: false 
+              secureTextEntry: false,
+              editable: true
             };
 
     componentWillMount() {
@@ -45,6 +46,10 @@ class Input extends Component {
             default:
                 this.setState({ keyboardType: 'default' });
         }
+
+        if (this.props.editable !== undefined) {
+            this.setState({ editable: this.props.editable });
+        }
     }
 
     validateInput(text) {
@@ -73,6 +78,38 @@ class Input extends Component {
         return '';        
     }
 
+    renderInput() {
+        const {            
+            inputStyle, 
+            validInputStyle,
+            invalidInputStyle   
+        } = styles;
+
+        if (!this.state.editable) {
+            return <Text style={inputStyle}>{this.state.text}</Text>;
+        }
+        return (
+            <View style={{ flex: 1 }}>
+                <TextInput 
+                    style={[inputStyle, !this.state.isError ? validInputStyle : invalidInputStyle]}
+                    autoCorrect={false}                  
+                    underlineColorAndroid='transparent'                       
+                    placeholderTextColor={colors.lightText}
+                    value={this.state.text}
+                    keyboardType={this.state.keyboardType}
+                    secureTextEntry={this.state.secureTextEntry}
+                    onChangeText={this.onTextChanged.bind(this)}
+                    onBlur={this.onBlur.bind(this)}
+                    onFocus={this.onFocus.bind(this)}
+                    autoCapitalize={this.props.autoCapitalize}
+                    returnKeyType={this.props.returnKeyType}
+                    placeholder={this.props.label}
+                />
+                <Text style={styles.errorTextStyle} >{this.renderError()}</Text>
+            </View>
+        );
+    }
+
     renderError() {
         if (this.state.isError) {
             return this.state.errorText;
@@ -84,12 +121,9 @@ class Input extends Component {
     render() {
         const { 
             viewStyle, 
-            labelTextStyle, 
-            inputStyle, 
+            labelTextStyle,      
             activeLabelStyle, 
             inactiveLabelStyle,
-            validInputStyle,
-            invalidInputStyle
         } = styles;
 
         return (
@@ -99,22 +133,7 @@ class Input extends Component {
                             this.state.isFocused ? activeLabelStyle : inactiveLabelStyle]}
                 >{this.renderLabel()}
                 </Text>
-                <TextInput 
-                    style={[inputStyle, !this.state.isError ? validInputStyle : invalidInputStyle]}
-                    autoCorrect={false}                  
-                    underlineColorAndroid='transparent'                       
-                    placeholderTextColor={colors.lightText}
-                    value={this.state.text}
-                    keyboardType={this.state.keyboardType}
-                    secureTextEntry={this.state.secureTextEntry}                    
-                    onChangeText={this.onTextChanged.bind(this)}
-                    onBlur={this.onBlur.bind(this)}
-                    onFocus={this.onFocus.bind(this)}
-                    autoCapitalize={this.props.autoCapitalize}
-                    returnKeyType={this.props.returnKeyType}
-                    placeholder={this.props.label}                
-                />
-                <Text style={styles.errorTextStyle} >{this.renderError()}</Text>
+                {this.renderInput()}
             </View>
         );
     }
@@ -148,7 +167,8 @@ const styles = StyleSheet.create({
         height: 24,
         lineHeight: 24,
         padding: 0,
-        fontSize: 18
+        fontSize: 18,
+        color: '#444'
     },
     validInputStyle: {
         borderBottomColor: colors.lightText,

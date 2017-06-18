@@ -1,4 +1,7 @@
 class Config {}
+
+
+
 Config.regex = {
     email: /^[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$/i,
     textOnly: /[^a-zA-Z0-9\s]/g
@@ -7,6 +10,7 @@ Config.regex = {
 Config.colors = {
     lightText: '#CED3D9',
     main: '#3D68EB',
+    darkMain: '#3457C3',
     error: '#EF9C7A',
     inactive: '#828486',
     mainText: '#FFF',
@@ -33,7 +37,18 @@ const lang = {
                         names: 'Name(s)',
                         firstLastName: 'Last name',    
                         secondLastName: 'Second last name',
-                        dateOfBirth: 'Date of birth'
+                        dateOfBirth: 'Date of birth',
+                        phone: 'Phone',
+                        ext: 'Extension',
+                        mobile: 'Mobile',
+                        //Profile
+                        contactInfo: 'Contact Information',
+                        //PageTitles
+                        accountSettings: 'Account Settings',
+                        feed: 'Feed',
+                        profileImage: 'Profile Image',
+                        register: 'Register',
+                        logout: 'Logout'
                 },
                 es: {   //Login page
                         email: 'Email',
@@ -49,7 +64,18 @@ const lang = {
                         names: 'Nombre(s)',
                         firstLastName: 'Apellido Paterno',      
                         secondLastName: 'Apellido Materno',
-                        dateOfBirth: 'Fecha de nacimiento'                        
+                        dateOfBirth: 'Fecha de nacimiento',
+                        phone: 'Telefono',
+                        ext: 'Extensión',
+                        mobile: 'Celular',
+                        //Profile
+                        contactInfo: 'Información de Contacto',                        
+                        //PageTitles
+                        accountSettings: 'Configuración de la cuenta',
+                        feed: 'Actualizaciones',
+                        profileImage: 'Imagen de Perfil',
+                        register: 'Registrarse',
+                        logout: 'Salir'
                 }
 
              };

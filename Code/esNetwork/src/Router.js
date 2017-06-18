@@ -2,10 +2,7 @@ import React, { Component } from 'react';
 import { StyleSheet, Modal } from 'react-native';
 import { Scene, Router, Actions } from 'react-native-router-flux';
 import { Menu } from './components';
-import LoginForm from './pages/LoginForm';
-import RegisterForm from './pages/RegisterForm';
-import MainForm from './pages/MainForm';
-import AccountForm from './pages/AccountForm';
+import { LoginForm, RegisterForm, MainForm, ProfileForm, ProfileImage } from './pages';
 import { Config } from './settings';
 
 const { colors } = Config;
@@ -34,9 +31,11 @@ class RouterComponent extends Component {
                         component={MainForm} 
                         hideNavBar
                     />   
-                    <Scene key='account' component={AccountForm} hideNavBar />
+                    <Scene key='profile' direction='vertical' component={ProfileForm} hideNavBar />
+                    <Scene key='profileImage' component={ProfileImage} hideNavBar />
                 </Scene>    
-                {/*<Scene key="statusModal" component={PostCardMenu} direction='vertical' hideNavBar />     */}
+                {/*<Scene key="statusModal" component={PostCardMenu} direction='vertical' 
+                hideNavBar />     */}
             </Router>
         );
     }

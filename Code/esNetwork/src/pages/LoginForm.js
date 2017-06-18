@@ -6,9 +6,16 @@ import { Config, Database } from '../settings';
 
 const { texts } = Config;
 
-export default class LoginForm extends Component {
+class LoginForm extends Component {
 
     state = { loading: 0, email: '', password: '' }
+
+    componentWillMount() {
+        const data = Database.realm('Session', { }, 'select', '');
+        if (data[0] !== undefined) {
+            Actions.main();
+        }
+    }
 
     onLoginResponse(responseData) {
         const { status } = this.state;
@@ -37,7 +44,7 @@ export default class LoginForm extends Component {
         this.setState({ loading: 1 });  
         Keyboard.dismiss();
          
-        Database.request('POST', 'loginUser', { email, password }, 
+        Database.request('POST', 'loginUser', { email, password }, false,
             this.handleResponse.bind(this), this.onLoginResponse.bind(this), 
             this.onError.bind(this));
     }
@@ -134,3 +141,5 @@ const styles = {
     width: 50
   }
 };
+
+export { LoginForm };

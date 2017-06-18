@@ -1,10 +1,12 @@
 import React, { Component } from 'react';
 import { ScrollView, Alert, ActivityIndicator, TouchableOpacity, Image, View, Text } from 'react-native';
 import { Actions } from 'react-native-router-flux';
-import { CardList, Menu, Header } from '../components';
+import { CardList, Menu, Header, Form } from '../components';
 import { Database, Config } from '../settings';
 
-export default class MainForm extends Component {
+const { texts } = Config;
+
+class MainForm extends Component {
 
     state = { elements: [], isLoading: false, showMenu: false, offset: 0 };
 
@@ -19,6 +21,7 @@ export default class MainForm extends Component {
             'GET', 
             `feed/${personId}/1`, 
             {}, 
+            true,
             this.handleResponse.bind(this), 
             this.onSuccess.bind(this),
             this.onError.bind(this)
@@ -75,19 +78,22 @@ export default class MainForm extends Component {
 
     render() {
         return (
-            <View style={{ flex: 1 }}>
-                <Header 
-                    onPress={this.onLeft.bind(this)}
-                    rightIcon='search'
-                    leftIcon='menu'
-                    title='Feed'
-                />
+            <Form
+                leftIcon='menu'
+                rightIcon='search'
+                title={texts.feed}
+                menuList={
+                    [
+                        { name: 'Profile', form: 'profile', id: 2 }
+                    ]
+                }
+            >
                 <ScrollView style={{ backgroundColor: '#EFEFEF' }}>
                     {this.renderList()}    
-                </ScrollView>
-                {this.showMenu()}                
-            </View>
-
+                </ScrollView>                
+            </Form>            
         );
     }
 }
+
+export { MainForm };

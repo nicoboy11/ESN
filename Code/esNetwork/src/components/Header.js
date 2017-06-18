@@ -19,27 +19,35 @@ class Header extends Component{
         }
     }
 
-    onPress() {
+    onPressLeft() {
         if (this.props.leftIcon === 'back') {
             Actions.pop();
         } else {
-            this.props.onPress();
+            this.props.onPressLeft();
         }
+    }
+
+    onPressRight() {
+        this.props.onPressRight();
     }
 
     render() {
         const { containerStyle, titleStyle } = style;
-        const { rightIcon, leftIcon, title, onPress } = this.props;
+        const { rightIcon, leftIcon, title, onPress, isVisible } = this.props;
+
+        if (!isVisible) {
+            return null;
+        }
 
         return (
-            <View style={containerStyle}>
-                <TouchableOpacity onPress={this.onPress.bind(this)} >
+            <View style={[containerStyle]}>
+                <TouchableOpacity onPress={this.onPressLeft.bind(this)} >
                     {this.renderButton(leftIcon)}
                 </TouchableOpacity>
                 <Text allowFontScaling ellipsizeMode='tail' numberOfLines={2} style={titleStyle} >
                     {title}
                 </Text>
-                <TouchableOpacity>
+                <TouchableOpacity onPress={this.onPressRight.bind(this)} >
                     {this.renderButton(rightIcon)}
                 </TouchableOpacity>                    
             </View>        
@@ -55,7 +63,8 @@ const style = StyleSheet.create({
         flexDirection: 'row',
         alignContent: 'center',
         justifyContent: 'space-between',
-        alignItems: 'center'
+        alignItems: 'center',
+        alignSelf: 'flex-start'
     },
     imageStyle: {
         width: 24,

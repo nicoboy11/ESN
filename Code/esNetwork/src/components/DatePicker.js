@@ -8,22 +8,46 @@ import {
     View,
     StyleSheet
 } from 'react-native';
-import { Config, helper } from '../settings';
+import { Config, Helper } from '../settings';
 
 const { colors } = Config;
 
 class DatePicker extends Component {
 
-    state = { date: null, text: '' }
+    constructor(props) {
+        super(props);
+        this.state = {
+            date: null, 
+            borderLine: 1,
+            editable: true
+        };
+    }
+
+    componentWillMount() {
+        if (this.props.date !== undefined) {
+            this.setState({ date: this.props.date.toLocaleDateString() });
+        }
+
+        if (this.props.editable !== undefined) {
+            if (this.props.editable === false){
+                this.setState({ borderLine: 0 });
+            }
+            this.setState({ editable: this.props.editable });
+        }        
+    }
 
     async showDatePicker() {
         try {
+            if (!this.props.editable) {
+                return;
+            }
+
             const { action, year, month, day } = await DatePickerAndroid.open({
                 date: new Date()
             });
             if (action !== DatePickerAndroid.dismissedAction) {
                 const date = new Date(year, month, day);
-                const dateISO = helper.getDateISO(year, month, day);
+                const dateISO = Helper.getDateISO(year, month, day);
                 this.setState({ date: date.toLocaleDateString() });
                 //Back to the parent component
                 this.props.onChangeDate(dateISO);
@@ -34,7 +58,7 @@ class DatePicker extends Component {
     }
 
     renderLabel() {
-        if (this.state.text !== '') {
+        if (this.state.date !== null) {
             return this.props.label;
         }
         
@@ -43,10 +67,15 @@ class DatePicker extends Component {
 
     renderSelection() {
         if (this.state.date != null) {
-            return <Text style={[styles.validInputStyle, { color: '#333' }]}>{this.state.date}</Text>;
+            return (
+                <Text 
+                    style={[styles.validInputStyle, { color: '#444', borderBottomWidth: this.state.borderLine }]}
+                >
+                    {this.state.date}
+                </Text>);
         }
 
-        return <Text style={styles.validInputStyle}>{this.props.label}</Text>;
+        return <Text style={[styles.validInputStyle, { borderBottomWidth: this.state.borderLine }]}>{this.props.label}</Text>;
     }
 
     renderPicker() {
@@ -65,7 +94,8 @@ class DatePicker extends Component {
                     <Text 
                         style={[labelTextStyle, 
                                 this.state.isFocused ? activeLabelStyle : inactiveLabelStyle]}
-                    >{this.renderLabel()}
+                    >
+                        {this.renderLabel()}
                     </Text>                
                     {this.renderSelection()}
                 </TouchableOpacity>
@@ -102,7 +132,6 @@ const styles = StyleSheet.create({
     },
     validInputStyle: {
         borderBottomColor: colors.lightText,
-        borderBottomWidth: 1,
         color: colors.lightText,
         fontSize: 18
     }
