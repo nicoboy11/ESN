@@ -37,7 +37,13 @@ class Form extends Component {
     }
 
     onRight() {
-        console.log('right');
+        switch (this.props.rightIcon) {
+            case 'menu':
+                this.toogle();
+                return; 
+            default:
+                return;
+        }
     }
 
     toogle() {

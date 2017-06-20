@@ -334,15 +334,15 @@ BEGIN
 			p.firstLastName,
 			p.secondLastName,
             getFullName(p.id) as person,
-			p.dateOfBirth,
+			formatDate(p.dateOfBirth) as dateOfBirth,
 			p.email,
             p.mobile,
             p.genderId,
             g.description as gender,
 			p.phone,
 			p.ext,
-			p.startDate,
-			p.endDate,
+			formatDate(p.startDate) as startDate,
+			formatDate(p.endDate) as endDate,
 			p.higherPersonId,
             getFullName(p.higherPersonId) as higherPerson,
 			formatDate(p.lastLogin) as lastLogin,
@@ -351,7 +351,8 @@ BEGIN
 			p.job,
 			p.roleId,
 			p.abbr,
-            getLevelKey(_id) as levelKey
+            getLevelKey(_id) as levelKey,
+            p.theme
     FROM person as p
     INNER JOIN gender as g on g.id = p.genderId
     WHERE p.id = _id;
@@ -1064,15 +1065,12 @@ BEGIN
 	ORDER BY roleId, startDate, endDate;
 
 END$$    
-/*
+
 DELIMITER $$
 DROP PROCEDURE IF EXISTS `GetPersonTasks`$$
-CREATE PROCEDURE `GetTaskMember` (	IN _personId int )
+CREATE PROCEDURE `GetPersonTasks` (	IN _personId int )
 BEGIN
 
-
-   -- Tengo que pivotear para que regrese un solo row por cada tarea
-    
     SELECT	t.id as taskId,
 			t.name,
             t.description,
@@ -1089,14 +1087,18 @@ BEGIN
             te.name as teamName,
             te.abbr as teamAbbr,
             getJsonMembers(t.id,3) as collaborators,
-            getJsonMembers(t.id,2) as leader
+            getJsonMembers(t.id,2) as leader,
+            per.theme,
+            'Task' as category
     FROM task as t
+    INNER JOIN person as per on per.id = t.creatorId
     LEFT JOIN project as p on p.id = t.projectId
     LEFT JOIN projectTeam as pte on pte.projectId = p.id
     LEFT JOIN team as te on te.id = pte.teamId
+    WHERE t.creatorId = _personId;
 
 END$$   
-*/
+
 /*---------Task Messages----------*/
 DELIMITER $$
 DROP PROCEDURE IF EXISTS `CreateTaskMessage`$$

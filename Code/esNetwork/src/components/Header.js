@@ -41,13 +41,13 @@ class Header extends Component{
 
         return (
             <View style={[containerStyle]}>
-                <TouchableOpacity onPress={this.onPressLeft.bind(this)} >
+                <TouchableOpacity style={{ width: 44 }} onPress={this.onPressLeft.bind(this)} >
                     {this.renderButton(leftIcon)}
                 </TouchableOpacity>
                 <Text allowFontScaling ellipsizeMode='tail' numberOfLines={2} style={titleStyle} >
                     {title}
                 </Text>
-                <TouchableOpacity onPress={this.onPressRight.bind(this)} >
+                <TouchableOpacity style={{ width: 44 }} onPress={this.onPressRight.bind(this)} >
                     {this.renderButton(rightIcon)}
                 </TouchableOpacity>                    
             </View>        

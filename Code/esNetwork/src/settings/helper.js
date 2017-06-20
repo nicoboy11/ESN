@@ -9,6 +9,12 @@ class Helper {
                 ('00' + (month + 1).toString()).slice(-2) + '-' + 
                 ('00' + day.toString()).slice(-2);
     }
+    
+    static toDate(dateString) {
+        return new Date(parseInt(dateString.substring(0, 4)),
+                                parseInt(dateString.substring(5, 7)) - 1,
+                                parseInt(dateString.substring(8, 10)) - 1);
+    }
 
     static isValidEmail(email) {
         const re = regex.email;

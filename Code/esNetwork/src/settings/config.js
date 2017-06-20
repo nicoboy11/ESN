@@ -48,7 +48,8 @@ const lang = {
                         feed: 'Feed',
                         profileImage: 'Profile Image',
                         register: 'Register',
-                        logout: 'Logout'
+                        logout: 'Logout',
+                        tasks: 'Tasks'
                 },
                 es: {   //Login page
                         email: 'Email',
@@ -75,7 +76,8 @@ const lang = {
                         feed: 'Actualizaciones',
                         profileImage: 'Imagen de Perfil',
                         register: 'Registrarse',
-                        logout: 'Salir'
+                        logout: 'Salir',
+                        tasks: 'Tareas'
                 }
 
              };

@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { View, StyleSheet, ScrollView, Text, Image, TouchableOpacity } from 'react-native';
 import { Actions } from 'react-native-router-flux';
 import { Input, DatePicker } from '../components';
-import { Config, Database } from '../settings';
+import { Config, Database, Helper } from '../settings';
 
 const { texts, colors } = Config;
 
@@ -21,6 +21,23 @@ class ProfileForm extends Component {
         genderId: 1
     }
 
+    componentWillMount() {
+        const data = Database.realm('Session', { }, 'select', '');
+        this.setState({
+            dateOfBirth: data[0].dateOfBirth,
+            loading: 0,
+            names: data[0].names,
+            firstLastName: data[0].firstLastName,
+            secondLastName: data[0].secondLastName,
+            email: data[0].email,
+            phone: data[0].phone,
+            ext: data[0].ext,
+            mobile: data[0].mobile,
+            abbr: data[0].abbr,
+            genderId: 1
+        });
+    }
+
     onChangeDate(dateISO) {
         this.setState({ dateOfBirth: dateISO });
     }
@@ -30,7 +47,7 @@ class ProfileForm extends Component {
         return (
             <TouchableOpacity style={avatarContainer}>
                 <View style={[avatarStyle, { backgroundColor: colors.alternateColor }]} >
-                    <Text style={avatarTextStyle}>{this.props.personId}</Text>
+                    <Text style={avatarTextStyle}>{this.state.abbr}</Text>
                 </View>
                 <View style={indicatorStyle} />
             </TouchableOpacity>           
@@ -56,7 +73,13 @@ class ProfileForm extends Component {
                 </TouchableOpacity>                       
                 <ScrollView>
                     <View style={headerStyle}>
-                        <Text style={mainTextStyle}>Even Sosa</Text>                         
+                        <Text style={mainTextStyle}>
+                            {
+                                this.state.names + ' ' + 
+                                this.state.firstLastName + ' ' +
+                                this.state.secondLastName
+                            }
+                        </Text>                         
                         {this.renderAvatar()}
                         <View style={contactContainerStyle}>
                             <TouchableOpacity style={contactStyle} >  
@@ -77,13 +100,13 @@ class ProfileForm extends Component {
                             type='email' 
                             returnKeyType='next' 
                             onChangeText={(email) => this.setState({ email })}
-                            value='even.sosa@gmail.com'
+                            value={this.state.email}
                             editable={false}                
                         />
                         <DatePicker 
                             label={texts.dateOfBirth} 
                             onChangeDate={this.onChangeDate.bind(this)}
-                            date={new Date(1985, 9, 23)}
+                            date={this.state.dateOfBirth}
                             editable={false}                                 
                         />
                         <Input 
@@ -93,7 +116,7 @@ class ProfileForm extends Component {
                             onChangeText={(mobile) => this.setState({ mobile })}
                             value={this.state.mobile}       
                             editable={false}
-                            value='8341263004'
+                            value={this.state.mobile}
                         />                      
                         <Input 
                             label={texts.phone} 
@@ -102,7 +125,7 @@ class ProfileForm extends Component {
                             onChangeText={(phone) => this.setState({ phone })}
                             value={this.state.phone}      
                             editable={false}
-                            value='3163655'
+                            value={this.state.phone}
                         />     
                         <Input 
                             label={texts.ext} 
@@ -111,7 +134,7 @@ class ProfileForm extends Component {
                             onChangeText={(ext) => this.setState({ ext })}
                             value={this.state.ext}      
                             editable={false}
-                            value='1209'
+                            value={this.state.ext}
                         />  
                     </View>
 

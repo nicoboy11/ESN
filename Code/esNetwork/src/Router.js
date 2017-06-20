@@ -1,11 +1,26 @@
 import React, { Component } from 'react';
-import { StyleSheet, Modal } from 'react-native';
-import { Scene, Router, Actions } from 'react-native-router-flux';
+import { StyleSheet, Modal, Text } from 'react-native';
+import { Scene, Router, Actions, TabBar } from 'react-native-router-flux';
 import { Menu } from './components';
-import { LoginForm, RegisterForm, MainForm, ProfileForm, ProfileImage } from './pages';
+import { 
+    LoginForm, 
+    RegisterForm, 
+    MainForm, 
+    ProfileForm, 
+    ProfileImage,
+    TaskForm
+} from './pages';
 import { Config } from './settings';
 
 const { colors } = Config;
+
+class TabIcon extends React.Component {
+    render(){
+        return (
+            <Text style={{color: this.props.selected ? 'red' :'black'}}>{this.props.title}</Text>
+        );
+    }
+}
 
 class RouterComponent extends Component {
 
@@ -16,7 +31,7 @@ class RouterComponent extends Component {
                 leftButtonIconStyle={{ tintColor: 'white' }}
                 titleStyle={styles.textStyle}
             > 
-                <Scene initial key='authentication'>
+                <Scene key='authentication'>
                     <Scene key='login' navigationBarStyle={{ opacity: 0 }} component={LoginForm} />
                     <Scene 
                         hideNaveBar={false} 
@@ -25,12 +40,21 @@ class RouterComponent extends Component {
                         title='Register'
                     />                 
                 </Scene>   
-                <Scene key='main'>
+                <Scene initial key='tabbar' tabs={true}>
                     <Scene 
                         key='mainForm' 
                         component={MainForm} 
                         hideNavBar
+                        title='Feed'
+                        icon={TabIcon}
                     />   
+                    <Scene 
+                        key='tasks' 
+                        component={TaskForm} 
+                        hideNavBar
+                        title='Tasks'
+                        icon={TabIcon}
+                    />                       
                     <Scene key='profile' direction='vertical' component={ProfileForm} hideNavBar />
                     <Scene key='profileImage' component={ProfileImage} hideNavBar />
                 </Scene>    

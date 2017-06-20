@@ -6,7 +6,21 @@ Session.schema = {
     name: 'Session',
     properties: {
         token: 'string',
-        personId: 'int'
+        personId: 'int',
+        names: 'string',
+        firstLastName: 'string',
+        secondLastName: 'string',
+        dateOfBirth: 'date',
+        email: 'string',
+        mobile: 'string',
+        phone: 'string',
+        ext: 'string',
+        genderId: 'int',
+        avatar: 'string',
+        abbr: 'string',  
+        levelKey: 'string',
+        theme: 'string',
+        isSync: 'bool'
     }
 };
 
@@ -51,7 +65,7 @@ class Database {
             case 'create':
                 realm.write(() => {
                     if (data[0] === undefined) {
-                        realm.create(table, { token: fields.token, personId: fields.personId });
+                        realm.create(table, fields);
                     } else {
                         data[0].token = fields.token;
                         data[0].personId = fields.personId;

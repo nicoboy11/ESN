@@ -3,3 +3,4 @@ export * from './RegisterForm';
 export * from './MainForm';
 export * from './ProfileForm';
 export * from './ProfileImage';
+export * from './TaskForm';

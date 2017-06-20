@@ -407,8 +407,12 @@ apiRoutes.put('/post/:id',function(req,res){
 /**
  * TASKS
  */
- apiRoutes.get('/task/:userId', function(req,res){
-
+ apiRoutes.get('/personTasks/:userId', function(req,res){
+    db("CALL GetPersonTasks(" + fpInt(req.params.userId) + ")",conn,function(error,result){
+        if(handle(error,res,true)){
+            handleResponse(result,res);
+        }
+    }); 
  });
 
 /** FEED */

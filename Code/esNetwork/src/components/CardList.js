@@ -13,7 +13,18 @@ class CardList extends Component {
 
     renderRow(data) {
         if (data.category === 'Task') {
-            return <TaskCard />;
+            return (
+                    <TaskCard 
+                        name={data.name}
+                        team={data.teamAbbr}
+                        project={data.projectName}
+                        date={data.dueDate}
+                        creatorAvatar={data.creatorAvatar}
+                        theme={data.theme}
+                        creator={data.creator}
+                        collaborators={data.collaborators}
+                    />
+            );
         }
 
         return ( 

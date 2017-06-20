@@ -1,14 +1,13 @@
 import React, { Component } from 'react';
-import { ScrollView, Alert, ActivityIndicator, TouchableOpacity, Image, View, Text } from 'react-native';
-import { Actions } from 'react-native-router-flux';
-import { CardList, Menu, Header, Form } from '../components';
-import { Database, Config } from '../settings';
+import { ScrollView, ActivityIndicator, Alert } from 'react-native';
+import { Form, CardList } from '../components';
+import { Config, Database } from '../settings';
 
 const { texts } = Config;
 
-class MainForm extends Component {
+class TaskForm extends Component {
 
-    state = { elements: [], isLoading: false, showMenu: false, offset: 0, personId: 0 };
+    state = { elements: [], isLoading: false };
 
     componentWillMount() {
         this.setState({ isLoading: true });
@@ -19,7 +18,7 @@ class MainForm extends Component {
         /** Get elements from API */
         Database.request(
             'GET', 
-            `feed/${personId}/1`, 
+            `personTasks/${personId}`, 
             {}, 
             true,
             this.handleResponse.bind(this), 
@@ -37,32 +36,11 @@ class MainForm extends Component {
         this.setState({ elements: responseData, isLoading: false });
     }
 
-    onLeft() {
-        const showMenu = this.state.showMenu;
-        this.setState({ showMenu: !showMenu });
-    }
-
-    closeMenu() {
-        this.setState({ showMenu: false });
-    }
-
-    showMenu() {
-        if (this.state.showMenu) {
-            return <Menu closeMenu={this.closeMenu.bind(this)} />;
-        }
-
-        return;
-    }
-
     handleResponse(response) {
         console.log(response.status);
         this.setState({ status: response.status });
         return response.json();
-    }   
-
-    refresh() {
-        this.setState({ elements: [], isLoading: false });
-    }   
+    }       
 
     renderList() {
         if (this.state.isLoading) {
@@ -73,26 +51,27 @@ class MainForm extends Component {
             <CardList 
                 elements={this.state.elements}
             />
-        );
+        );        
     }
 
     render() {
         return (
             <Form
-                leftIcon='menu'
-                title={texts.feed}
+                rightIcon='menu'
+                title={texts.tasks}
                 menuList={
                     [
-                        { name: 'Profile', form: 'profile', id: this.state.personId }
+                        { name: 'Search', form: 'search', id: 1 }
                     ]
                 }
             >
                 <ScrollView style={{ backgroundColor: '#EFEFEF' }}>
-                    {this.renderList()}    
+                    {this.renderList()}
                 </ScrollView>                
             </Form>            
         );
     }
+
 }
 
-export { MainForm };
+export { TaskForm };

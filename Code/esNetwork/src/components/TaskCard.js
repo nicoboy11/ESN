@@ -13,6 +13,38 @@ const { colors } = Config;
 
 class TaskCard extends Component {
 
+    renderCollaborators() {
+        const {
+            smallImageStyle
+        } = styles;
+
+        const collaborators = JSON.parse(this.props.collaborators);
+
+        return collaborators.map(collaborator => (
+                (collaborator.avatar.length === 2) ? 
+                <View style={[smallImageStyle, { backgroundColor: this.props.theme }]} ><Text>{collaborator.avatar}</Text></View> :
+                <Image style={smallImageStyle} source={{ uri: collaborator.avatar }} />
+            )
+        );
+    }
+
+    renderAvatar() {
+        const {
+            imageStyle,
+            avatarTextStyle
+        } = styles;
+
+        if (this.props.creatorAvatar.length === 2) {
+            return (
+                <View style={[imageStyle, { backgroundColor: this.props.theme }]} >
+                    <Text style={avatarTextStyle}>{this.props.creatorAvatar}</Text>
+                </View>
+            );
+        }
+
+        return <Image src={{ uri: this.props.creatorAvatar }} />;
+    }
+
     render() {
         const {
             containerStyle,
@@ -40,22 +72,22 @@ class TaskCard extends Component {
             <View style={containerStyle} >
                 <View style={topViewStyle} >
                     <View>
-                        <Text style={taskTextStyle} >Organizar inventarios del almacén 1 alfabeticamente</Text>
+                        <Text style={taskTextStyle} >{this.props.name}</Text>
                         {/* Aqui van las imagenes */}
                     </View>
                 </View>         
                 <View style={middleViewStyle} >
                     <View style={middleLeftStyle} >
                         <View style={linkListStyle} >
-                            <LinkButton style={linkStyle} title='DISA' />
+                            <LinkButton style={linkStyle} title={this.props.team} />
                             <Text>|</Text>
-                            <LinkButton style={linkStyle} title='Nominas' />
+                            <LinkButton style={linkStyle} title={this.props.project} />
                             <Text>|</Text>
-                            <LinkButton style={[linkStyle, { color: colors.error }]} title='Mañana' />
+                            <LinkButton style={[linkStyle, { color: colors.error }]} title={this.props.dueDate} />
                         </View>
                         <View style={creatorStyle} >
-                            <Image style={imageStyle} source={{ uri: 'avt_12' }} />
-                            <Text style={creatorTextStyle} >Even Sosa</Text>
+                            {this.renderAvatar()}
+                            <Text style={creatorTextStyle} >{this.props.creator}</Text>
                         </View> 
                     </View>
                     <View style={middleRightStyle}>
@@ -69,9 +101,7 @@ class TaskCard extends Component {
                         <View style={peopleStyle} >
                             <Image style={[smallImageStyle, { marginRight: 5 }]} source={{ uri: 'avt_12' }} />
                             <View style={contributorsStyle}>
-                                <Image style={smallImageStyle} source={{ uri: 'avt_12' }} />
-                                <Image style={smallImageStyle} source={{ uri: 'avt_12' }} />
-                                <Image style={smallImageStyle} source={{ uri: 'avt_12' }} />
+                                {this.renderCollaborators()}
                             </View>
                         </View>                        
                     </View>
@@ -126,7 +156,9 @@ const styles = StyleSheet.create({
     imageStyle: {
         width: 20,
         height: 20,
-        borderRadius: 10
+        borderRadius: 10,
+        justifyContent: 'center',
+        alignItems: 'center'  
     },    
     bottomLeftStyle: {
         flex: 2,
@@ -169,7 +201,11 @@ const styles = StyleSheet.create({
     },
     startTextStyle: {
         color: colors.mainText
-    }
+    },
+    avatarTextStyle: {
+        color: colors.mainText,
+        fontSize: 12
+    },
 });
 
 export { TaskCard };

@@ -261,13 +261,13 @@ BEGIN
 
 	DECLARE _members text;
 
-    SELECT concat('{',
+    SELECT concat('[',
 					group_concat( concat(personId, 
                     ':{','avatar:"',getAvatar(personId),'",',
 						'abbr:"',getPersonAbbr(personId),'"',
 						'person:"',getFullName(personId),'"',
                     '}') separator ','),
-				  '}') INTO _members
+				  ']') INTO _members
     FROM taskMember
     WHERE taskId = _taskId and roleId = _roleId;
     

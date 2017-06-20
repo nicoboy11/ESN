@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { View, Image, Alert, Keyboard } from 'react-native';
 import { Actions } from 'react-native-router-flux';
 import { Input, LinkButton, Button } from '../components';
-import { Config, Database } from '../settings';
+import { Config, Database, Helper } from '../settings';
 
 const { texts } = Config;
 
@@ -13,7 +13,7 @@ class LoginForm extends Component {
     componentWillMount() {
         const data = Database.realm('Session', { }, 'select', '');
         if (data[0] !== undefined) {
-            Actions.main();
+            Actions.tabbar();
         }
     }
 
@@ -26,9 +26,28 @@ class LoginForm extends Component {
             /**
              * Create DataBase object for user
              */
-             const token = Database.realm('Session', responseData[0], 'create', '');
+             const data = {
+                token: responseData[0].token,
+                personId: responseData[0].personId,
+                names: responseData[0].names,
+                firstLastName: responseData[0].firstLastName,
+                secondLastName: responseData[0].secondLastName,
+                dateOfBirth: Helper.toDate(responseData[0].dateOfBirth),
+                email: responseData[0].email,
+                mobile: responseData[0].mobile,
+                phone: responseData[0].phone,
+                ext: responseData[0].ext,
+                genderId: responseData[0].genderId,
+                avatar: responseData[0].avatar,
+                abbr: responseData[0].abbr,  
+                levelKey: responseData[0].levelKey,
+                theme: responseData[0].theme,
+                isSync: true
+            };
+
+             const token = Database.realm('Session', data, 'create', '');
             /** Go to main screen */
-            Actions.main();
+            Actions.tabbar();
         }
 
         this.refresh();
