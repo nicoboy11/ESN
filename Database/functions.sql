@@ -262,10 +262,12 @@ BEGIN
 	DECLARE _members text;
 
     SELECT concat('[',
-					group_concat( concat(personId, 
-                    ':{','avatar:"',getAvatar(personId),'",',
-						'abbr:"',getPersonAbbr(personId),'"',
-						'person:"',getFullName(personId),'"',
+					group_concat( concat(
+                    '{',
+						'"personId":',personId,',',
+						'"avatar":"',getAvatar(personId),'",',
+						'"abbr":"',getPersonAbbr(personId),'",',
+						'"person":"',getFullName(personId),'"',
                     '}') separator ','),
 				  ']') INTO _members
     FROM taskMember

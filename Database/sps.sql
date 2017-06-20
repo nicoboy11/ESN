@@ -1142,3 +1142,83 @@ BEGIN
     
 END$$
 
+/*---------Task Checklist----------*/
+DELIMITER $$
+DROP PROCEDURE IF EXISTS `CreateCheckList`$$
+CREATE PROCEDURE `CreateCheckList` ( IN _taskId int, IN _title varchar(255), _dueDate date, _personId int )
+BEGIN
+
+	INSERT INTO checkList ( taskId, title, creationDate, dueDate, personId )
+    VALUES ( _taskId, _title, NOW(), _dueDate, _personId );
+
+	SELECT LAST_INSERT_ID() as id;
+
+END$$ 
+
+DELIMITER $$
+DROP PROCEDURE IF EXISTS `EditCheckList`$$
+CREATE PROCEDURE `EditCheckList` (IN _checkListId int, IN _title varchar(255), IN _dueDate datetime, IN _personId int)
+BEGIN
+
+	UPDATE checkList
+	SET title = _title,
+		dueDate = _dueDate,
+        personId = _personId
+    WHERE id = _checkListId;
+
+END$$
+    
+DELIMITER $$
+DROP PROCEDURE IF EXISTS `CreateCheckListItem`$$
+CREATE PROCEDURE `CreateCheckListItem` ( IN _checkListId int, _item varchar(255), _creatorId int )
+BEGIN
+
+	DECLARE _dueDate datetime;
+	DECLARE _sortNumber int;
+
+    SELECT dueDate INTO _dueDate
+    FROM checkList
+    WHERE id = _checkListId;
+
+    SELECT ifnull(max(sortNumber),0) + 1 INTO _sortNumber
+    FROM checkListItem
+    WHERE checkListId = _checkListId;
+
+	INSERT INTO checkListItem (checkListId, item, dueDate, creatorId, isChecked, sortNumber)
+    VALUES(_checkListId, _item, _dueDate, _creatorId, false, _sortNumber );
+
+END$$
+
+DELIMITER $$
+DROP PROCEDURE IF EXISTS `EditCheckListItem`$$
+CREATE PROCEDURE `EditCheckListItem` (	IN _checkListId int,	IN _sortNumber int,	IN _item varchar(255),
+										IN _dueDate datetime,	IN _isChecked bool,	IN _terminatorId int,
+                                        IN _terminationDate datetime )
+BEGIN
+
+	UPDATE checkListItem
+    SET item = coalesce(_item,item),
+		dueDate = coalesce(_dueDate,dueDate),
+        isChecked = coalesce(_isChecked,isChecked),
+        terminatorId = coalesce(_terminatorId,terminatorId),
+        terminationDate = coalesce(_terminationDate,terminationDate)
+    WHERE 	checkListId = _checkListId AND
+			sortNumber = _sortNumber;
+
+END$$
+
+
+
+
+/*
+checkListId int,
+    item varchar(255),
+    dueDate datetime,
+    isChecked bool,
+    creatorId int,
+    terminatorId int,
+    terminationDate datetime,
+    sortNumber
+*/
+
+

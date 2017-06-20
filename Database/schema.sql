@@ -297,7 +297,7 @@ CREATE TABLE checkList(
     taskId int ,
     title varchar(255),
     dueDate datetime,
-    dateCreated datetime,
+    creationDate datetime,
     personId int,
     CONSTRAINT FOREIGN KEY (taskId) REFERENCES task(id),
     CONSTRAINT FOREIGN KEY (personId) REFERENCES person(id)
@@ -312,9 +312,11 @@ CREATE TABLE checkListItem(
     creatorId int,
     terminatorId int,
     terminationDate datetime,
+    sortNumber int,
     CONSTRAINT FOREIGN KEY (checkListId) REFERENCES checkList(id),
     CONSTRAINT FOREIGN KEY (creatorId) REFERENCES person(id),
-    CONSTRAINT FOREIGN KEY (terminatorId) REFERENCES person(id)
+    CONSTRAINT FOREIGN KEY (terminatorId) REFERENCES person(id),
+    CONSTRAINT UNIQUE KEY (checkListId,sortNumber) 
 );
 
 
