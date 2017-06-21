@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { ScrollView, ActivityIndicator, Alert } from 'react-native';
-import { Form, CardList } from '../components';
+import { Form, CardList, Button } from '../components';
 import { Config, Database } from '../settings';
 
 const { texts } = Config;
@@ -40,7 +40,7 @@ class TaskForm extends Component {
         console.log(response.status);
         this.setState({ status: response.status });
         return response.json();
-    }       
+    }      
 
     renderList() {
         if (this.state.isLoading) {
@@ -66,6 +66,7 @@ class TaskForm extends Component {
                 }
             >
                 <ScrollView style={{ backgroundColor: '#EFEFEF' }}>
+                    {/*Aqui va para la nueva tarea*/} 
                     {this.renderList()}
                 </ScrollView>                
             </Form>            

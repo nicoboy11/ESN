@@ -30,11 +30,6 @@ wss.on('connection', function connection(ws){
 
 });
 
-
-
-
-
-
 var conn = mysql.createConnection({
     host: config.db.host,
     port: config.db.port,

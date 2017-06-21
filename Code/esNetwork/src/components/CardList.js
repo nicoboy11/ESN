@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { ListView, Alert } from 'react-native';
+import { ListView, Alert, Text } from 'react-native';
 import { PostCard, TaskCard } from './';
 
 class CardList extends Component {
@@ -12,30 +12,37 @@ class CardList extends Component {
     }
 
     renderRow(data) {
-        if (data.category === 'Task') {
-            return (
-                    <TaskCard 
-                        name={data.name}
-                        team={data.teamAbbr}
-                        project={data.projectName}
-                        date={data.dueDate}
-                        creatorAvatar={data.creatorAvatar}
-                        theme={data.theme}
-                        creator={data.creator}
-                        collaborators={data.collaborators}
-                    />
-            );
+        switch (data.category) {
+            case 'Task':
+                 return (
+                        <TaskCard 
+                            name={data.name}
+                            team={data.teamAbbr}
+                            project={data.projectName}
+                            dueDate={data.dueDate}
+                            creatorAvatar={data.creatorAvatar}
+                            theme={data.theme}
+                            creator={data.creator}
+                            collaborators={data.collaborators}
+                            leader={data.leader}
+                        />
+                );
+            case 'Post':
+                return ( 
+                        <PostCard 
+                            avatar={data.avatar} 
+                            theme={data.theme} 
+                            creationDate={data.creationDate}
+                            message={data.message}
+                            person={data.person}
+                        />
+                );        
+            case 'Chat':
+                return (
+                    <Text>{data.message}</Text>
+                );
+            default: return;
         }
-
-        return ( 
-                <PostCard 
-                    avatar={data.avatar} 
-                    theme={data.theme} 
-                    creationDate={data.creationDate}
-                    message={data.message}
-                    person={data.person}
-                />
-        );
     }
 
     render() {

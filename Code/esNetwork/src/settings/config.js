@@ -49,7 +49,12 @@ const lang = {
                         profileImage: 'Profile Image',
                         register: 'Register',
                         logout: 'Logout',
-                        tasks: 'Tasks'
+                        tasks: 'Tasks',
+                        //Task Card
+                        addTeam: '[Team]',
+                        addProject: '[Project]',
+                        newTask: 'New task',
+                        comment: 'Comment'
                 },
                 es: {   //Login page
                         email: 'Email',
@@ -77,7 +82,12 @@ const lang = {
                         profileImage: 'Imagen de Perfil',
                         register: 'Registrarse',
                         logout: 'Salir',
-                        tasks: 'Tareas'
+                        tasks: 'Tareas',
+                        //Task Card
+                        addTeam: '[Equipo]',
+                        addProject: '[Proyecto]',
+                        newTask: 'Nueva Tarea',
+                        comment: 'Comentar'
                 }
 
              };

@@ -4,26 +4,75 @@ import {
     Text, 
     Image, 
     TouchableOpacity, 
-    StyleSheet 
+    StyleSheet
 } from 'react-native';
+import { Actions } from 'react-native-router-flux';
 import { LinkButton } from './';
 import { Config } from '../settings';
 
-const { colors } = Config;
+const { colors, texts } = Config;
 
 class TaskCard extends Component {
 
+    openComments() {
+        Actions.taskMessage({ taskId: this.props.taskId, name: this.props.name });
+    } 
+
+    renderResponsible() {
+        const {
+            smallImageStyle,
+            collaboratorAbbrStyle
+        } = styles;        
+
+        const leader = JSON.parse(this.props.leader);
+
+        if (leader === null) {
+            return <View />;
+        } 
+
+        return leader.map(leaderPerson => (
+            (leaderPerson.avatar.length === 2) ?
+            <View
+                key={leaderPerson.personId}
+                style={[smallImageStyle, { backgroundColor: leaderPerson.theme }]}                     
+            >
+                <Text 
+                    style={collaboratorAbbrStyle}
+                >
+                    {leaderPerson.avatar}
+                </Text>
+            </View> :
+            <Image 
+                style={[smallImageStyle, { marginRight: 5 }]} 
+                source={{ uri: leaderPerson.avatar }} 
+            />
+        ));
+    }        
+
     renderCollaborators() {
         const {
-            smallImageStyle
+            smallImageStyle,
+            collaboratorAbbrStyle
         } = styles;
 
         const collaborators = JSON.parse(this.props.collaborators);
+        if (collaborators === null) {
+            return <View />;
+        }
 
         return collaborators.map(collaborator => (
                 (collaborator.avatar.length === 2) ? 
-                <View style={[smallImageStyle, { backgroundColor: this.props.theme }]} ><Text>{collaborator.avatar}</Text></View> :
-                <Image style={smallImageStyle} source={{ uri: collaborator.avatar }} />
+                <View 
+                    key={collaborator.personId} 
+                    style={[smallImageStyle, { backgroundColor: collaborator.theme }]} 
+                >
+                    <Text 
+                        style={collaboratorAbbrStyle}
+                    >
+                            {collaborator.avatar}
+                    </Text>
+                </View> :
+                <Image key={collaborator.personId} style={smallImageStyle} source={{ uri: collaborator.avatar }} />
             )
         );
     }
@@ -53,14 +102,12 @@ class TaskCard extends Component {
             bottomViewStyle,
             taskTextStyle,
             linkStyle,
-            imageStyle,
             bottomLeftStyle,
             bottomRightStyle,
             creatorStyle,
             creatorTextStyle,
             contributorsStyle,
             peopleStyle,
-            smallImageStyle,
             startStyle,
             startTextStyle,
             linkListStyle,
@@ -79,11 +126,20 @@ class TaskCard extends Component {
                 <View style={middleViewStyle} >
                     <View style={middleLeftStyle} >
                         <View style={linkListStyle} >
-                            <LinkButton style={linkStyle} title={this.props.team} />
+                            <LinkButton 
+                                style={linkStyle} 
+                                title={(this.props.team === null) ? texts.addTeam : this.props.team} 
+                            />
                             <Text>|</Text>
-                            <LinkButton style={linkStyle} title={this.props.project} />
+                            <LinkButton 
+                                style={linkStyle} 
+                                title={(this.props.project === null) ? texts.addProject : this.props.project} 
+                            />
                             <Text>|</Text>
-                            <LinkButton style={[linkStyle, { color: colors.error }]} title={this.props.dueDate} />
+                            <LinkButton 
+                                style={[linkStyle, { color: colors.error }]} 
+                                title={this.props.dueDate} 
+                            />
                         </View>
                         <View style={creatorStyle} >
                             {this.renderAvatar()}
@@ -99,14 +155,14 @@ class TaskCard extends Component {
                 <View style={bottomViewStyle} >
                     <View style={bottomLeftStyle} >
                         <View style={peopleStyle} >
-                            <Image style={[smallImageStyle, { marginRight: 5 }]} source={{ uri: 'avt_12' }} />
+                            {this.renderResponsible()}
                             <View style={contributorsStyle}>
                                 {this.renderCollaborators()}
                             </View>
                         </View>                        
                     </View>
                     <View style={bottomRightStyle} >
-                        <LinkButton title='Comment' />
+                        <LinkButton title={texts.comment} onPress={this.openComments.bind(this)} />
                     </View>                    
                 </View>                                     
             </View>
@@ -185,8 +241,14 @@ const styles = StyleSheet.create({
     smallImageStyle: {
         width: 15,
         height: 15,
-        borderRadius: 7.5
+        borderRadius: 7.5,
+        justifyContent: 'center',
+        alignItems: 'center'
     },
+    collaboratorAbbrStyle: {
+        fontSize: 8,
+        color: colors.mainText
+    },    
     startStyle: {
         width: 50,
         height: 50,

@@ -4,3 +4,4 @@ export * from './MainForm';
 export * from './ProfileForm';
 export * from './ProfileImage';
 export * from './TaskForm';
+export * from './TaskMessageForm';

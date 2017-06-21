@@ -592,7 +592,8 @@ BEGIN
 			attachmentTypeId,
 			formatDate(creationDate) as creationDate,
             getAvatar(pst.personId) as avatar,
-            p.theme
+            p.theme,
+            'Post' as category
 	FROM post as pst
     INNER JOIN person as p on pst.personId = p.id
 	WHERE pst.personId = _personId and pst.scopeTypeId = _scopeTypeId
@@ -607,7 +608,8 @@ BEGIN
 			attachmentTypeId,
 			formatDate(creationDate) as creationDate,
             getAvatar(pst.personId) as avatar,
-            p.theme
+            p.theme,
+            'Post' as category            
 	FROM post as pst
 	INNER JOIN followers as f on pst.personId = f.personId
     INNER JOIN person as p on pst.personId = p.id    
@@ -1141,6 +1143,8 @@ BEGIN
 	ORDER BY messageDate asc;
     
 END$$
+
+CALL GetMessage(1,1)
 
 /*---------Task Checklist----------*/
 DELIMITER $$

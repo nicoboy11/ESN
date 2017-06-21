@@ -8,7 +8,8 @@ import {
     MainForm, 
     ProfileForm, 
     ProfileImage,
-    TaskForm
+    TaskForm,
+    TaskMessageForm
 } from './pages';
 import { Config } from './settings';
 
@@ -40,7 +41,7 @@ class RouterComponent extends Component {
                         title='Register'
                     />                 
                 </Scene>   
-                <Scene initial key='tabbar' tabs={true}>
+                <Scene key='tabbar' tabs={true}>
                     <Scene 
                         key='mainForm' 
                         component={MainForm} 
@@ -58,6 +59,7 @@ class RouterComponent extends Component {
                     <Scene key='profile' direction='vertical' component={ProfileForm} hideNavBar />
                     <Scene key='profileImage' component={ProfileImage} hideNavBar />
                 </Scene>    
+                <Scene initial key='taskMessage' component={TaskMessageForm} hideNavBar />
                 {/*<Scene key="statusModal" component={PostCardMenu} direction='vertical' 
                 hideNavBar />     */}
             </Router>

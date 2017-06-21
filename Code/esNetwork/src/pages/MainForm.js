@@ -34,7 +34,12 @@ class MainForm extends Component {
     }
     
     onSuccess(responseData) {
-        this.setState({ elements: responseData, isLoading: false });
+        if (this.state.status > 299) {
+            Database.realm('Session', { }, 'delete', '');
+            Actions.authentication();
+        } else {
+            this.setState({ elements: responseData, isLoading: false });
+        }
     }
 
     onLeft() {

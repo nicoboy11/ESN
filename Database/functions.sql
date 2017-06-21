@@ -264,16 +264,21 @@ BEGIN
     SELECT concat('[',
 					group_concat( concat(
                     '{',
-						'"personId":',personId,',',
+						'"personId":',t.personId,',',
 						'"avatar":"',getAvatar(personId),'",',
 						'"abbr":"',getPersonAbbr(personId),'",',
-						'"person":"',getFullName(personId),'"',
+						'"person":"',getFullName(personId),'",',
+                        '"theme":"',ifnull(p.theme,'#555555'),'"',
                     '}') separator ','),
 				  ']') INTO _members
-    FROM taskMember
-    WHERE taskId = _taskId and roleId = _roleId;
+    FROM taskMember as t
+    INNER JOIN person as p on p.id = t.personId
+    WHERE taskId = _taskId and t.roleId = _roleId;
     
     RETURN _members;
 
 END$$
+
+
+
 

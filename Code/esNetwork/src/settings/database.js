@@ -75,7 +75,16 @@ class Database {
                 return data[0].token;
             case 'select':
                 return data;
-
+            case 'delete':
+                realm.write(() => {
+                    if (data[0] === undefined) {
+                        realm.create(table, fields);
+                    } else {
+                        data[0].token = '';
+                        data[0].personId = 0;
+                    }
+                });      
+                return data;          
             default:
                 return data;
         }

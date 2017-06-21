@@ -12,7 +12,7 @@ class LoginForm extends Component {
 
     componentWillMount() {
         const data = Database.realm('Session', { }, 'select', '');
-        if (data[0] !== undefined) {
+        if (data[0] !== undefined && data[0].token !== '') {
             Actions.tabbar();
         }
     }
