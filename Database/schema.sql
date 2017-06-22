@@ -264,6 +264,7 @@ CREATE TABLE taskMember(
 	taskId int,
     personId int,
     roleId int,
+    isPinned bool,
     lastSeen datetime,
     startDate datetime,
     endDate datetime,
@@ -272,6 +273,19 @@ CREATE TABLE taskMember(
     CONSTRAINT FOREIGN KEY (roleId) REFERENCES roleType(id),
     CONSTRAINT UNIQUE KEY (taskId,personId)    
 );
+
+DROP TABLE IF EXISTS taskMonitor;
+CREATE TABLE taskMonitor (
+	taskId int,
+    personId int,
+    sessionNumber int,
+    startDate datetime,
+    endDate datetime,
+    CONSTRAINT FOREIGN KEY (taskId) REFERENCES task(id),
+    CONSTRAINT FOREIGN KEY (personId) REFERENCES person(id),  
+	CONSTRAINT UNIQUE KEY (taskId,personId,sessionNumber)  
+);
+
 
 /*----------TASK MESSAGES----------------*/
 DROP TABLE IF EXISTS taskMessage;

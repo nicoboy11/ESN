@@ -5,7 +5,8 @@ var express = require('express'),
     server = app.listen(3001),
     config = require('./config.json'),
     jwt = require("jsonwebtoken"),
-    formidable = require("formidable");
+    formidable = require("formidable"),
+    http = require("http");
 
 app.use(bodyParser({limit: '50mb'}));
 app.use(bodyParser.json());
@@ -14,18 +15,32 @@ app.use(bodyParser.urlencoded());
 
 
 var WebSocket = require('ws');
-var wss = new WebSocket.Server({ port: 9998 })
+var wss = new WebSocket.Server({ port: 9998, path:'/task' })
+
+var clients = [];
 
 wss.on('connection', function connection(ws){
 
     ws.on('message', function incoming(message){
-        var i = 0;
-        wss.clients.forEach(function each(client){
-            if(client !== ws && client.readyState === WebSocket.OPEN){
-                console.log(i++);
-                client.send(message);
-            }
-        })
+
+        if(message.includes('{"newConnectionxxx":0,')) {
+            var json = JSON.parse(message);
+            
+            var obj = { "client":ws, "room":json.room, "personId":json.personId }
+            clients.push(obj);
+        }
+        else {
+
+            var jsonMsg = JSON.parse(message);
+            clients.forEach(function each(client){
+                if(client.room === jsonMsg.room && client.client.readyState === WebSocket.OPEN){
+                    client.client.send(jsonMsg.message); 
+                }
+            })
+
+
+        }
+
     })
 
 });
@@ -402,13 +417,40 @@ apiRoutes.put('/post/:id',function(req,res){
 /**
  * TASKS
  */
- apiRoutes.get('/personTasks/:userId', function(req,res){
-    db("CALL GetPersonTasks(" + fpInt(req.params.userId) + ")",conn,function(error,result){
+ apiRoutes.get('/personTasks/:personId', function(req,res){
+    db("CALL GetPersonTasks(" + fpInt(req.params.personId) + ")",conn,function(error,result){
         if(handle(error,res,true)){
             handleResponse(result,res);
         }
     }); 
  });
+
+//  Get Task Messages
+apiRoutes.get('/taskMessages/:taskId/:personId',function(req,res){
+
+    db("CALL GetTaskMessages(" + req.params.taskId + "," + req.params.personId + ")",conn,function(error,result){
+        if(handle(error,res,true)){
+            handleResponse(result,res,"");
+        }
+    });
+
+});
+
+//  Send Messages
+apiRoutes.post('/taskMessages',function(req,res){
+
+    reqUpload(req,'postatt','personId', function(fileName, params){
+        db("CALL CreateTaskMessage(" + fpInt(params.taskId) + "," + fpInt(params.personId) + "," + fpVarchar(params.message) +
+                            "," + fpInt(params.messageTypeId) + "," + fpVarchar(params.attachment) + "," + fpInt(params.attachmentTypeId) + ");",
+        conn, function(error, result){
+            if(handle(error,res,true)){
+                res.status(200).end( JSON.stringify(result[0]) );
+            }
+        });
+    });
+
+});
+
 
 /** FEED */
 apiRoutes.get('/feed/:userId/:scopeTypeId',function(req,res){
