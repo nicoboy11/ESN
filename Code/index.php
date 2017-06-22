@@ -15,7 +15,7 @@ echo $_SERVER['REQUEST_URI'];
 
         
 
-            var ws = new WebSocket("ws://localhost:9998/echo");
+            var ws = new WebSocket("ws://localhost:9998/task");
 
             ws.onopen = function()
             {
@@ -44,7 +44,15 @@ echo $_SERVER['REQUEST_URI'];
 
         function sendMessage() {
             var msg = document.getElementById('message').value;
-            ws.send(msg);
+            var roomId = document.getElementById('room').value;
+            var personId = document.getElementById('person').value;
+            ws.send('{"room":' + roomId + ',"personId":' + personId + ',"message":"' + msg + '"}');
+        }
+
+        function join() {
+            var roomId = document.getElementById('room').value;
+            var personId = document.getElementById('person').value;
+            ws.send('{"newConnectionxxx":0,"room":' + roomId + ',"personId":' + personId + '}');
         }
 
       </script>
@@ -54,7 +62,10 @@ echo $_SERVER['REQUEST_URI'];
    
       <div id="sse">
             <a href="javascript:close()">Close</a><br /><br />
-            <input id="message" type="text" />
+	    PersonId: <input id="person" type="text" /><br />
+	    Room: <input id="room" type="text" />
+	    <a href="javascript:join()">Join</a><br /><br />
+	    Message: <input id="message" type="text" />
             <a href="javascript:sendMessage()">Send Message</a>
             <div id="messages">
 

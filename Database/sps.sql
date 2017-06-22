@@ -996,9 +996,47 @@ BEGIN
             getPersonAbbr(creatorId) as abbr,
             projectId,
             stateId,
-            calendarId
+            calendarId,
+            isPinned
 	FROM task
     WHERE id = _taskId;
+
+END$$
+
+DELIMITER $$
+DROP PROCEDURE IF EXISTS `StartTaskMonitor`$$
+CREATE PROCEDURE `StartTaskMonitor` (IN _taskId int, IN _personId int, IN _startDate datetime)
+BEGIN
+	
+    DECLARE _sessionNumber int;
+
+	IF( (SELECT count(*) FROM taskMonitor    
+			WHERE 	taskId = _taskId AND
+					personId = _personId AND
+                    endDate is null) > 0 ) THEN
+		SIGNAL sqlstate 'ERROR' SET message_text = 'You cannot perform this action because there is still an active task.';
+    END IF;
+
+	SELECT ifnull(max(sessionNumber),0) + 1 INTO _sessionNumber
+    FROM taskMonitor
+    WHERE 	taskId = _taskId AND
+			personId = _personId;
+
+	INSERT INTO taskMonitor (taskId, personId, startDate, sessionNumber)
+    VALUES (_taskId, _personId, _startDate, _sessionNumber);
+
+END$$
+
+DELIMITER $$
+DROP PROCEDURE IF EXISTS `EndTaskMonitor`$$
+CREATE PROCEDURE `EndTaskMonitor` (IN _taskId int, IN _personId int, IN _endDate datetime)
+BEGIN
+	
+	UPDATE taskMonitor
+    SET endDate = _endDate
+    WHERE 	taskId = _taskId AND
+			personId = _personId AND
+            endDate is null;
 
 END$$
 
@@ -1022,7 +1060,7 @@ END$$
 DELIMITER $$
 DROP PROCEDURE IF EXISTS `EditTaskMember`$$
 CREATE PROCEDURE `EditTaskMember` (	IN _taskId int, 		IN _personId int, 		IN _roleId int, 
-									IN _lastSeen datetime,	IN _startDate datetime, IN _endDate datetime	)
+									IN _lastSeen datetime,	IN _startDate datetime, IN _endDate datetime, IN _isPinned bool	)
 BEGIN
 
 	IF(areValidDates(_startDate,_endDate) = FALSE) THEN
@@ -1033,7 +1071,8 @@ BEGIN
     SET roleId = coalesce(_roleId,roleId),
 		lastSeen = coalesce(_lastSeen,lastSeen),
 		startDate = coalesce(_startDate,startDate), 
-        endDate = coalesce(_endDate,endDate)
+        endDate = coalesce(_endDate,endDate),
+        isPinned = coalesce(_isPinned, isPinned)
 	WHERE 	taskId = _taskId AND
 			personId = _personId;
 
@@ -1091,13 +1130,16 @@ BEGIN
             getJsonMembers(t.id,3) as collaborators,
             getJsonMembers(t.id,2) as leader,
             per.theme,
+            tm.isPinned,
             'Task' as category
     FROM task as t
     INNER JOIN person as per on per.id = t.creatorId
+    INNER JOIN taskMember as tm on tm.personId = t.creatorId AND tm.taskId = t.id
     LEFT JOIN project as p on p.id = t.projectId
     LEFT JOIN projectTeam as pte on pte.projectId = p.id
     LEFT JOIN team as te on te.id = pte.teamId
-    WHERE t.creatorId = _personId;
+    WHERE t.creatorId = _personId
+    ORDER BY tm.isPinned desc;
 
 END$$   
 
@@ -1119,8 +1161,8 @@ END$$
 
 
 DELIMITER $$
-DROP PROCEDURE IF EXISTS `GetMessage`$$
-CREATE PROCEDURE `GetMessage` (	IN _taskId int,	IN _personId int	)
+DROP PROCEDURE IF EXISTS `GetTaskMessages`$$
+CREATE PROCEDURE `GetTaskMessages` (	IN _taskId int,	IN _personId int	)
 BEGIN
 
 	SELECT 	tmsg.id as taskMessageId,
@@ -1133,7 +1175,7 @@ BEGIN
             messageTypeId,
             attachment,
 			attachmentTypeId,
-            messageDate
+            formatDate(messageDate) messageDate
     FROM task as t
     INNER JOIN taskMessage as tmsg on tmsg.taskId = t.id
     LEFT JOIN taskMember as tm on tm.taskId = t.id
@@ -1143,8 +1185,6 @@ BEGIN
 	ORDER BY messageDate asc;
     
 END$$
-
-CALL GetMessage(1,1)
 
 /*---------Task Checklist----------*/
 DELIMITER $$
@@ -1171,6 +1211,23 @@ BEGIN
     WHERE id = _checkListId;
 
 END$$
+    
+DELIMITER $$
+DROP PROCEDURE IF EXISTS `GetCheckList`$$
+CREATE PROCEDURE `GetCheckList` (IN _taskId int, IN _checkListId int)
+BEGIN
+
+	SELECT 	taskId,
+			title,
+            dueDate,
+            personId
+    FROM checkList
+    WHERE 	taskId = _taskId AND
+			id = coalesce(_checkListId,id);
+			
+
+END$$
+    
     
 DELIMITER $$
 DROP PROCEDURE IF EXISTS `CreateCheckListItem`$$
@@ -1211,6 +1268,20 @@ BEGIN
 
 END$$
 
+DELIMITER $$
+DROP PROCEDURE IF EXISTS `GetCheckListItem`$$
+CREATE PROCEDURE `GetCheckListItem` (IN _checkListId int)
+BEGIN
+
+	SELECT 	item,
+			formatDate(dueDate) as dueDate,
+            isChecked,
+            sortNumber
+    FROM checkListItem
+    WHERE checkListId = _checkListId
+    ORDER BY sortNumber;
+
+END$$ 
 
 
 

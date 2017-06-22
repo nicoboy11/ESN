@@ -158,8 +158,12 @@ CALL CreateTaskMessage(1, 2, 'Hi', 1, NULL, NULL);
 CALL CreateTaskMessage(1, 3, 'Hi', 1, NULL, NULL);
 CALL CreateTaskMessage(1, 4, 'Hi', 1, NULL, NULL); /* Should Fail */
 
+
+
 CALL CreateCheckList(1, 'Even Tasks', '2017-09-10', 2);
 CALL EditCheckList(1, 'Paulinas Tasks','2017-09-27 10:00:00',2);
+CALL CreateCheckList(1, 'Even Tasks', '2017-09-10', 2);
+CALL CreateCheckList(1, 'Nicolas Tasks', '2017-09-10', 2);
 
 CALL CreateCheckListItem (1, 'Do this first', 1);
 CALL CreateCheckListItem (1, 'Do this second', 1);

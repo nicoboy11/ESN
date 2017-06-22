@@ -247,7 +247,7 @@ BEGIN
 	INNER JOIN taskMember as tm on t.id = tm.taskId
 	WHERE	tm.taskId = _taskId AND
 			tm.personId = _personId AND
-			endDate > NOW();
+			ifnull(endDate,NOW() + 1) > NOW();
 
 	RETURN _isValid;
     
