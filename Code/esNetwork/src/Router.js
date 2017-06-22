@@ -32,7 +32,7 @@ class RouterComponent extends Component {
                 leftButtonIconStyle={{ tintColor: 'white' }}
                 titleStyle={styles.textStyle}
             > 
-                <Scene initial key='authentication'>
+                <Scene key='authentication'>
                     <Scene key='login' navigationBarStyle={{ opacity: 0 }} component={LoginForm} />
                     <Scene 
                         hideNaveBar={false} 
@@ -59,7 +59,7 @@ class RouterComponent extends Component {
                     <Scene key='profile' direction='vertical' component={ProfileForm} hideNavBar />
                     <Scene key='profileImage' component={ProfileImage} hideNavBar />
                 </Scene>    
-                <Scene key='taskMessage' component={TaskMessageForm} hideNavBar />
+                <Scene initial key='taskMessage' component={TaskMessageForm} hideNavBar />
                 {/*<Scene key="statusModal" component={PostCardMenu} direction='vertical' 
                 hideNavBar />     */}
             </Router>

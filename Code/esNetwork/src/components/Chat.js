@@ -1,5 +1,14 @@
 import React, { Component } from 'react';
-import { View, TextInput, Image, TouchableOpacity, StyleSheet, Text, FlatList } from 'react-native';
+import { 
+    View, 
+    TextInput, 
+    Image, 
+    TouchableOpacity, 
+    StyleSheet, 
+    Text, 
+    FlatList, 
+    Alert
+} from 'react-native';
 import { CardList } from './';
 import { Config, Database } from '../settings';
 
@@ -12,72 +21,90 @@ class Chat extends Component {
               personId: null }
 
     componentWillMount() {
+        const ws = new WebSocket('ws://143.167.71.24:9998/task');
+        ws.onopen = function () {
+            ws.send('{"newConnectionxxx":0,"room":1,"personId":1}');
+        };
+
         //get current log in
         const data = Database.realm('Session', { }, 'select', '');
-        const personId = data[0].personId;        
-        this.setState({ personId });
+        const personId = data[0].personId;   
 
-        this.setState({
-            elements: [
-                {
-                    category: 'Chat',
-                    key: 1,
-                    taskMessageId: 1,
-                    taskId: 1,
-                    personId: 2,
-                    avatar: 'PO',
-                    person: 'Paulina Orihuela Pérez',
-                    message: 'This is a Test',
-                    messageTypeId: 1,
-                    attachment: null,
-                    attachmentTypeId: null,
-                    messageDate: '2017-06-21 02:01:48',
-                    isSelf: false,
-                    theme: '#D7C000'
-                },
-                {
-                    category: 'Chat',
-                    key: 2,
-                    taskMessageId: 2,
-                    taskId: 1,
-                    personId: 3,
-                    avatar: 'JH',
-                    person: 'Julianne Hadyn Fear',
-                    message: 'Hi',
-                    messageTypeId: 1,
-                    attachment: null,
-                    attachmentTypeId: null,
-                    messageDate: '2017-06-21 02:01:49',
-                    isSelf: false,
-                    theme: '#EFA209'
-                }                
-            ]
-        });
+        this.setState({ personId });
+        this.getMessages(personId);
+    }
+
+    onError(error) {
+        Alert.alert('Error', error.message);
+    }
+    
+    onSuccess(responseData) {
+        if (this.state.status > 299) {
+            console.log('error');
+        } else {
+            this.setState({
+                elements: responseData
+            });
+        }
+    }
+
+    onSuccessPost(responseData) {
+        this.getMessages(this.state.personId);
     }
 
     onTextChanged(text) {
         this.setState({ input: text });
     }
 
+    handleResponse(response) {
+        console.log(response.status);
+        return response.json();
+    } 
+
+    getMessages(personId) {
+        Database.request(
+            'GET', 
+            `taskMessages/${this.props.taskId}/${personId}`, 
+            {}, 
+            true,
+            this.handleResponse.bind(this), 
+            this.onSuccess.bind(this),
+            this.onError.bind(this)
+        );
+    }
+
     sendMessage() {
-        const key = 'K' + (new Date().getTime() / 1000);
+        const personId = this.state.personId;
+
         const newMessage = {
                     category: 'Chat',
-                    key,
-                    taskMessageId: 3,
-                    taskId: 1,
-                    personId: 1,
-                    avatar: 'ES',
-                    person: 'Even Sosa Rodríguez',
+                    key: 'mientras',
+                    taskMessageId: 0,
+                    taskId: this.props.taskId,
+                    personId: this.state.personId,
                     message: this.state.input,
                     messageTypeId: 1,
                     attachment: null,
                     attachmentTypeId: null,
-                    messageDate: '2017-06-21 02:01:49',
-                    isSelf: false,
-                    theme: '#EFA209'
+                    messageDate: 'Now'
                 };
-        this.setState({ elements: [...this.state.elements, newMessage], input: '' });
+
+        Database.request(
+            'POST', 
+            'taskMessages', 
+            {
+                taskId: this.props.taskId,
+                personId,
+                message: this.state.input,
+                messageTypeId: 1
+            }, 
+            true,
+            this.handleResponse.bind(this), 
+            this.onSuccessPost.bind(this),
+            this.onError.bind(this)
+        );
+        
+//        this.setState({ elements: [...this.state.elements, newMessage], input: '' });
         this.refs.chatList.scrollToEnd();
     }
 
@@ -94,7 +121,7 @@ class Chat extends Component {
             return (
                     <View style={{ flexDirection: 'row' }} >
                         <View style={spacer} />                        
-                        <View key={item.key} style={bubbleRightStyle}>
+                        <View style={bubbleRightStyle}>
                             <Text style={{ color: colors.mainText }}>{item.message}</Text>
                             <Text style={dateBubble}>{item.messageDate}</Text>
                         </View> 
@@ -104,7 +131,7 @@ class Chat extends Component {
 
         return (
                 <View style={{ flexDirection: 'row' }} >          
-                    <View key={item.key} style={bubbleLeftStyle}>
+                    <View style={bubbleLeftStyle}>
                         <Text style={[personBubble, { color: item.theme }]}>{item.person}</Text>
                         <Text>{item.message}</Text>
                         <Text style={dateBubble}>{item.messageDate}</Text>
@@ -127,6 +154,7 @@ class Chat extends Component {
             <View style={containerStyle}>
                 <View style={chatStyle} >
                     <FlatList 
+                        keyExtractor={item => item.taskMessageId}
                         ref='chatList'
                         data={this.state.elements} 
                         renderItem={this.renderMessages.bind(this)}

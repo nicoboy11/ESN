@@ -32,7 +32,7 @@ class Database {
                 const data = Database.realm('Session', { }, 'select', '');
                 return {
                     Accept: 'application/json',
-                    'Content-Type': 'application/json',
+                    'Content-Type': 'multipart/form-data',
                     Authorization: `Bearer ${data[0].token}`
                 };
         }
@@ -44,10 +44,26 @@ class Database {
     }
 
     static request(type, sp, params, needsAuth, onStart, onSuccess, onError) {
+        
+        //let data = (Object.keys(params).length === 0) ? null : JSON.stringify(params)
+        let data = new FormData();
+        if (type === 'POST') {
+            const keys = Object.keys(params);
+            
+            for (let i = 0; i < keys.length; i++) {
+                const key = keys[i];
+                data.append(key, params[key]);
+            }
+        }
+
+        if (type === 'GET') {
+            data = null;
+        }
+
         fetch(Config.network.server + sp, { 
             method: type, 
             headers: Database.getHeader(needsAuth),
-            body: (Object.keys(params).length === 0) ? null : JSON.stringify(params)
+            body: data
         })
         .then(onStart)
         .then(onSuccess)

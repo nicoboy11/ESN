@@ -20,9 +20,9 @@ var wss = new WebSocket.Server({ port: 9998, path:'/task' })
 var clients = [];
 
 wss.on('connection', function connection(ws){
-
+    console.log('connected ws');
     ws.on('message', function incoming(message){
-
+        console.log(message);
         if(message.includes('{"newConnectionxxx":0,')) {
             var json = JSON.parse(message);
             
@@ -206,7 +206,6 @@ function reqUpload(req, type, field, callback){
     var params = {};
 
     form.parse(req);
-
     form.on('field', function(name, value){
         params[name] = value;
     }) 
@@ -438,13 +437,16 @@ apiRoutes.get('/taskMessages/:taskId/:personId',function(req,res){
 
 //  Send Messages
 apiRoutes.post('/taskMessages',function(req,res){
-
     reqUpload(req,'postatt','personId', function(fileName, params){
         db("CALL CreateTaskMessage(" + fpInt(params.taskId) + "," + fpInt(params.personId) + "," + fpVarchar(params.message) +
                             "," + fpInt(params.messageTypeId) + "," + fpVarchar(params.attachment) + "," + fpInt(params.attachmentTypeId) + ");",
         conn, function(error, result){
             if(handle(error,res,true)){
-                res.status(200).end( JSON.stringify(result[0]) );
+                var message = JSON.stringify(result[0])
+                if(message === '' || message === undefined){
+                    message = '[{"message": "ok"}]'
+                }
+                res.status(200).end( message );
             }
         });
     });

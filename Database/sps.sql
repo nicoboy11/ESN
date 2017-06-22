@@ -1160,6 +1160,8 @@ BEGIN
 END$$
 
 
+
+
 DELIMITER $$
 DROP PROCEDURE IF EXISTS `GetTaskMessages`$$
 CREATE PROCEDURE `GetTaskMessages` (	IN _taskId int,	IN _personId int	)
@@ -1175,9 +1177,11 @@ BEGIN
             messageTypeId,
             attachment,
 			attachmentTypeId,
-            formatDate(messageDate) messageDate
+            formatDate(messageDate) messageDate,
+            p.theme
     FROM task as t
     INNER JOIN taskMessage as tmsg on tmsg.taskId = t.id
+    INNER JOIN person as p on p.id = tmsg.personId
     LEFT JOIN taskMember as tm on tm.taskId = t.id
 	WHERE 	t.id = _taskId AND
 			tm.personId = _personId AND

@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import { ScrollView, ActivityIndicator, Alert } from 'react-native';
+import { Actions } from 'react-native-router-flux';
 import { Form, CardList, Button } from '../components';
 import { Config, Database } from '../settings';
 
@@ -29,7 +30,9 @@ class TaskForm extends Component {
 
     onError(error) {
         Alert.alert('Error', error.message);
-        this.refresh();
+        if (this.state.status === 403) {
+            Actions.authentication();
+        }
     }
     
     onSuccess(responseData) {

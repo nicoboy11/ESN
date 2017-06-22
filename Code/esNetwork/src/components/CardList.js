@@ -42,6 +42,7 @@ class CardList extends Component {
                             creator={data.creator}
                             collaborators={data.collaborators}
                             leader={data.leader}
+                            taskId={data.taskId}
                         />
                 );
             case 'Post':

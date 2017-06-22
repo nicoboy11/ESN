@@ -259,6 +259,7 @@ CREATE TABLE task(
     CONSTRAINT FOREIGN KEY (stateId) REFERENCES stateType(id)    
 );
 
+
 DROP TABLE IF EXISTS taskMember;
 CREATE TABLE taskMember(
 	taskId int,

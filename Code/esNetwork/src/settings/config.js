@@ -20,7 +20,8 @@ Config.colors = {
 };
 
 Config.network = {
-    server: 'http://143.167.71.24:3001/'
+    server: 'http://143.167.71.24:3001/',
+    wsServer: 'ws://143.167.71.24:9998/task'
 };
 
 const lang = {

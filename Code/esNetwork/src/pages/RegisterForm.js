@@ -52,7 +52,8 @@ class RegisterForm extends Component {
               genderId
             }, 
             false,
-            this.handleResponse.bind(this), this.onLoginResponse.bind(this), 
+            this.handleResponse.bind(this), 
+            this.onLoginResponse.bind(this), 
             this.onError.bind(this));
     }    
 
