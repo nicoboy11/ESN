@@ -18,7 +18,7 @@ class PostCard extends Component {
                 </View>
             );
         }
-
+        
         return <Image style={avatarStyle} source={{ uri: { avatar } }} />;
     }
 

@@ -15,7 +15,8 @@ Config.colors = {
     inactive: '#828486',
     mainText: '#FFF',
     elementBackground: '#FFF',
-    alternateColor: '#08C2A5'
+    alternateColor: '#08C2A5',
+    veryLight: '#E1E4E8'
 };
 
 Config.network = {

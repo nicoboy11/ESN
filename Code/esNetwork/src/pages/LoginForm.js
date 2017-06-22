@@ -86,10 +86,10 @@ class LoginForm extends Component {
         return (
             <View style={mainContainerStyle}>
                     <View style={logoContainerStyle}>
-                    <Image 
+                    {/*<Image 
                             style={imageStyle} 
                             source={{ uri: 'http://www.freeiconspng.com/uploads/data-network-icon-image-gallery-27.png' }} 
-                    />
+                    />*/}
                     </View>
                     <View style={inputContainerStyle}>
                         <View style={topInputStyle}>

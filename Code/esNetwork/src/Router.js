@@ -16,9 +16,9 @@ import { Config } from './settings';
 const { colors } = Config;
 
 class TabIcon extends React.Component {
-    render(){
+    render() {
         return (
-            <Text style={{color: this.props.selected ? 'red' :'black'}}>{this.props.title}</Text>
+            <Text style={{ color: this.props.selected ? 'red' : 'black' }}>{this.props.title}</Text>
         );
     }
 }
@@ -32,7 +32,7 @@ class RouterComponent extends Component {
                 leftButtonIconStyle={{ tintColor: 'white' }}
                 titleStyle={styles.textStyle}
             > 
-                <Scene key='authentication'>
+                <Scene initial key='authentication'>
                     <Scene key='login' navigationBarStyle={{ opacity: 0 }} component={LoginForm} />
                     <Scene 
                         hideNaveBar={false} 
@@ -43,23 +43,23 @@ class RouterComponent extends Component {
                 </Scene>   
                 <Scene key='tabbar' tabs={true}>
                     <Scene 
-                        key='mainForm' 
-                        component={MainForm} 
-                        hideNavBar
-                        title='Feed'
-                        icon={TabIcon}
-                    />   
-                    <Scene 
                         key='tasks' 
                         component={TaskForm} 
                         hideNavBar
                         title='Tasks'
                         icon={TabIcon}
-                    />                       
+                    />                         
+                    <Scene 
+                        key='mainForm' 
+                        component={MainForm} 
+                        hideNavBar
+                        title='Feed'
+                        icon={TabIcon}
+                    />                     
                     <Scene key='profile' direction='vertical' component={ProfileForm} hideNavBar />
                     <Scene key='profileImage' component={ProfileImage} hideNavBar />
                 </Scene>    
-                <Scene initial key='taskMessage' component={TaskMessageForm} hideNavBar />
+                <Scene key='taskMessage' component={TaskMessageForm} hideNavBar />
                 {/*<Scene key="statusModal" component={PostCardMenu} direction='vertical' 
                 hideNavBar />     */}
             </Router>
