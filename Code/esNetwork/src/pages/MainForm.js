@@ -21,7 +21,7 @@ class MainForm extends Component {
             'GET', 
             `feed/${personId}/1`, 
             {}, 
-            true,
+            2,
             this.handleResponse.bind(this), 
             this.onSuccess.bind(this),
             this.onError.bind(this)
@@ -84,11 +84,13 @@ class MainForm extends Component {
     render() {
         return (
             <Form
-                leftIcon='menu'
+                rightIcon='menu'
                 title={texts.feed}
                 menuList={
                     [
-                        { name: 'Profile', form: 'profile', id: this.state.personId }
+                        { name: 'Profile', form: 'profile', id: this.state.personId },
+                        { name: 'Logout', form: 'authentication', id: 0 }
+
                     ]
                 }
             >

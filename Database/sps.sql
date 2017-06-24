@@ -339,20 +339,20 @@ BEGIN
             p.mobile,
             p.genderId,
             g.description as gender,
-			p.phone,
-			p.ext,
+			ifnull(p.phone,'') as phone,
+			ifnull(p.ext,'') as ext,
 			formatDate(p.startDate) as startDate,
 			formatDate(p.endDate) as endDate,
 			p.higherPersonId,
             getFullName(p.higherPersonId) as higherPerson,
 			formatDate(p.lastLogin) as lastLogin,
-			p.avatar,
+			getAvatar(p.id) as avatar,
 			p.description,
 			p.job,
 			p.roleId,
 			p.abbr,
             getLevelKey(_id) as levelKey,
-            p.theme
+            ifnull(p.theme,'') as theme
     FROM person as p
     INNER JOIN gender as g on g.id = p.genderId
     WHERE p.id = _id;
@@ -1134,11 +1134,11 @@ BEGIN
             'Task' as category
     FROM task as t
     INNER JOIN person as per on per.id = t.creatorId
-    INNER JOIN taskMember as tm on tm.personId = t.creatorId AND tm.taskId = t.id
+    INNER JOIN taskMember as tm on tm.taskId = t.id
     LEFT JOIN project as p on p.id = t.projectId
     LEFT JOIN projectTeam as pte on pte.projectId = p.id
     LEFT JOIN team as te on te.id = pte.teamId
-    WHERE t.creatorId = _personId
+    WHERE tm.personId = _personId
     ORDER BY tm.isPinned desc;
 
 END$$   
@@ -1156,15 +1156,18 @@ BEGIN
 
 	INSERT INTO taskMessage (taskId, personId, message, messageTypeId, attachment, attachmentTypeId, messageDate)
     VALUES(_taskId, _personId, _message, _messageTypeId, _attachment, _attachmentTypeId, NOW() );
+    
+    SET @taskMessageId = LAST_INSERT_ID();
+    
+	CALL GetTaskMessages(_taskId,_personId,@taskMessageId);
 
 END$$
 
 
 
-
 DELIMITER $$
 DROP PROCEDURE IF EXISTS `GetTaskMessages`$$
-CREATE PROCEDURE `GetTaskMessages` (	IN _taskId int,	IN _personId int	)
+CREATE PROCEDURE `GetTaskMessages` (	IN _taskId int,	IN _personId int, IN _taskMessageId int	)
 BEGIN
 
 	SELECT 	tmsg.id as taskMessageId,
@@ -1185,7 +1188,8 @@ BEGIN
     LEFT JOIN taskMember as tm on tm.taskId = t.id
 	WHERE 	t.id = _taskId AND
 			tm.personId = _personId AND
-            tmsg.messageDate < ifnull(tm.endDate,NOW())
+            tmsg.id = coalesce(_taskMessageId, tmsg.id) AND
+            tmsg.messageDate <= ifnull(tm.endDate,NOW())
 	ORDER BY messageDate asc;
     
 END$$

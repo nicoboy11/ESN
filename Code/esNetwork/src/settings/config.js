@@ -4,7 +4,7 @@ class Config {}
 
 Config.regex = {
     email: /^[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$/i,
-    textOnly: /[^a-zA-Z0-9\s]/g
+    textOnly: /[^a-zA-Z0-9áéíóúÁÉÍÓÚüÜñÑ\s]/g
 };
 
 Config.colors = {
@@ -16,7 +16,9 @@ Config.colors = {
     mainText: '#FFF',
     elementBackground: '#FFF',
     alternateColor: '#08C2A5',
-    veryLight: '#E1E4E8'
+    veryLight: '#E1E4E8',
+    contrastColor: '#32394A',
+    contrastColorDark: '#2E3543'
 };
 
 Config.network = {
@@ -56,7 +58,30 @@ const lang = {
                         addTeam: '[Team]',
                         addProject: '[Project]',
                         newTask: 'New task',
-                        comment: 'Comment'
+                        comment: 'Comment',
+                        days: {
+                                0: 'Sunday',
+                                1: 'Monday',
+                                2: 'Tuesday',
+                                3: 'Wednesday',
+                                4: 'Thursday',
+                                5: 'Friday',
+                                6: 'Saturday'                            
+                        },
+                        month: {
+                                0: 'Jan',
+                                1: 'Feb',
+                                2: 'Mar',
+                                3: 'Apr',
+                                4: 'May',
+                                5: 'Jun',
+                                6: 'Jul',
+                                7: 'Aug',
+                                8: 'Sep',
+                                9: 'Oct',
+                                10: 'Nov',
+                                11: 'Dec'                            
+                        }
                 },
                 es: {   //Login page
                         email: 'Email',
@@ -89,7 +114,30 @@ const lang = {
                         addTeam: '[Equipo]',
                         addProject: '[Proyecto]',
                         newTask: 'Nueva Tarea',
-                        comment: 'Comentar'
+                        comment: 'Comentar',
+                        days: {
+                                0: 'Domingo',
+                                1: 'Lunes',
+                                2: 'Martes',
+                                3: 'Miércoles',
+                                4: 'Jueves',
+                                5: 'Viernes',
+                                6: 'Sábado'                            
+                        },
+                        month: {
+                                0: 'Ene',
+                                1: 'Feb',
+                                2: 'Mar',
+                                3: 'Abr',
+                                4: 'May',
+                                5: 'Jun',
+                                6: 'Jul',
+                                7: 'Aug',
+                                8: 'Sep',
+                                9: 'Oct',
+                                10: 'Nov',
+                                11: 'Dic'                            
+                        }
                 }
 
              };

@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { StyleSheet, Modal, Text } from 'react-native';
-import { Scene, Router, Actions, TabBar } from 'react-native-router-flux';
+import { Scene, Router, ActionConst, Actions, TabBar } from 'react-native-router-flux';
 import { Menu } from './components';
 import { 
     LoginForm, 
@@ -32,8 +32,13 @@ class RouterComponent extends Component {
                 leftButtonIconStyle={{ tintColor: 'white' }}
                 titleStyle={styles.textStyle}
             > 
-                <Scene key='authentication'>
-                    <Scene key='login' navigationBarStyle={{ opacity: 0 }} component={LoginForm} />
+                <Scene initial key='authentication' type={ActionConst.RESET}>
+                    <Scene 
+                        key='login' 
+                        navigationBarStyle={{ opacity: 0 }} 
+                        component={LoginForm} 
+                        type={ActionConst.RESET}
+                    />
                     <Scene 
                         hideNaveBar={false} 
                         key='register' 
@@ -56,10 +61,10 @@ class RouterComponent extends Component {
                         title='Feed'
                         icon={TabIcon}
                     />                     
-                    <Scene key='profile' direction='vertical' component={ProfileForm} hideNavBar />
-                    <Scene key='profileImage' component={ProfileImage} hideNavBar />
                 </Scene>    
-                <Scene initial key='taskMessage' component={TaskMessageForm} hideNavBar />
+                <Scene key='profile' component={ProfileForm} hideNavBar />
+                <Scene key='profileImage' component={ProfileImage} hideNavBar />                
+                <Scene key='taskMessage' component={TaskMessageForm} hideNavBar />
                 {/*<Scene key="statusModal" component={PostCardMenu} direction='vertical' 
                 hideNavBar />     */}
             </Router>

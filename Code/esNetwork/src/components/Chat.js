@@ -13,24 +13,49 @@ import { CardList } from './';
 import { Config, Database } from '../settings';
 
 const { colors } = Config;
+//get current log in
+const data = Database.realm('Session', { }, 'select', '');
 
 class Chat extends Component {
 
-    state = { elements: [], 
-              input: '',
-              personId: null }
+    constructor(props) {
+        super(props);
+
+        this.state = { elements: [], 
+                        input: '',
+                        personId: data[0].personId };
+    }              
 
     componentWillMount() {
-        const ws = new WebSocket('ws://143.167.71.24:9998/task');
-        ws.onopen = function () {
-            ws.send('{"newConnectionxxx":0,"room":1,"personId":1}');
+        const taskId = this.props.taskId;
+        const personId = data[0].personId;
+
+        const self = this;
+
+        this.ws = new WebSocket('ws://143.167.71.24:9998/task');
+
+        this.ws.onmessage = function (e) {
+            const newMessage = 
+                        { 
+                            message: e.data,
+                            person: 'Robot',
+                            theme: '#918277',
+                            messageDate: '2017-09-09',
+                            messageTypeId: 1,
+                            taskId: 1,
+                            taskMessageId: 99,
+                            personId: 2
+                        };
+
+            self.setState({ elements: [...self.state.elements, newMessage] });
         };
 
-        //get current log in
-        const data = Database.realm('Session', { }, 'select', '');
-        const personId = data[0].personId;   
+        this.ws.onopen = function () {
+            this.send(`{"newConnectionxxx":0,
+                    "taskId":${taskId},
+                    "personId":${personId}}`);
+        };
 
-        this.setState({ personId });
         this.getMessages(personId);
     }
 
@@ -49,6 +74,8 @@ class Chat extends Component {
     }
 
     onSuccessPost(responseData) {
+        this.ws.send(JSON.stringify(responseData[0]));
+
         this.getMessages(this.state.personId);
     }
 
@@ -56,29 +83,29 @@ class Chat extends Component {
         this.setState({ input: text });
     }
 
-    handleResponse(response) {
-        console.log(response.status);
-        return response.json();
-    } 
-
     getMessages(personId) {
         Database.request(
             'GET', 
             `taskMessages/${this.props.taskId}/${personId}`, 
             {}, 
-            true,
+            2,
             this.handleResponse.bind(this), 
             this.onSuccess.bind(this),
             this.onError.bind(this)
         );
     }
 
+    handleResponse(response) {
+        console.log(response.status);
+        return response.json();
+    } 
+
     sendMessage() {
         const personId = this.state.personId;
 
         const newMessage = {
                     category: 'Chat',
-                    key: 'mientras',
+                    key: 'loading',
                     taskMessageId: 0,
                     taskId: this.props.taskId,
                     personId: this.state.personId,
@@ -86,7 +113,7 @@ class Chat extends Component {
                     messageTypeId: 1,
                     attachment: null,
                     attachmentTypeId: null,
-                    messageDate: 'Now'
+                    messageDate: 'Sending...'
                 };
 
         Database.request(
@@ -98,13 +125,13 @@ class Chat extends Component {
                 message: this.state.input,
                 messageTypeId: 1
             }, 
-            true,
+            1,
             this.handleResponse.bind(this), 
             this.onSuccessPost.bind(this),
             this.onError.bind(this)
         );
         
-//        this.setState({ elements: [...this.state.elements, newMessage], input: '' });
+        this.setState({ elements: [...this.state.elements, newMessage], input: '' });
         this.refs.chatList.scrollToEnd();
     }
 
@@ -121,7 +148,7 @@ class Chat extends Component {
             return (
                     <View style={{ flexDirection: 'row' }} >
                         <View style={spacer} />                        
-                        <View style={bubbleRightStyle}>
+                        <View style={[bubbleRightStyle, (item.key === 'loading') ? { opacity: 0.5 } : {}]}>
                             <Text style={{ color: colors.mainText }}>{item.message}</Text>
                             <Text style={dateBubble}>{item.messageDate}</Text>
                         </View> 

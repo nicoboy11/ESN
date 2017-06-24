@@ -1,10 +1,11 @@
 import React, { Component } from 'react';
-import { View, StyleSheet, ScrollView, Text, Image, TouchableOpacity } from 'react-native';
+import { View, StyleSheet, ScrollView, Text, Image, TouchableOpacity, Alert } from 'react-native';
 import { Actions } from 'react-native-router-flux';
-import { Input, DatePicker } from '../components';
+import { Input, DatePicker, Form } from '../components';
 import { Config, Database, Helper } from '../settings';
 
 const { texts, colors } = Config;
+const session = Database.realm('Session', { }, 'select', '');
 
 class ProfileForm extends Component {
 
@@ -18,29 +19,78 @@ class ProfileForm extends Component {
         phone: '',
         ext: '',
         mobile: '',
-        genderId: 1
+        genderId: 1,
+        editable: false,
+        currentOption: ''
     }
 
     componentWillMount() {
-        const data = Database.realm('Session', { }, 'select', '');
-        this.setState({
-            dateOfBirth: data[0].dateOfBirth,
-            loading: 0,
-            names: data[0].names,
-            firstLastName: data[0].firstLastName,
-            secondLastName: data[0].secondLastName,
-            email: data[0].email,
-            phone: data[0].phone,
-            ext: data[0].ext,
-            mobile: data[0].mobile,
-            abbr: data[0].abbr,
-            genderId: 1
-        });
+        this.getProfile(this.props);
+    }
+
+    componentWillReceiveProps(nextProps) {
+        this.getProfile(nextProps);
+    }
+
+    onError(error) {
+        Alert.alert('Error', error.message);
+        if (this.state.status === 403) {
+            Actions.authentication();
+        }
+    }
+    
+    onSuccess(responseData) {
+        if (this.state.status === 403) {
+            Database.realm('Session', { }, 'delete', '');
+            Actions.authentication();
+        } else if (this.state.status > 299) {
+            Alert.alert('Error', 'There was an error with the request.');
+        } else {        
+            this.setState({
+                dateOfBirth: Helper.toDate(responseData[0].dateOfBirth),
+                loading: 0,
+                names: responseData[0].names,
+                firstLastName: responseData[0].firstLastName,
+                secondLastName: responseData[0].secondLastName,
+                email: responseData[0].email,
+                phone: responseData[0].phone,
+                ext: responseData[0].ext,
+                mobile: responseData[0].mobile,
+                abbr: responseData[0].abbr,
+                genderId: 1
+            });
+        }
     }
 
     onChangeDate(dateISO) {
         this.setState({ dateOfBirth: dateISO });
     }
+
+    onPressRight() {
+        this.setState({ editable: true });
+    }
+
+    getProfile(props) {
+        if (session[0].personId === this.props.personId) {
+            this.setState({ currentOption: 'Edit' });
+        }    
+
+        Database.request(
+            'GET', 
+            `person/${props.personId}`, 
+            {}, 
+            2,
+            this.handleResponse.bind(this), 
+            this.onSuccess.bind(this),
+            this.onError.bind(this)
+        );
+    }
+
+    handleResponse(response) {
+        console.log(response.status);
+        this.setState({ status: response.status });
+        return response.json();
+    }  
 
     renderAvatar() {
         const { avatarStyle, avatarTextStyle, indicatorStyle, avatarContainer } = styles;
@@ -67,10 +117,13 @@ class ProfileForm extends Component {
         } = styles;
 
         return (
-                <View style={{ flex: 1 }}>
-                <TouchableOpacity style={{ backgroundColor: colors.main }} onPress={() => Actions.pop()} >
-                    <Image style={imageStyle} source={require('../img/wback.png')} />
-                </TouchableOpacity>                       
+                <Form
+                   leftIcon='back'
+                   title='Profile'
+                   menuList={[]}
+                   rightIcon={this.state.currentOption}
+                   onPressRight={this.onPressRight.bind(this)}
+                >                       
                 <ScrollView>
                     <View style={headerStyle}>
                         <Text style={mainTextStyle}>
@@ -90,9 +143,7 @@ class ProfileForm extends Component {
                             </TouchableOpacity>
                         </View>
                     </View>
-                    <View>
-
-                    </View>
+                    <View />
                     <View style={mainViewStyle}>
                         <Text style={titleStyle}>{texts.contactInfo}</Text>
                         <Input 
@@ -101,13 +152,13 @@ class ProfileForm extends Component {
                             returnKeyType='next' 
                             onChangeText={(email) => this.setState({ email })}
                             value={this.state.email}
-                            editable={false}                
+                            editable={this.state.editable}
                         />
                         <DatePicker 
                             label={texts.dateOfBirth} 
                             onChangeDate={this.onChangeDate.bind(this)}
                             date={this.state.dateOfBirth}
-                            editable={false}                                 
+                            editable={this.state.editable}
                         />
                         <Input 
                             label={texts.mobile} 
@@ -115,8 +166,7 @@ class ProfileForm extends Component {
                             returnKeyType='next' 
                             onChangeText={(mobile) => this.setState({ mobile })}
                             value={this.state.mobile}       
-                            editable={false}
-                            value={this.state.mobile}
+                            editable={this.state.editable}
                         />                      
                         <Input 
                             label={texts.phone} 
@@ -124,8 +174,7 @@ class ProfileForm extends Component {
                             returnKeyType='next' 
                             onChangeText={(phone) => this.setState({ phone })}
                             value={this.state.phone}      
-                            editable={false}
-                            value={this.state.phone}
+                            editable={this.state.editable}
                         />     
                         <Input 
                             label={texts.ext} 
@@ -133,8 +182,7 @@ class ProfileForm extends Component {
                             returnKeyType='next' 
                             onChangeText={(ext) => this.setState({ ext })}
                             value={this.state.ext}      
-                            editable={false}
-                            value={this.state.ext}
+                            editable={this.state.editable}
                         />  
                     </View>
 
@@ -146,7 +194,7 @@ class ProfileForm extends Component {
                         value={this.state.gender}                    
                     />                     */}                                      
                 </ScrollView>
-                </View>
+                </Form>
         );
     }
 }

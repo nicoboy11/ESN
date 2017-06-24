@@ -15,7 +15,8 @@ class RegisterForm extends Component {
         secondLastName: '',
         email: '',
         password: '',
-        genderId: 1
+        genderId: 1,
+        mobile: ''
     }
 
     onChangeDate(dateISO) {
@@ -30,7 +31,8 @@ class RegisterForm extends Component {
                 secondLastName, 
                 email, 
                 genderId,
-                password } = this.state;
+                password,
+                mobile } = this.state;
 
         this.setState({ loading: 1 });  
         Keyboard.dismiss();
@@ -49,7 +51,8 @@ class RegisterForm extends Component {
               secondLastName, 
               email, 
               password,
-              genderId
+              genderId,
+              mobile
             }, 
             false,
             this.handleResponse.bind(this), 
@@ -120,6 +123,13 @@ class RegisterForm extends Component {
                     value={this.state.email}                    
                 />
                 <Input 
+                    label={texts.mobile} 
+                    type='number' 
+                    returnKeyType='next' 
+                    onChangeText={(mobile) => this.setState({ mobile })}
+                    value={this.state.mobile}                    
+                />                
+                <Input 
                     label={texts.password} 
                     type='password' 
                     returnKeyType='next' 
@@ -129,6 +139,7 @@ class RegisterForm extends Component {
                 <DatePicker 
                     label={texts.dateOfBirth} 
                     onChangeDate={this.onChangeDate.bind(this)}
+                    editable
                 />
                 <Button 
                     title={texts.signup} 

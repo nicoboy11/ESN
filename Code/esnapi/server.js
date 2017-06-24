@@ -13,7 +13,6 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded());
 
 
-
 var WebSocket = require('ws');
 var wss = new WebSocket.Server({ port: 9998, path:'/task' })
 
@@ -22,18 +21,18 @@ var clients = [];
 wss.on('connection', function connection(ws){
     console.log('connected ws');
     ws.on('message', function incoming(message){
-        console.log(message);
+        console.log("incoming");
         if(message.includes('{"newConnectionxxx":0,')) {
             var json = JSON.parse(message);
             
-            var obj = { "client":ws, "room":json.room, "personId":json.personId }
+            var obj = { "client":ws, "room":json.taskId, "personId":json.personId }
             clients.push(obj);
         }
         else {
-
-            var jsonMsg = JSON.parse(message);
+            var jsonMsg = JSON.parse(message);    
             clients.forEach(function each(client){
-                if(client.room === jsonMsg.room && client.client.readyState === WebSocket.OPEN){
+                if(client.client != ws && client.room === jsonMsg.taskId && client.client.readyState === WebSocket.OPEN){
+                    console.log("sending: " + jsonMsg.message);
                     client.client.send(jsonMsg.message); 
                 }
             })
@@ -94,7 +93,7 @@ function db(sql,conn,callback){
         });
     }
     catch(err){
-        console.log(err.message);
+        console.log("sqlErr" + err.message);
     }
 }
 
@@ -103,7 +102,7 @@ function handle(error,res,show){
     if(error){
         var message = error.message.replace(error.code,"").replace(":","").trim();
 
-        console.log("Error" + message);
+        console.log("Error Handle: " + message);
 
         if(show){
             res.status(422).end( responseMsg(message) );
@@ -125,7 +124,12 @@ function handleResponse(result,res,errorMessage){
 
     if(result != undefined && result[0] != undefined ){
         if(result[0].length == 0){
-            res.status(401).end( responseMsg(errorMessage) );
+            if(errorMessage == ""){
+                res.status(200).end( "{}" );
+            }
+            else{
+                res.status(401).end( responseMsg(errorMessage) );
+            }
         }
         else{
             res.status(200).end( JSON.stringify(result[0]) );
@@ -217,7 +221,7 @@ function reqUpload(req, type, field, callback){
         console.log('file created!');
     })
     .on('progress',function(bytesReceived, bytesExpected){
-        console.log(bytesReceived + ' : ' + bytesExpected);
+        console.log('progress: ' + bytesReceived + ' : ' + bytesExpected);
     })        
     .on('end',function(){
         if(fileName === ''){
@@ -226,7 +230,7 @@ function reqUpload(req, type, field, callback){
         callback(fileName, params);
     })
     .on('error', function(err){
-        console.log(err.message);
+        console.log('upload Error:' + err.message);
         callback();
     })
 }
@@ -427,7 +431,7 @@ apiRoutes.put('/post/:id',function(req,res){
 //  Get Task Messages
 apiRoutes.get('/taskMessages/:taskId/:personId',function(req,res){
 
-    db("CALL GetTaskMessages(" + req.params.taskId + "," + req.params.personId + ")",conn,function(error,result){
+    db("CALL GetTaskMessages(" + req.params.taskId + "," + req.params.personId + ",NULL)",conn,function(error,result){
         if(handle(error,res,true)){
             handleResponse(result,res,"");
         }

@@ -19,7 +19,7 @@ class CardList extends Component {
         const ds = new ListView.DataSource({ 
             rowHasChanged: (r1, r2) => r1 !== r2
         });
-        this.dataSource = ds.cloneWithRows(elements);
+        this.dataSource = ds.cloneWithRows(elements || null);
     }
 
     renderRow(data) {
@@ -54,6 +54,7 @@ class CardList extends Component {
                             message={data.message}
                             person={data.person}
                             abbr={data.abbr}
+                            personId={data.personId}
                         />
                 );        
             case 'Chat':

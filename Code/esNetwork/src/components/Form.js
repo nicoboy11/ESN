@@ -10,10 +10,10 @@ import {
     Easing
 } from 'react-native';
 import { Actions } from 'react-native-router-flux';
-import { Config } from '../settings';
+import { Config, Helper } from '../settings';
 import { Menu, Header } from './';
 
-const { texts } = Config;
+const { texts, colors } = Config;
 
 class Form extends Component {
 
@@ -42,6 +42,7 @@ class Form extends Component {
                 this.toogle();
                 return; 
             default:
+                this.props.onPressRight();
                 return;
         }
     }
@@ -75,7 +76,13 @@ class Form extends Component {
 
             (<TouchableOpacity 
                 key={element.form}
-                onPress={() => { this.toogle(); Actions[element.form]({ personId: element.id }); }}
+                onPress={() => { 
+                                    this.toogle(); 
+                                    if (element.form === 'authentication') {
+                                        Helper.logout();
+                                    }
+                                    Actions[element.form]({ personId: element.id }); 
+                                }}
                 style={menuListContainerStyle}
             >
                 <Text style={menuListStyle}>{element.name}</Text>
@@ -105,10 +112,7 @@ class Form extends Component {
                     screen: Dimensions.get('screen') 
                 })}
             >
-                <Animated.View style={[menuStyle, { width: this.state.width }]}>
-                    {this.renderList()}
-                </Animated.View>
-                <View style={{ width: this.state.screen.width }}>
+                <Animated.View style={{ right: this.state.width, width: this.state.screen.width }}>
                     <Header 
                         onPressLeft={this.onLeft.bind(this)}
                         onPressRight={this.onRight.bind(this)}
@@ -120,7 +124,10 @@ class Form extends Component {
                     <View style={{ flex: 1 }}>
                         {this.props.children}
                     </View>
-                </View>
+                </Animated.View>
+                <Animated.View style={[menuStyle, { right: this.state.width, width: this.state.width }]}>
+                    {this.renderList()}
+                </Animated.View>                
             </View>
         );
     }
@@ -132,12 +139,20 @@ const styles = new StyleSheet.create({
         flexDirection: 'row'
     },
     menuStyle: {
-        backgroundColor: Config.colors.main,
-        flexDirection: 'row',
+        backgroundColor: colors.contrastColor
     },
     menuListContainerStyle: {
-        marginTop: 10,
-        marginLeft: 10
+        paddingTop: 10,
+        paddingBottom: 10,
+        paddingLeft: 10,
+        borderBottomWidth: 1,
+        borderBottomColor: colors.contrastColorDark,
+        justifyContent: 'flex-start',
+        alignContent: 'center'
+    },
+    menuListStyle: {
+        color: colors.mainText,
+        fontSize: 18
     }
 });
 

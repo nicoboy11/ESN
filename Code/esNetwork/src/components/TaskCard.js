@@ -8,7 +8,7 @@ import {
 } from 'react-native';
 import { Actions } from 'react-native-router-flux';
 import { LinkButton } from './';
-import { Config } from '../settings';
+import { Config, Helper } from '../settings';
 
 const { colors, texts } = Config;
 
@@ -43,6 +43,7 @@ class TaskCard extends Component {
                 </Text>
             </View> :
             <Image 
+                key={leaderPerson.personId}
                 style={[smallImageStyle, { marginRight: 5 }]} 
                 source={{ uri: leaderPerson.avatar }} 
             />
@@ -116,7 +117,7 @@ class TaskCard extends Component {
         } = styles;
 
         return (
-            <View style={containerStyle} >
+            <View key={this.props.taskId} style={containerStyle} >
                 <View style={topViewStyle} >
                     <View>
                         <Text style={taskTextStyle} >{this.props.name}</Text>
@@ -137,8 +138,8 @@ class TaskCard extends Component {
                             />
                             <Text>|</Text>
                             <LinkButton 
-                                style={[linkStyle, { color: colors.error }]} 
-                                title={this.props.dueDate} 
+                                style={[linkStyle, { color: Helper.prettyfyDate(this.props.dueDate).color }]} 
+                                title={Helper.prettyfyDate(this.props.dueDate).date} 
                             />
                         </View>
                         <View style={creatorStyle} >

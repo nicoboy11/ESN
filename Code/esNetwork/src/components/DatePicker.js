@@ -24,16 +24,24 @@ class DatePicker extends Component {
     }
 
     componentWillMount() {
-        if (this.props.date !== undefined) {
-            this.setState({ date: this.props.date.toLocaleDateString() });
+        this.loadPicker(this.props);
+    }
+
+    componentWillReceiveProps(nextProps) {
+        this.loadPicker(nextProps);
+    }
+
+    loadPicker(props) {
+        if (props.date !== undefined && props.date !== null) {
+            this.setState({ date: props.date.toLocaleDateString() });
         }
 
-        if (this.props.editable !== undefined) {
-            if (this.props.editable === false){
+        if (props.editable !== undefined) {
+            if (props.editable === false) {
                 this.setState({ borderLine: 0 });
             }
-            this.setState({ editable: this.props.editable });
-        }        
+            this.setState({ editable: props.editable });
+        }      
     }
 
     async showDatePicker() {
@@ -69,13 +77,27 @@ class DatePicker extends Component {
         if (this.state.date != null) {
             return (
                 <Text 
-                    style={[styles.validInputStyle, { color: '#444', borderBottomWidth: this.state.borderLine }]}
+                    style={
+                        [
+                            styles.validInputStyle, 
+                            { color: '#444', borderBottomWidth: this.state.borderLine }
+                        ]}
                 >
                     {this.state.date}
                 </Text>);
         }
 
-        return <Text style={[styles.validInputStyle, { borderBottomWidth: this.state.borderLine }]}>{this.props.label}</Text>;
+        return (
+            <Text 
+                style={
+                    [
+                        styles.validInputStyle, 
+                        { borderBottomWidth: this.state.borderLine }
+                    ]}
+            >
+                        {this.props.label}
+            </Text>
+        );
     }
 
     renderPicker() {
