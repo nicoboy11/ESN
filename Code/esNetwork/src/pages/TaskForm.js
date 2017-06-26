@@ -1,15 +1,15 @@
 import React, { Component } from 'react';
 import { ScrollView, ActivityIndicator, Alert } from 'react-native';
 import { Actions } from 'react-native-router-flux';
-import { Form, CardList, Button } from '../components';
+import { Form, CardList, NewCard } from '../components';
 import { Config, Database } from '../settings';
 
-const { texts } = Config;
+const { texts, network } = Config;
 const data = Database.realm('Session', { }, 'select', '');
 
 class TaskForm extends Component {
 
-    state = { elements: [], isLoading: false, personId: data[0].personId };
+    state = { elements: [], isLoading: false, personId: data[0].personId, newTaskText: '' };
 
     componentWillMount() {
         this.setState({ isLoading: true });
@@ -39,7 +39,7 @@ class TaskForm extends Component {
             Actions.authentication();
         } else if (this.state.status > 299) {
             Alert.alert('Error', 'There was an error with the request.');
-        } else {        
+        } else {
             this.setState({ elements: responseData, isLoading: false });
         }
     }
@@ -49,6 +49,18 @@ class TaskForm extends Component {
         this.setState({ status: response.status });
         return response.json();
     }      
+
+    createTask() {
+        Database.request(
+            'POST', 
+            `task/${data[0].personId}`, 
+            {}, 
+            2,
+            this.handleResponse.bind(this), 
+            this.onSuccess.bind(this),
+            this.onError.bind(this)
+        );
+    }
 
     renderList() {
         if (this.state.isLoading) {
@@ -76,6 +88,14 @@ class TaskForm extends Component {
             >
                 <ScrollView style={{ backgroundColor: '#EFEFEF' }}>
                     {/*Aqui va para la nueva tarea*/} 
+                    <NewCard
+                        name={`${data[0].names} ${data[0].firstLastName}`} 
+                        avatar={network.server + data[0].avatar} 
+                        color={data[0].theme} 
+                        value={this.state.newTaskText}
+                        onChangeText={(newTaskText) => this.setState({ newTaskText })}
+                        onSubmitEditing={this.createTask.bind(this)}
+                    />                    
                     {this.renderList()}
                 </ScrollView>                
             </Form>            

@@ -7,7 +7,7 @@ import {
     StyleSheet
 } from 'react-native';
 import { Actions } from 'react-native-router-flux';
-import { LinkButton, ESModal } from './';
+import { LinkButton, ESModal, Avatar } from './';
 import { Config, Helper, Database } from '../settings';
 
 const { colors, texts } = Config;
@@ -31,11 +31,6 @@ class TaskCard extends Component {
     }
 
     renderResponsible() {
-        const {
-            smallImageStyle,
-            collaboratorAbbrStyle
-        } = styles;        
-
         const leader = JSON.parse(this.props.leader);
 
         if (leader === null) {
@@ -43,68 +38,39 @@ class TaskCard extends Component {
         } 
 
         return leader.map(leaderPerson => (
-            (leaderPerson.avatar.length === 2) ?
-            <View
+            <Avatar 
                 key={leaderPerson.personId}
-                style={[smallImageStyle, { backgroundColor: leaderPerson.theme }]}                     
-            >
-                <Text 
-                    style={collaboratorAbbrStyle}
-                >
-                    {leaderPerson.avatar}
-                </Text>
-            </View> :
-            <Image 
-                key={leaderPerson.personId}
-                style={[smallImageStyle, { marginRight: 5 }]} 
-                source={{ uri: Config.network.server + leaderPerson.avatar }} 
+                avatar={
+                            (leaderPerson.avatar.length > 2) ? 
+                            Config.network.server + leaderPerson.avatar : 
+                            leaderPerson.avatar
+                        }
+                color={leaderPerson.theme}
+                size='mini'
             />
         ));
     }        
 
     renderCollaborators() {
-        const {
-            smallImageStyle,
-            collaboratorAbbrStyle
-        } = styles;
-
         const collaborators = JSON.parse(this.props.collaborators);
         if (collaborators === null) {
             return <View />;
         }
 
-        return collaborators.map(collaborator => (
-                (collaborator.avatar.length === 2) ? 
-                <View 
-                    key={collaborator.personId} 
-                    style={[smallImageStyle, { backgroundColor: collaborator.theme }]} 
-                >
-                    <Text 
-                        style={collaboratorAbbrStyle}
-                    >
-                            {collaborator.avatar}
-                    </Text>
-                </View> :
-                <Image key={collaborator.personId} style={smallImageStyle} source={{ uri: Config.network.server + collaborator.avatar }} />
+        return collaborators.map(collaborator => 
+            (
+                <Avatar 
+                    key={collaborator.personId}
+                    avatar={
+                                (collaborator.avatar.length > 2) ? 
+                                Config.network.server + collaborator.avatar : 
+                                collaborator.avatar
+                            }
+                    color={collaborator.theme}
+                    size='mini'
+                />
             )
         );
-    }
-
-    renderAvatar() {
-        const {
-            imageStyle,
-            avatarTextStyle
-        } = styles;
-
-        if (this.props.creatorAvatar.length === 2) {
-            return (
-                <View style={[imageStyle, { backgroundColor: this.props.theme }]} >
-                    <Text style={avatarTextStyle}>{this.props.creatorAvatar}</Text>
-                </View>
-            );
-        }
-
-        return <Image style={imageStyle} source={{ uri: Config.network.server + this.props.creatorAvatar }} />;
     }
 
     render() {
@@ -117,8 +83,6 @@ class TaskCard extends Component {
             linkStyle,
             bottomLeftStyle,
             bottomRightStyle,
-            creatorStyle,
-            creatorTextStyle,
             contributorsStyle,
             peopleStyle,
             startStyle,
@@ -162,10 +126,12 @@ class TaskCard extends Component {
                                 title={Helper.prettyfyDate(this.props.dueDate).date} 
                             />
                         </View>
-                        <View style={creatorStyle} >
-                            {this.renderAvatar()}
-                            <Text style={creatorTextStyle} >{this.props.creator}</Text>
-                        </View> 
+                        <Avatar 
+                            name={this.props.creator} 
+                            avatar={Config.network.server + this.props.creatorAvatar} 
+                            size='small'
+                            color={this.props.theme}
+                        />
                     </View>
                     <View style={middleRightStyle}>
                         <TouchableOpacity style={startStyle} >

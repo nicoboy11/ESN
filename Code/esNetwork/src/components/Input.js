@@ -41,6 +41,10 @@ class Input extends Component {
         this.setState({ isFocused: false });
     }
 
+    onSubmitEditing() {
+        this.props.onSubmitEditing();
+    }
+
     setInputConfig(props) {
         switch (props.type) {
             case 'email':
@@ -112,6 +116,7 @@ class Input extends Component {
                     onChangeText={this.onTextChanged.bind(this)}
                     onBlur={this.onBlur.bind(this)}
                     onFocus={this.onFocus.bind(this)}
+                    onSubmitEditing={this.onSubmitEditing.bind(this)}
                     autoCapitalize={this.props.autoCapitalize}
                     returnKeyType={this.props.returnKeyType}
                     placeholder={this.props.label}

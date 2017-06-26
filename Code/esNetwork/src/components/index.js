@@ -12,3 +12,5 @@ export * from './Form';
 export * from './Chat';
 export * from './ESModal';
 export * from './ListItem';
+export * from './Avatar';
+export * from './NewCard';

@@ -7,7 +7,6 @@ DEFAULT COLLATE utf8_general_ci;
 USE esn;
 
 /* LOG */
-DROP TABLE esnLog;
 CREATE TABLE esnLog(
 	id int PRIMARY KEY AUTO_INCREMENT,
     errorDescription text,
