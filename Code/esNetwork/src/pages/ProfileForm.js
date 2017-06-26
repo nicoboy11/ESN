@@ -1,10 +1,12 @@
 import React, { Component } from 'react';
-import { View, StyleSheet, ScrollView, Text, Image, TouchableOpacity } from 'react-native';
+import { View, StyleSheet, ScrollView, Text, Image, TouchableOpacity, Alert } from 'react-native';
 import { Actions } from 'react-native-router-flux';
-import { Input, DatePicker } from '../components';
+import ImagePicker from 'react-native-image-picker';
+import { Input, DatePicker, Form } from '../components';
 import { Config, Database, Helper } from '../settings';
 
 const { texts, colors } = Config;
+const session = Database.realm('Session', { }, 'select', '');
 
 class ProfileForm extends Component {
 
@@ -18,38 +20,194 @@ class ProfileForm extends Component {
         phone: '',
         ext: '',
         mobile: '',
-        genderId: 1
+        genderId: 1,
+        editable: false,
+        currentOption: '',
+        avatar: null
     }
 
     componentWillMount() {
-        const data = Database.realm('Session', { }, 'select', '');
-        this.setState({
-            dateOfBirth: data[0].dateOfBirth,
-            loading: 0,
-            names: data[0].names,
-            firstLastName: data[0].firstLastName,
-            secondLastName: data[0].secondLastName,
-            email: data[0].email,
-            phone: data[0].phone,
-            ext: data[0].ext,
-            mobile: data[0].mobile,
-            abbr: data[0].abbr,
-            genderId: 1
-        });
+        this.getProfile(this.props);
+    }
+
+    componentWillReceiveProps(nextProps) {
+        this.getProfile(nextProps);
+    }
+
+    onResponse(response) {
+        console.log(response.status);
+        this.setState({ status: response.status });
+        return response.json();
+    }  
+
+    onError(error) {
+        Alert.alert('Error', error.message);
+        if (this.state.status === 403) {
+            Actions.authentication();
+        }
+    }
+    
+    onSuccess(responseData) {
+        if (this.state.status === 403) {
+            Database.realm('Session', { }, 'delete', '');
+            Actions.authentication();
+        } else if (this.state.status > 299) {
+            Alert.alert('Error', 'There was an error with the request.');
+        } else {        
+            this.setState({
+                dateOfBirth: Helper.toDate(responseData[0].dateOfBirth),
+                loading: 0,
+                names: responseData[0].names,
+                firstLastName: responseData[0].firstLastName,
+                secondLastName: responseData[0].secondLastName,
+                email: responseData[0].email,
+                phone: responseData[0].phone,
+                ext: responseData[0].ext,
+                mobile: responseData[0].mobile,
+                abbr: responseData[0].abbr,
+                avatar: { uri: Config.network.server + responseData[0].avatar },
+                genderId: 1,
+                editable: false,
+                currentOption: 'Edit'
+            });
+        }
     }
 
     onChangeDate(dateISO) {
         this.setState({ dateOfBirth: dateISO });
     }
 
+    onPressRight() {
+        switch (this.state.currentOption) {
+            case 'Edit':
+                this.setState({ editable: true, currentOption: 'Save' });
+                break;
+            case 'Save':
+                this.saveProfile();
+                break;
+            default:
+                break;
+        }
+    }
+
+    onPressLeft() {
+        if (this.state.editable) {
+            this.setState({ editable: false, currentOption: 'Edit' });
+        }
+    }
+
+    getProfile(props) {
+        if (session[0].personId === props.personId) {
+            this.setState({ currentOption: 'Edit' });
+        }    
+
+        Database.request(
+            'GET', 
+            `person/${props.personId}`, 
+            {}, 
+            2,
+            this.onResponse.bind(this), 
+            this.onSuccess.bind(this),
+            this.onError.bind(this)
+        );
+    }
+
+    saveProfile() {
+        let avatar;
+
+        if (this.state.avatarFileName !== undefined) {
+            avatar = {
+                        uri: this.state.avatar.uri,
+                        name: this.state.avatarFileName,
+                        type: this.state.avatarFileType
+                    };
+        }
+
+        Database.request(
+            'PUT',
+            `person/${this.props.personId}`, 
+            {
+                email: this.state.email,
+                avatar
+            },
+            1,
+            this.onResponse.bind(this),
+            this.onSuccess.bind(this),
+            this.onError.bind(this)
+        );
+    }
+
+    imageAction() {
+        if (this.state.editable) {
+            const options = {
+                title: 'Select your profile photo',
+                customButtons: [
+                    { name: 'fb', title: 'Photos from facebook' },
+                ],
+                storageOptions: {
+                    skipBackup: true,
+                    path: 'images'
+                }
+            };
+
+            ImagePicker.showImagePicker(options, (response) => {
+                if (response.didCancel) {
+                    console.log('canceled');
+                } else if (response.error) {
+                    console.log('error');
+                } else if (response.customButton) {
+                    console.log('customButton', response.customButton);
+                } else {
+                    const source = { uri: response.uri };
+                    this.setState({
+                        avatar: source,
+                        avatarFileName: response.fileName,
+                        avatarFileType: response.type
+                    });
+                }
+            });
+        }
+    }    
+
     renderAvatar() {
-        const { avatarStyle, avatarTextStyle, indicatorStyle, avatarContainer } = styles;
+        const { 
+            avatarStyle, 
+            avatarTextStyle, 
+            indicatorStyle, 
+            avatarContainer,
+             contactImageStyle 
+        } = styles;
+
+        let indicator;
+
+        if (this.state.editable) {
+            indicator = (
+                <View
+                    style={indicatorStyle} 
+                >
+                    <Image 
+                        source={require('../img/wcamera.png')} 
+                        style={contactImageStyle}
+                    />
+                </View>
+            );
+        }
+
+        if (this.state.avatar !== null) {
+            return (
+                <TouchableOpacity style={avatarContainer} onPress={this.imageAction.bind(this)} >
+                    <Image style={avatarStyle} source={this.state.avatar} />
+                    {indicator}
+                </TouchableOpacity>    
+            );
+        }
+
         return (
-            <TouchableOpacity style={avatarContainer}>
+            <TouchableOpacity style={avatarContainer} onPress={this.imageAction.bind(this)} >
                 <View style={[avatarStyle, { backgroundColor: colors.alternateColor }]} >
                     <Text style={avatarTextStyle}>{this.state.abbr}</Text>
                 </View>
-                <View style={indicatorStyle} />
+                {indicator}
             </TouchableOpacity>           
         );
     }
@@ -67,10 +225,14 @@ class ProfileForm extends Component {
         } = styles;
 
         return (
-                <View style={{ flex: 1 }}>
-                <TouchableOpacity style={{ backgroundColor: colors.main }} onPress={() => Actions.pop()} >
-                    <Image style={imageStyle} source={require('../img/wback.png')} />
-                </TouchableOpacity>                       
+                <Form
+                   leftIcon={(this.state.editable) ? 'Cancel' : 'back'}
+                   title='Profile'
+                   menuList={[]}
+                   rightIcon={this.state.currentOption}
+                   onPressRight={this.onPressRight.bind(this)}
+                   onPressLeft={this.onPressLeft.bind(this)}
+                >                       
                 <ScrollView>
                     <View style={headerStyle}>
                         <Text style={mainTextStyle}>
@@ -90,9 +252,7 @@ class ProfileForm extends Component {
                             </TouchableOpacity>
                         </View>
                     </View>
-                    <View>
-
-                    </View>
+                    <View />
                     <View style={mainViewStyle}>
                         <Text style={titleStyle}>{texts.contactInfo}</Text>
                         <Input 
@@ -101,13 +261,13 @@ class ProfileForm extends Component {
                             returnKeyType='next' 
                             onChangeText={(email) => this.setState({ email })}
                             value={this.state.email}
-                            editable={false}                
+                            editable={this.state.editable}
                         />
                         <DatePicker 
                             label={texts.dateOfBirth} 
                             onChangeDate={this.onChangeDate.bind(this)}
                             date={this.state.dateOfBirth}
-                            editable={false}                                 
+                            editable={this.state.editable}
                         />
                         <Input 
                             label={texts.mobile} 
@@ -115,8 +275,7 @@ class ProfileForm extends Component {
                             returnKeyType='next' 
                             onChangeText={(mobile) => this.setState({ mobile })}
                             value={this.state.mobile}       
-                            editable={false}
-                            value={this.state.mobile}
+                            editable={this.state.editable}
                         />                      
                         <Input 
                             label={texts.phone} 
@@ -124,8 +283,7 @@ class ProfileForm extends Component {
                             returnKeyType='next' 
                             onChangeText={(phone) => this.setState({ phone })}
                             value={this.state.phone}      
-                            editable={false}
-                            value={this.state.phone}
+                            editable={this.state.editable}
                         />     
                         <Input 
                             label={texts.ext} 
@@ -133,8 +291,7 @@ class ProfileForm extends Component {
                             returnKeyType='next' 
                             onChangeText={(ext) => this.setState({ ext })}
                             value={this.state.ext}      
-                            editable={false}
-                            value={this.state.ext}
+                            editable={this.state.editable}
                         />  
                     </View>
 
@@ -146,7 +303,7 @@ class ProfileForm extends Component {
                         value={this.state.gender}                    
                     />                     */}                                      
                 </ScrollView>
-                </View>
+                </Form>
         );
     }
 }
@@ -167,9 +324,9 @@ const styles = StyleSheet.create({
         fontWeight: '200'
     },
     avatarStyle: {
-        width: 80,
-        height: 80,
-        borderRadius: 40,
+        width: 120,
+        height: 120,
+        borderRadius: 60,
         justifyContent: 'center',
         alignItems: 'center',
         alignSelf: 'center',
@@ -189,19 +346,20 @@ const styles = StyleSheet.create({
         marginTop: 10
     },
     avatarContainer: {
-        width: 82,
-        height: 82,
+        width: 122,
+        height: 122,
         alignSelf: 'center',
         marginTop: 20
     },
     indicatorStyle: {
-        width: 20,
-        height: 20,
+        width: 30,
+        height: 30,
         position: 'absolute',
-        borderRadius: 10,
+        borderRadius: 15,
         backgroundColor: 'gray',
         right: 5,
-        bottom: 5
+        bottom: 5,
+        padding: 5
     },
     contactContainerStyle: {
         flexDirection: 'row',

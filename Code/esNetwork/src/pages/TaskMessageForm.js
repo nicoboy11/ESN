@@ -10,7 +10,7 @@ class TaskMessageForm extends Component {
                 leftIcon='back'
                 title={this.props.name}
             >
-                <Chat />
+                <Chat taskId={this.props.taskId} />
             </Form>
         );
     }

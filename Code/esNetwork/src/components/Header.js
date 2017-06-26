@@ -3,6 +3,8 @@ import { View, TouchableOpacity, Text, Image, StyleSheet } from 'react-native';
 import { Actions } from 'react-native-router-flux';
 import { Config } from '../settings';
 
+const { colors } = Config;
+
 class Header extends Component{
 
     renderButton(icon) {
@@ -16,6 +18,7 @@ class Header extends Component{
             case 'back':
                 return <Image style={imageStyle} source={require('../img/wback.png')} />;
             default:
+                return <Text style={{ color: colors.mainText }}>{icon}</Text>;
         }
     }
 

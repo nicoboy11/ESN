@@ -1,11 +1,16 @@
 import React, { Component } from 'react';
 import { View, Image, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { Actions } from 'react-native-router-flux';
 import { LinkButton } from './';
 import { Config } from '../settings';
 
 const { colors } = Config;
 
 class PostCard extends Component {
+
+    personPress() {
+        Actions.profile({ personId: this.props.personId });
+    }
 
     renderAvatar() {
         const { avatarStyle, avatarTextStyle } = styles;
@@ -18,8 +23,8 @@ class PostCard extends Component {
                 </View>
             );
         }
-
-        return <Image style={avatarStyle} source={{ uri: { avatar } }} />;
+        
+        return <Image style={avatarStyle} source={{ uri: Config.network.server + avatar  }} />;
     }
 
     render() {
@@ -48,7 +53,11 @@ class PostCard extends Component {
                         {this.renderAvatar()}
                     </View>
                     <View style={titleViewStyle} >
-                        <LinkButton style={titleStyle} title={person} />
+                        <LinkButton 
+                            style={titleStyle} 
+                            title={person} 
+                            onPress={this.personPress.bind(this)}
+                        />
                         <Text style={dateStyle} >{creationDate}</Text>
                     </View>
                     <View style={unfollowViewStyle} >

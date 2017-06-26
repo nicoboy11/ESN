@@ -8,7 +8,7 @@ class Input extends Component {
 
     state = { isError: false, 
               errorText: '', 
-              text: this.props.value, 
+              value: this.props.value, 
               isFocused: false, 
               keyboardType: 'default', 
               secureTextEntry: false,
@@ -17,14 +17,20 @@ class Input extends Component {
 
     componentWillMount() {
         console.log(Helper);
-        this.setInputConfig();
+        this.setInputConfig(this.props);
     }
+
+    componentWillReceiveProps(nextProps) {
+        this.setState(...this.state, nextProps);
+        
+        this.setInputConfig(nextProps);        
+    }    
 
     onTextChanged(text) {
         const newText = this.validateInput(text);
-        this.setState({ text: newText });
+        this.setState({ value: newText });
         this.props.onChangeText(newText);
-        console.log(newText);
+        //console.log(newText);
     }
 
     onFocus() {
@@ -35,21 +41,24 @@ class Input extends Component {
         this.setState({ isFocused: false });
     }
 
-    setInputConfig() {
-        switch (this.props.type) {
+    setInputConfig(props) {
+        switch (props.type) {
             case 'email':
                 this.setState({ keyboardType: 'email-address' });
                 break;
             case 'password':
                 this.setState({ secureTextEntry: true });
                 break;
+            case 'number':
+                this.setState({ keyboardType: 'phone-pad' });
+                break;
             default:
                 this.setState({ keyboardType: 'default' });
         }
-
-        if (this.props.editable !== undefined) {
-            this.setState({ editable: this.props.editable });
-        }
+/*
+        if (props.editable !== undefined) {
+            this.setState({ editable: props.editable });
+        }*/
     }
 
     validateInput(text) {
@@ -64,6 +73,8 @@ class Input extends Component {
                     newText = text.replace(regex.textOnly, '');
                 }
                 break;
+            case 'number':
+                break;
             default:
                 this.setState({ keyboardType: 'default' });
         }
@@ -71,7 +82,7 @@ class Input extends Component {
     }
 
     renderLabel() {
-        if (this.state.text !== '') {
+        if (this.state.value !== '' || !this.state.editable) {
             return this.props.label;
         }
         
@@ -86,7 +97,7 @@ class Input extends Component {
         } = styles;
 
         if (!this.state.editable) {
-            return <Text style={inputStyle}>{this.state.text}</Text>;
+            return <Text style={inputStyle}>{this.state.value}</Text>;
         }
         return (
             <View style={{ flex: 1 }}>
@@ -95,7 +106,7 @@ class Input extends Component {
                     autoCorrect={false}                  
                     underlineColorAndroid='transparent'                       
                     placeholderTextColor={colors.lightText}
-                    value={this.state.text}
+                    value={this.props.value}
                     keyboardType={this.state.keyboardType}
                     secureTextEntry={this.state.secureTextEntry}
                     onChangeText={this.onTextChanged.bind(this)}

@@ -8,20 +8,30 @@ const { texts } = Config;
 
 class LoginForm extends Component {
 
-    state = { loading: 0, email: '', password: '' }
+    state = { loading: 0, email: '', password: '', message: '' }
 
     componentWillMount() {
         const data = Database.realm('Session', { }, 'select', '');
-        if (data[0] !== undefined && data[0].token !== '') {
+        if (data[0] !== undefined && data.length > 0) {
             Actions.tabbar();
         }
+    }
+
+    componentWillReceiveProps() {
+        this.setState({ loading: 0, email: '', password: '', message: '' });
     }
 
     onLoginResponse(responseData) {
         const { status } = this.state;
         console.log('Response');
-        if (status > 399) {
-            Alert.alert(texts.loginFailed, responseData.message);
+
+        if (status > 399 || status === undefined) {
+            if (status === 422) {
+                Alert.alert(texts.loginFailed, 'The server is not available.');                
+            } else {
+                Alert.alert(texts.loginFailed, responseData.message);
+            }
+            this.setState({ loading: 0 });
         } else {
             /**
              * Create DataBase object for user
@@ -45,17 +55,17 @@ class LoginForm extends Component {
                 isSync: true
             };
 
-             const token = Database.realm('Session', data, 'create', '');
+            Database.realm('Session', data, 'create', '');
             /** Go to main screen */
-            Actions.tabbar();
+            Actions.tabbar({ personId: responseData[0].personId });
         }
-
-        this.refresh();
     }
 
     onError(error) {
         console.log(error);
-        this.refresh();
+        Alert.alert('Error', error.message);
+        this.setState({ password: '' });
+        this.setState({ loading: 0 });
     }
 
     onLoginPress() {
@@ -63,33 +73,29 @@ class LoginForm extends Component {
         this.setState({ loading: 1 });  
         Keyboard.dismiss();
          
-        Database.request('POST', 'loginUser', { email, password }, false,
-            this.handleResponse.bind(this), this.onLoginResponse.bind(this), 
+        Database.request('POST', 'loginUser', { email, password }, 0,
+            this.handleResponse.bind(this), 
+            this.onLoginResponse.bind(this), 
             this.onError.bind(this));
     }
 
-    refresh() {
-        this.setState({ loading: 0 });
-        this.setState({ password: '' });
-    }    
-
     handleResponse(response) {
         console.log(response.status);
-        this.setState({ status: response.status });
+        this.setState({ status: response.status });        
         return response.json();
     }    
 
     render() {
-        const { mainContainerStyle, logoContainerStyle, inputContainerStyle, imageStyle,
+        const { mainContainerStyle, logoContainerStyle, inputContainerStyle,
                 topInputStyle, bottomInputStyle } = styles;
         
         return (
             <View style={mainContainerStyle}>
                     <View style={logoContainerStyle}>
-                    <Image 
+                    {/*<Image 
                             style={imageStyle} 
                             source={{ uri: 'http://www.freeiconspng.com/uploads/data-network-icon-image-gallery-27.png' }} 
-                    />
+                    />*/}
                     </View>
                     <View style={inputContainerStyle}>
                         <View style={topInputStyle}>
@@ -110,6 +116,7 @@ class LoginForm extends Component {
                             <Button 
                                 title={texts.login} 
                                 animating={this.state.loading}
+                                message={this.state.message}
                                 onPress={this.onLoginPress.bind(this)} 
                             />                  
                         </View>  

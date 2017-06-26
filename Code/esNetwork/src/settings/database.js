@@ -27,27 +27,69 @@ Session.schema = {
 
 class Database {
 
-    static getHeader(needsAuth) {
-        if (needsAuth) {
-                const data = Database.realm('Session', { }, 'select', '');
+    static getHeader(headerType) {
+        const data = Database.realm('Session', { }, 'select', '');
+        switch (headerType) {
+            case 0:
+                return {
+                            Accept: 'application/json',
+                            'Content-Type': 'application/json'
+                        };            
+            case 1:
                 return {
                     Accept: 'application/json',
-                    'Content-Type': 'application/json',
+                    'Content-Type': 'multipart/form-data',
                     Authorization: `Bearer ${data[0].token}`
-                };
+                };            
+            case 2:
+                return {
+                            Accept: 'application/json',
+                            'Content-Type': 'application/json',
+                            Authorization: `Bearer ${data[0].token}`
+                        };              
+            default:
+                return {
+                            Accept: 'application/json',
+                            'Content-Type': 'application/json'
+                        };             
         }
-
-        return {
-                    Accept: 'application/json',
-                    'Content-Type': 'application/json'
-                };
     }
 
-    static request(type, sp, params, needsAuth, onStart, onSuccess, onError) {
+    /**
+     * 
+     * @param {*} type is it a POST, GET, POST or DELETE?
+     * @param {*} sp Which procedure is being called?
+     * @param {*} params an object with the params
+     * @param {*} headerType header types 0: without Auth, 1 with file and token, 2 with token
+     * @param {*} onStart 
+     * @param {*} onSuccess 
+     * @param {*} onError 
+     */
+    static request(type, sp, params, headerType, onStart, onSuccess, onError) {
+        let data = (Object.keys(params).length === 0) ? null : JSON.stringify(params);
+        
+        if (type === 'POST' || type === 'PUT') {
+            if (headerType === 1) {
+                data = new FormData();
+                const keys = Object.keys(params);
+                
+                for (let i = 0; i < keys.length; i++) {
+                    const key = keys[i];                    
+                    if (params[key] !== undefined) {
+                        data.append(key, params[key]);
+                    }
+                }
+            }
+        }
+
+        if (type === 'GET') {
+            data = null;
+        }
+
         fetch(Config.network.server + sp, { 
             method: type, 
-            headers: Database.getHeader(needsAuth),
-            body: (Object.keys(params).length === 0) ? null : JSON.stringify(params)
+            headers: Database.getHeader(headerType),
+            body: data
         })
         .then(onStart)
         .then(onSuccess)
@@ -77,12 +119,7 @@ class Database {
                 return data;
             case 'delete':
                 realm.write(() => {
-                    if (data[0] === undefined) {
-                        realm.create(table, fields);
-                    } else {
-                        data[0].token = '';
-                        data[0].personId = 0;
-                    }
+                    realm.delete(data);
                 });      
                 return data;          
             default:

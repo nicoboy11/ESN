@@ -283,6 +283,7 @@ CREATE TABLE task(
     CONSTRAINT FOREIGN KEY (priorityId) REFERENCES priority(id)
 );
 
+
 DROP TABLE IF EXISTS taskMember;
 CREATE TABLE taskMember(
 	taskId int,

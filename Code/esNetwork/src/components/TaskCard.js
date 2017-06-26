@@ -7,16 +7,28 @@ import {
     StyleSheet
 } from 'react-native';
 import { Actions } from 'react-native-router-flux';
-import { LinkButton } from './';
-import { Config } from '../settings';
+import { LinkButton, ESModal } from './';
+import { Config, Helper, Database } from '../settings';
 
 const { colors, texts } = Config;
 
 class TaskCard extends Component {
 
+    constructor(props) {
+        super(props);
+        this.state = {
+            ...props,
+            isTeamModalVisible: false
+        };
+    }
+
     openComments() {
         Actions.taskMessage({ taskId: this.props.taskId, name: this.props.name });
     } 
+
+    teamSelected(text, value) {
+        this.setState({ team: text, isTeamModalVisible: false });      
+    }
 
     renderResponsible() {
         const {
@@ -43,8 +55,9 @@ class TaskCard extends Component {
                 </Text>
             </View> :
             <Image 
+                key={leaderPerson.personId}
                 style={[smallImageStyle, { marginRight: 5 }]} 
-                source={{ uri: leaderPerson.avatar }} 
+                source={{ uri: Config.network.server + leaderPerson.avatar }} 
             />
         ));
     }        
@@ -72,7 +85,7 @@ class TaskCard extends Component {
                             {collaborator.avatar}
                     </Text>
                 </View> :
-                <Image key={collaborator.personId} style={smallImageStyle} source={{ uri: collaborator.avatar }} />
+                <Image key={collaborator.personId} style={smallImageStyle} source={{ uri: Config.network.server + collaborator.avatar }} />
             )
         );
     }
@@ -91,7 +104,7 @@ class TaskCard extends Component {
             );
         }
 
-        return <Image src={{ uri: this.props.creatorAvatar }} />;
+        return <Image style={imageStyle} source={{ uri: Config.network.server + this.props.creatorAvatar }} />;
     }
 
     render() {
@@ -116,7 +129,14 @@ class TaskCard extends Component {
         } = styles;
 
         return (
-            <View style={containerStyle} >
+            <View key={this.props.taskId} style={containerStyle} >
+                <ESModal 
+                    title={texts.teamSelect} 
+                    visible={this.state.isTeamModalVisible} 
+                    onSelection={(this.teamSelected.bind(this))}
+                    elements={[]}
+                    table='teams'
+                />
                 <View style={topViewStyle} >
                     <View>
                         <Text style={taskTextStyle} >{this.props.name}</Text>
@@ -128,7 +148,8 @@ class TaskCard extends Component {
                         <View style={linkListStyle} >
                             <LinkButton 
                                 style={linkStyle} 
-                                title={(this.props.team === null) ? texts.addTeam : this.props.team} 
+                                title={(this.state.team === null) ? texts.addTeam : this.state.team} 
+                                onPress={() => this.setState({ isTeamModalVisible: true })}
                             />
                             <Text>|</Text>
                             <LinkButton 
@@ -137,8 +158,8 @@ class TaskCard extends Component {
                             />
                             <Text>|</Text>
                             <LinkButton 
-                                style={[linkStyle, { color: colors.error }]} 
-                                title={this.props.dueDate} 
+                                style={[linkStyle, { color: Helper.prettyfyDate(this.props.dueDate).color }]} 
+                                title={Helper.prettyfyDate(this.props.dueDate).date} 
                             />
                         </View>
                         <View style={creatorStyle} >

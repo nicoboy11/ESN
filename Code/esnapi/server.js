@@ -11,8 +11,7 @@ var express = require('express'),
 app.use(bodyParser({limit: '50mb'}));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded());
-
-
+app.use(express.static('uploads'))
 
 var WebSocket = require('ws');
 var wss = new WebSocket.Server({ port: 9998, path:'/task' })
@@ -20,21 +19,21 @@ var wss = new WebSocket.Server({ port: 9998, path:'/task' })
 var clients = [];
 
 wss.on('connection', function connection(ws){
-
+    console.log('connected ws');
     ws.on('message', function incoming(message){
-
+        console.log("incoming");
         if(message.includes('{"newConnectionxxx":0,')) {
             var json = JSON.parse(message);
             
-            var obj = { "client":ws, "room":json.room, "personId":json.personId }
+            var obj = { "client":ws, "room":json.taskId, "personId":json.personId }
             clients.push(obj);
         }
         else {
-
-            var jsonMsg = JSON.parse(message);
+            var jsonMsg = JSON.parse(message);    
             clients.forEach(function each(client){
-                if(client.room === jsonMsg.room && client.client.readyState === WebSocket.OPEN){
-                    client.client.send(jsonMsg.message); 
+                if(client.client != ws && client.room === jsonMsg.taskId && client.client.readyState === WebSocket.OPEN){
+                    console.log("sending: " + jsonMsg.message);
+                    client.client.send(message); 
                 }
             })
 
@@ -94,7 +93,7 @@ function db(sql,conn,callback){
         });
     }
     catch(err){
-        console.log(err.message);
+        console.log("sqlErr" + err.message);
     }
 }
 
@@ -103,7 +102,7 @@ function handle(error,res,show){
     if(error){
         var message = error.message.replace(error.code,"").replace(":","").trim();
 
-        console.log("Error" + message);
+        console.log("Error Handle: " + message);
 
         if(show){
             res.status(422).end( responseMsg(message) );
@@ -125,7 +124,12 @@ function handleResponse(result,res,errorMessage){
 
     if(result != undefined && result[0] != undefined ){
         if(result[0].length == 0){
-            res.status(401).end( responseMsg(errorMessage) );
+            if(errorMessage == ""){
+                res.status(200).end( "{}" );
+            }
+            else{
+                res.status(401).end( responseMsg(errorMessage) );
+            }
         }
         else{
             res.status(200).end( JSON.stringify(result[0]) );
@@ -206,7 +210,6 @@ function reqUpload(req, type, field, callback){
     var params = {};
 
     form.parse(req);
-
     form.on('field', function(name, value){
         params[name] = value;
     }) 
@@ -218,7 +221,7 @@ function reqUpload(req, type, field, callback){
         console.log('file created!');
     })
     .on('progress',function(bytesReceived, bytesExpected){
-        console.log(bytesReceived + ' : ' + bytesExpected);
+        console.log('progress: ' + bytesReceived + ' : ' + bytesExpected);
     })        
     .on('end',function(){
         if(fileName === ''){
@@ -227,7 +230,7 @@ function reqUpload(req, type, field, callback){
         callback(fileName, params);
     })
     .on('error', function(err){
-        console.log(err.message);
+        console.log('upload Error:' + err.message);
         callback();
     })
 }
@@ -310,7 +313,7 @@ apiRoutes.put('/person/:id',function(req,res){
                             "," + fpVarchar(params.os_android) + "," + fpVarchar(params.os_ios) + "," + fpVarchar(params.os_chrome) + "," + fpVarchar(params.os_safari) + ");",
         conn,function(error,result){
             if(handle(error,res,true)){
-                res.status(200).end( responseMsg("Updated") );
+                handleResponse(result,res,"");
             }
         });
     });
@@ -400,6 +403,31 @@ apiRoutes.put('/post/:id',function(req,res){
 });
 
 /**
+ * Obtain All teams a person belongs to
+ */
+apiRoutes.get('/teams/:personId',function(req,res){
+    db("CALL GetPersonTeam(" + req.params.personId + ");",conn,function(error,result){
+        if(handle(error,res,true)){
+            handleResponse(result,res,"");
+        }
+    });
+});
+
+/*
+apiRoutes.put('/team',function(req,res){
+    db("CALL EditTeam(" +   fpInt(req.body.teamId) + "," + fpInt(req.body.name) + "," + fpInt(req.body.abbr) + "," + 
+                            fpInt(req.body.teamGoal) + "," + fpInt(req.body.parentTeamId) + "," + fpInt(req.body.email) + "," + 
+                            fpInt(req.body.address) + "," + fpInt(req.body.postcode) + "," + fpInt(req.body.cityId) + "," + 
+                            fpInt(req.body.phone1) + "," + fpInt(req.body.ext1) + "," + fpInt(req.body.phone2) + "," + 
+                            fpInt(req.body.ext2) + "," + fpInt(req.body.latitude) + "," + fpInt(req.body.longitude) + "," + 
+                            fpInt(req.body.logo) + "," + fpInt(req.body.personId) + "," + fpInt(req.body.stateTypeId) + ")",conn,function(error,result){
+        if(handle(error,res,true)){
+            handleResponse(result,res);
+        }
+    });     
+});
+*/
+/**
  * 
  * 
  * 
@@ -428,7 +456,7 @@ apiRoutes.put('/post/:id',function(req,res){
 //  Get Task Messages
 apiRoutes.get('/taskMessages/:taskId/:personId',function(req,res){
 
-    db("CALL GetTaskMessages(" + req.params.taskId + "," + req.params.personId + ")",conn,function(error,result){
+    db("CALL GetTaskMessages(" + req.params.taskId + "," + req.params.personId + ",NULL)",conn,function(error,result){
         if(handle(error,res,true)){
             handleResponse(result,res,"");
         }
@@ -438,19 +466,35 @@ apiRoutes.get('/taskMessages/:taskId/:personId',function(req,res){
 
 //  Send Messages
 apiRoutes.post('/taskMessages',function(req,res){
-
     reqUpload(req,'postatt','personId', function(fileName, params){
         db("CALL CreateTaskMessage(" + fpInt(params.taskId) + "," + fpInt(params.personId) + "," + fpVarchar(params.message) +
                             "," + fpInt(params.messageTypeId) + "," + fpVarchar(params.attachment) + "," + fpInt(params.attachmentTypeId) + ");",
         conn, function(error, result){
             if(handle(error,res,true)){
-                res.status(200).end( JSON.stringify(result[0]) );
+                var message = JSON.stringify(result[0])
+                if(message === '' || message === undefined){
+                    message = '[{"message": "ok"}]'
+                }
+                res.status(200).end( message );
             }
         });
     });
 
 });
 
+/*
+
+apiRoutes.put('/task',function(req,res){
+    db("CALL EditTask(" +   fpInt(req.body.taskId) + "," + fpInt(req.body.name) + "," + fpInt(req.body.description) + "," + 
+                            fpInt(req.body.startDate) + "," + fpInt(req.body.dueDate) + "," + fpInt(req.body.creationDate) + "," + 
+                            fpInt(req.body.creatorId) + "," + fpInt(req.body.projectId) + "," + fpInt(req.body.stateId) + "," + 
+                            fpInt(req.body.calendarId) + ")",conn,function(error,result){
+        if(handle(error,res,true)){
+            handleResponse(result,res);
+        }
+    });     
+});
+*/
 
 /** FEED */
 apiRoutes.get('/feed/:userId/:scopeTypeId',function(req,res){
