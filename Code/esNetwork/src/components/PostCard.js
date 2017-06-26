@@ -24,7 +24,7 @@ class PostCard extends Component {
             );
         }
         
-        return <Image style={avatarStyle} source={{ uri: { avatar } }} />;
+        return <Image style={avatarStyle} source={{ uri: Config.network.server + avatar  }} />;
     }
 
     render() {

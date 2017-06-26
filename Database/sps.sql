@@ -313,6 +313,8 @@ BEGIN
             os_safari = coalesce(_os_safari,os_safari)
 		WHERE id = _id;
         
+        CALL GetPerson(_id);
+        
     ELSE
     
 		SIGNAL sqlstate 'ERROR' SET message_text = 'A hierarchical loop was found.';
@@ -756,6 +758,37 @@ BEGIN
     INNER JOIN roleType as r on r.id = tm.roleId
     WHERE tm.teamId = _teamId;
     
+END$$
+
+
+DELIMITER $$
+DROP PROCEDURE IF EXISTS `GetPersonTeam`$$
+CREATE PROCEDURE `GetPersonTeam` (IN _personId int)
+BEGIN
+
+	SELECT	t.id as value,
+			t.name as text,
+			t.abbr,
+			t.teamGoal,
+			t.parentTeamId,
+			t.email,
+			t.address,
+			t.postCode,
+			t.cityId,
+			t.phone1,
+			t.ext1,
+			t.phone2,
+			t.ext2,
+			t.latitude,
+			t.longitude,
+			t.logo,
+			t.personID,
+			t.stateTypeId,
+			t.isActive
+    FROM teamMember as tm
+    INNER JOIN team as t on t.id = tm.teamId
+    WHERE tm.personId = _personId;
+
 END$$
 
 /*--------------------Projects--------------------------*/

@@ -32,6 +32,7 @@ class Form extends Component {
                 this.toogle();
                 return; 
             default:
+                this.props.onPressLeft();
                 return;
         }
     }

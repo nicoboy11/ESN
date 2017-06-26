@@ -11,7 +11,7 @@ var express = require('express'),
 app.use(bodyParser({limit: '50mb'}));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded());
-
+app.use(express.static('uploads'))
 
 var WebSocket = require('ws');
 var wss = new WebSocket.Server({ port: 9998, path:'/task' })
@@ -33,7 +33,7 @@ wss.on('connection', function connection(ws){
             clients.forEach(function each(client){
                 if(client.client != ws && client.room === jsonMsg.taskId && client.client.readyState === WebSocket.OPEN){
                     console.log("sending: " + jsonMsg.message);
-                    client.client.send(jsonMsg.message); 
+                    client.client.send(message); 
                 }
             })
 
@@ -313,7 +313,7 @@ apiRoutes.put('/person/:id',function(req,res){
                             "," + fpVarchar(params.os_android) + "," + fpVarchar(params.os_ios) + "," + fpVarchar(params.os_chrome) + "," + fpVarchar(params.os_safari) + ");",
         conn,function(error,result){
             if(handle(error,res,true)){
-                res.status(200).end( responseMsg("Updated") );
+                handleResponse(result,res,"");
             }
         });
     });
@@ -403,6 +403,31 @@ apiRoutes.put('/post/:id',function(req,res){
 });
 
 /**
+ * Obtain All teams a person belongs to
+ */
+apiRoutes.get('/teams/:personId',function(req,res){
+    db("CALL GetPersonTeam(" + req.params.personId + ");",conn,function(error,result){
+        if(handle(error,res,true)){
+            handleResponse(result,res,"");
+        }
+    });
+});
+
+/*
+apiRoutes.put('/team',function(req,res){
+    db("CALL EditTeam(" +   fpInt(req.body.teamId) + "," + fpInt(req.body.name) + "," + fpInt(req.body.abbr) + "," + 
+                            fpInt(req.body.teamGoal) + "," + fpInt(req.body.parentTeamId) + "," + fpInt(req.body.email) + "," + 
+                            fpInt(req.body.address) + "," + fpInt(req.body.postcode) + "," + fpInt(req.body.cityId) + "," + 
+                            fpInt(req.body.phone1) + "," + fpInt(req.body.ext1) + "," + fpInt(req.body.phone2) + "," + 
+                            fpInt(req.body.ext2) + "," + fpInt(req.body.latitude) + "," + fpInt(req.body.longitude) + "," + 
+                            fpInt(req.body.logo) + "," + fpInt(req.body.personId) + "," + fpInt(req.body.stateTypeId) + ")",conn,function(error,result){
+        if(handle(error,res,true)){
+            handleResponse(result,res);
+        }
+    });     
+});
+*/
+/**
  * 
  * 
  * 
@@ -457,6 +482,19 @@ apiRoutes.post('/taskMessages',function(req,res){
 
 });
 
+/*
+
+apiRoutes.put('/task',function(req,res){
+    db("CALL EditTask(" +   fpInt(req.body.taskId) + "," + fpInt(req.body.name) + "," + fpInt(req.body.description) + "," + 
+                            fpInt(req.body.startDate) + "," + fpInt(req.body.dueDate) + "," + fpInt(req.body.creationDate) + "," + 
+                            fpInt(req.body.creatorId) + "," + fpInt(req.body.projectId) + "," + fpInt(req.body.stateId) + "," + 
+                            fpInt(req.body.calendarId) + ")",conn,function(error,result){
+        if(handle(error,res,true)){
+            handleResponse(result,res);
+        }
+    });     
+});
+*/
 
 /** FEED */
 apiRoutes.get('/feed/:userId/:scopeTypeId',function(req,res){

@@ -51,7 +51,7 @@ class DatePicker extends Component {
             }
 
             const { action, year, month, day } = await DatePickerAndroid.open({
-                date: new Date()
+                date: (this.props.date === null) ? new Date() : this.props.date
             });
             if (action !== DatePickerAndroid.dismissedAction) {
                 const date = new Date(year, month, day);

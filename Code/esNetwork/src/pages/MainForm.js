@@ -76,6 +76,7 @@ class MainForm extends Component {
 
         return (
             <CardList 
+                type='Post'
                 elements={this.state.elements}
             />
         );

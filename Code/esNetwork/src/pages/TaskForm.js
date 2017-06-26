@@ -57,6 +57,7 @@ class TaskForm extends Component {
 
         return (
             <CardList 
+                type='Task'
                 elements={this.state.elements}
             />
         );        

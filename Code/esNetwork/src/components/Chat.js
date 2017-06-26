@@ -35,19 +35,21 @@ class Chat extends Component {
         this.ws = new WebSocket('ws://143.167.71.24:9998/task');
 
         this.ws.onmessage = function (e) {
+            const messageObj = JSON.parse(e.data);
             const newMessage = 
                         { 
-                            message: e.data,
-                            person: 'Robot',
-                            theme: '#918277',
-                            messageDate: '2017-09-09',
-                            messageTypeId: 1,
-                            taskId: 1,
-                            taskMessageId: 99,
-                            personId: 2
+                            message: messageObj.message,
+                            person: messageObj.person,
+                            theme: messageObj.theme,
+                            messageDate: messageObj.messageDate,
+                            messageTypeId: messageObj.messageTypeId,
+                            taskId: messageObj.taskId,
+                            taskMessageId: messageObj.taskMessageId,
+                            personId: messageObj.personId
                         };
 
             self.setState({ elements: [...self.state.elements, newMessage] });
+            setTimeout(self.chatList.scrollToEnd(), 0);
         };
 
         this.ws.onopen = function () {
@@ -57,6 +59,10 @@ class Chat extends Component {
         };
 
         this.getMessages(personId);
+    }
+
+    componentDidUpdate() {
+        this.scrollToBottom();
     }
 
     onError(error) {
@@ -100,6 +106,11 @@ class Chat extends Component {
         return response.json();
     } 
 
+    scrollToBottom() {
+       /* const self = this;
+        setTimeout(self.chatList.scrollToEnd(), 100);*/
+    }
+
     sendMessage() {
         const personId = this.state.personId;
 
@@ -132,7 +143,7 @@ class Chat extends Component {
         );
         
         this.setState({ elements: [...this.state.elements, newMessage], input: '' });
-        this.refs.chatList.scrollToEnd();
+        this.chatList.scrollToEnd();
     }
 
     renderMessages({ item }) {
@@ -182,7 +193,7 @@ class Chat extends Component {
                 <View style={chatStyle} >
                     <FlatList 
                         keyExtractor={item => item.taskMessageId}
-                        ref='chatList'
+                        ref={(ref) => { this.chatList = ref; }}
                         data={this.state.elements} 
                         renderItem={this.renderMessages.bind(this)}
                     />

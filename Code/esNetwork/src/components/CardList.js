@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { ListView, StyleSheet, Text, View } from 'react-native';
-import { PostCard, TaskCard } from './';
+import { PostCard, TaskCard, ListItem } from './';
 import { Config } from '../settings';
 
 const { colors } = Config;
@@ -11,6 +11,11 @@ class CardList extends Component {
         this.setDataSource(this.props);
     }
 
+    componentDidMount() {
+       if (this.props.selectedItem !== null) {
+           this.refs.listView.scrollTo({ y: 100, animated: true });
+       }
+    }
     componentWillReceiveProps(nextProps) {
         this.setDataSource(nextProps);
     }
@@ -29,7 +34,7 @@ class CardList extends Component {
             personBubble
         } = styles;
 
-        switch (data.category) {
+        switch (this.props.type) {
             case 'Task':
                  return (
                         <TaskCard 
@@ -71,15 +76,25 @@ class CardList extends Component {
                         <Text style={dateBubble}>{data.messageDate}</Text>
                     </View>
                 );
-            default: return;
+            case 'DropDown':
+                return (
+                    <ListItem 
+                        onPress={(text, value) => this.props.onPress(text, value)} 
+                        text={data.text} 
+                        value={data.value}
+                        isSelected={(data.value === this.props.selectedItem)} 
+                    />
+                );
+            default: return null;
         }
     }
 
     render() {
         return (
             <ListView 
+                ref='listView'
                 dataSource={this.dataSource} 
-                renderRow={this.renderRow}
+                renderRow={this.renderRow.bind(this)}
                 enableEmptySections
             />
         );

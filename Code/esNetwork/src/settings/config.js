@@ -18,7 +18,8 @@ Config.colors = {
     alternateColor: '#08C2A5',
     veryLight: '#E1E4E8',
     contrastColor: '#32394A',
-    contrastColorDark: '#2E3543'
+    contrastColorDark: '#2E3543',
+    darkGray: '#343434'
 };
 
 Config.network = {
@@ -59,6 +60,7 @@ const lang = {
                         addProject: '[Project]',
                         newTask: 'New task',
                         comment: 'Comment',
+                        teamSelect: 'Select a team',
                         days: {
                                 0: 'Sunday',
                                 1: 'Monday',
@@ -115,6 +117,7 @@ const lang = {
                         addProject: '[Proyecto]',
                         newTask: 'Nueva Tarea',
                         comment: 'Comentar',
+                        teamSelect: 'Seleccione un Equipo',
                         days: {
                                 0: 'Domingo',
                                 1: 'Lunes',

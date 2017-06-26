@@ -66,17 +66,18 @@ class Database {
      * @param {*} onError 
      */
     static request(type, sp, params, headerType, onStart, onSuccess, onError) {
+        let data = (Object.keys(params).length === 0) ? null : JSON.stringify(params);
         
-        let data = (Object.keys(params).length === 0) ? null : JSON.stringify(params)
-        
-        if (type === 'POST') {
+        if (type === 'POST' || type === 'PUT') {
             if (headerType === 1) {
                 data = new FormData();
                 const keys = Object.keys(params);
                 
                 for (let i = 0; i < keys.length; i++) {
-                    const key = keys[i];
-                    data.append(key, params[key]);
+                    const key = keys[i];                    
+                    if (params[key] !== undefined) {
+                        data.append(key, params[key]);
+                    }
                 }
             }
         }
