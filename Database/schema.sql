@@ -6,6 +6,15 @@ DEFAULT COLLATE utf8_general_ci;
 
 USE esn;
 
+/* LOG */
+DROP TABLE esnLog;
+CREATE TABLE esnLog(
+	id int PRIMARY KEY AUTO_INCREMENT,
+    errorDescription text,
+    dateOfError datetime,
+    personId int
+);
+
 /* MISC TABLES */
 CREATE TABLE scopeType(
 	id int PRIMARY KEY AUTO_INCREMENT,
@@ -33,6 +42,11 @@ CREATE TABLE messageType(
 );
 
 CREATE TABLE gender(
+	id int PRIMARY KEY AUTO_INCREMENT,
+    description varchar(255)
+);
+
+CREATE TABLE priority(
 	id int PRIMARY KEY AUTO_INCREMENT,
     description varchar(255)
 );
@@ -90,6 +104,7 @@ CREATE TABLE person (
     os_ios varchar(255),
     os_chrome varchar(255),
     os_safari varchar(255),    
+    lastChanged datetime,
     CONSTRAINT FOREIGN KEY (higherPersonId) REFERENCES person(id),
     CONSTRAINT FOREIGN KEY (roleId) REFERENCES roleType(id),
     CONSTRAINT FOREIGN KEY (genderId) REFERENCES gender(id)
@@ -107,6 +122,7 @@ CREATE TABLE followers(
 	personId int,
     followerId int,
 	startDate datetime,
+	lastChanged datetime,
     CONSTRAINT FOREIGN KEY (personId) REFERENCES person(id),
     CONSTRAINT FOREIGN KEY (followerId) REFERENCES person(id),
     CONSTRAINT UNIQUE KEY (personId,followerId)
@@ -124,6 +140,7 @@ CREATE TABLE post(
     creationDate datetime,
     scopeTypeId int, /* tells if the post is intended for a group, or a project or general */
     scopeId int, /* depending on the scopeType this can be a group id or a project id, if null anyone who follows will see it */
+    lastChanged datetime,
 	CONSTRAINT FOREIGN KEY (personId) REFERENCES person(id),
     CONSTRAINT FOREIGN KEY (messageTypeId) REFERENCES messageType(id),
     CONSTRAINT FOREIGN KEY (scopeTypeId) REFERENCES scopeType(id),
@@ -183,6 +200,7 @@ CREATE TABLE team(
     creationDate datetime,
     personId int,    
     stateTypeId int, /* public or private group */
+    lastChanged datetime,
     CONSTRAINT FOREIGN KEY (parentTeamId) REFERENCES team(id),
     CONSTRAINT FOREIGN KEY (cityId) REFERENCES city(id),
     CONSTRAINT FOREIGN KEY (personId) REFERENCES person(id),
@@ -213,6 +231,7 @@ CREATE TABLE project(
     creatorId int,
 	dueDate datetime,
     logo varchar(255),
+    lastChanged datetime,
     CONSTRAINT FOREIGN KEY (creatorId) REFERENCES person(id)
 );
 
@@ -222,6 +241,7 @@ CREATE TABLE projectTeam(
     teamId int,
     startDate datetime,
     endDate datetime,
+    lastChanged datetime,
     CONSTRAINT FOREIGN KEY (projectId) REFERENCES project(id),
     CONSTRAINT FOREIGN KEY (teamId) REFERENCES team(id),
     CONSTRAINT UNIQUE KEY (projectId,teamId)    
@@ -254,9 +274,13 @@ CREATE TABLE task(
     projectId int,
     stateId int,
     calendarId varchar(255),/*investigar que se ocupa para google calendar*/
+    progress int,
+    priorityId int,
+    lastChanged datetime,
     CONSTRAINT FOREIGN KEY (projectId) REFERENCES project(id),
 	CONSTRAINT FOREIGN KEY (creatorId) REFERENCES person(id),    
-    CONSTRAINT FOREIGN KEY (stateId) REFERENCES stateType(id)    
+    CONSTRAINT FOREIGN KEY (stateId) REFERENCES stateType(id),
+    CONSTRAINT FOREIGN KEY (priorityId) REFERENCES priority(id)
 );
 
 DROP TABLE IF EXISTS taskMember;
@@ -281,6 +305,7 @@ CREATE TABLE taskMonitor (
     sessionNumber int,
     startDate datetime,
     endDate datetime,
+    lastChanged datetime,
     CONSTRAINT FOREIGN KEY (taskId) REFERENCES task(id),
     CONSTRAINT FOREIGN KEY (personId) REFERENCES person(id),  
 	CONSTRAINT UNIQUE KEY (taskId,personId,sessionNumber)  
@@ -313,6 +338,7 @@ CREATE TABLE checkList(
     dueDate datetime,
     creationDate datetime,
     personId int,
+    lastChanged datetime,
     CONSTRAINT FOREIGN KEY (taskId) REFERENCES task(id),
     CONSTRAINT FOREIGN KEY (personId) REFERENCES person(id)
 );
@@ -327,6 +353,7 @@ CREATE TABLE checkListItem(
     terminatorId int,
     terminationDate datetime,
     sortNumber int,
+    lastChanged datetime,
     CONSTRAINT FOREIGN KEY (checkListId) REFERENCES checkList(id),
     CONSTRAINT FOREIGN KEY (creatorId) REFERENCES person(id),
     CONSTRAINT FOREIGN KEY (terminatorId) REFERENCES person(id),

@@ -5,6 +5,18 @@ CALL CreateCity(1,'Sheffield');
 CALL CreateGender('Male');
 CALL CreateGender('Famale');
 
+CALL CreatePriority('None');
+CALL CreatePriority('Low');
+CALL CreatePriority('Medium');
+CALL CreatePriority('High');
+CALL CreatePriority('Urgent');
+
+CALL CreateGender('None');
+CALL CreateGender('Low');
+CALL CreateGender('Medium');
+CALL CreateGender('High');
+CALL CreateGender('Urgent');
+
 CALL CreateScopeType('All');
 CALL CreateScopeType('Team');
 CALL CreateScopeType('Project');
@@ -31,6 +43,10 @@ CALL CreateAttachmentType('Video');
 CALL CreateMessageType('Message');
 CALL CreateMessageType('Log');
 
+
+
+
+/*--------------------------MINIMAL UNTIL HERE---------------------------------------------------*/
 
 CALL CreatePerson('Even','Sosa','Rodríguez','1985-10-23','even.sosa@gmail.com','07731917608','','','password',1,NULL,'','token123',1);
 CALL CreatePerson('Paulina','Orihuela','Pérez','1988-04-20','paulina_o_16@hotmail.com','0448341414939','','1334','password',2,1,'avt/xjalkd.png','token123',1);
@@ -70,8 +86,6 @@ CALL CreateFollower(2,1);
 CALL CreateFollower(1,2);
 CALL CreateFollower(3,1);
 CALL CreateFollower(3,2);
-
-
 
 CALL CreatePostMessage(1,2,'cheers!',1,NULL,NULL);
 CALL CreatePostMessage(1,3,'cool!',1,NULL,NULL);
@@ -135,13 +149,13 @@ CALL CreateProjectMember(2,2,1,NOW(),'2018-01-01');
 
 CALL EditProjectMember(1,2,1,NOW(),'2016-01-01','2018-01-01');
 
-CALL CreateTask('Prepare ESN App', 'Write requirements and Design database', '2016-12-21', '2017-06-21', NOW(), 1, NULL, NULL);
+CALL CreateTask('Prepare ESN App', 'Write requirements and Design database', '2016-12-21', '2017-06-21', NOW(), 1, NULL, NULL, 1);
 /*CALL CreateTask('Prepare ESN App', 'Write requirements and Design database', '2017-12-21', '2017-06-21', NOW(), 1, NULL, NULL); --Date Error*/
-CALL CreateTask('Get new people', 'Advertise company to get new employees', '2016-12-21', '2017-06-21', NOW(), 1, 2, NULL);
-CALL CreateTask('Training on IOS', 'Preparation for the IOS training', '2016-12-21', '2017-06-21', NOW(), 1, 2, NULL);
-CALL CreateTask('Training on Android', 'Preparation for the Android training', '2016-12-21', '2017-06-21', NOW(), 1, 2, NULL);
-CALL CreateTask('September Conference', 'Review everything wrt the conference', '2016-12-21', '2017-06-21', NOW(), 1, 2, NULL);
-CALL CreateTask('Organizing data', 'Organize all data in folders', '2016-12-21', '2017-06-21', NOW(), 1, 2, NULL);
+CALL CreateTask('Get new people', 'Advertise company to get new employees', '2016-12-21', '2017-06-21', NOW(), 1, 2, NULL,1);
+CALL CreateTask('Training on IOS', 'Preparation for the IOS training', '2016-12-21', '2017-06-21', NOW(), 1, 2, NULL,2);
+CALL CreateTask('Training on Android', 'Preparation for the Android training', '2016-12-21', '2017-06-21', NOW(), 1, 2, NULL,3);
+CALL CreateTask('September Conference', 'Review everything wrt the conference', '2016-12-21', '2017-06-21', NOW(), 1, 2, NULL,4);
+CALL CreateTask('Organizing data', 'Organize all data in folders', '2016-12-21', '2017-06-21', NOW(), 1, 2, NULL,5);
 
 CALL EditTask(1, 'Prepare Enterprise Social Network', 'Write requirements, design database and application', NULL, NULL, NULL, NULL, NULL, NULL, NULL);
 

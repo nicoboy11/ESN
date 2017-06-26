@@ -11,6 +11,19 @@ BEGIN
     
 END$$
 
+/*================PRIORITY==============================*/
+
+DELIMITER $$
+DROP procedure IF EXISTS `CreatePriority`$$
+CREATE PROCEDURE `CreatePriority` (IN _description varchar(255))
+BEGIN
+
+	INSERT INTO priority(description) VALUES(_description);
+
+    SELECT LAST_INSERT_ID() as id;
+    
+END$$
+
 /*================PROVINCE==============================*/
 DELIMITER $$
 DROP procedure IF EXISTS `CreateProvince`$$
@@ -310,7 +323,8 @@ BEGIN
             os_android = coalesce(_os_android,os_android),
 			os_ios = coalesce(_os_ios,os_ios),
             os_chrome = coalesce(_os_chrome,os_chrome),
-            os_safari = coalesce(_os_safari,os_safari)
+            os_safari = coalesce(_os_safari,os_safari),
+			lastChanged = NOW()
 		WHERE id = _id;
         
     ELSE
@@ -499,7 +513,8 @@ BEGIN
 		attachment = 		coalesceForceVarchar(_attachment,attachment,true),
         attachmentTypeId = 	coalesceForceInt(_attachmentTypeId,attachmentTypeId,true),
         scopeTypeId = 		coalesceForceInt(_scopeTypeId,scopeTypeId,true),
-        scopeId = 			coalesceForceInt(_scopeId,scopeId,true)
+        scopeId = 			coalesceForceInt(_scopeId,scopeId,true),
+        lastChanged = 		NOW()
     WHERE id = 	_postId;
 
 END$$
@@ -681,7 +696,8 @@ BEGIN
         logo = 			coalesce(_logo,logo),
         personID = 		coalesce(_personId,personId),
         stateTypeId = 	coalesce(_stateTypeId,stateTypeId),
-        isActive = 		coalesce(_isActive,isActive)
+        isActive = 		coalesce(_isActive,isActive),
+        lastChanged = 	NOW()
     WHERE id = _teamId;
 
 END$$
@@ -791,7 +807,8 @@ BEGIN
         startDate = _startDate, 
         creatorId = _creatorId, 
         dueDate = _dueDate, 
-        logo = _logo
+        logo = _logo,
+        lastChanged = NOW()
 	WHERE id = _id;
 
 END$$
@@ -838,7 +855,8 @@ BEGIN
 
 	UPDATE projectTeam 
     SET startDate = _startDate, 
-        endDate = _endDate
+        endDate = _endDate,
+        lastChanged = NOW()
 	WHERE 	projectId = _projectId AND
 			teamId = _teamId;
 
@@ -942,17 +960,37 @@ DELIMITER $$
 DROP PROCEDURE IF EXISTS `CreateTask`$$
 CREATE PROCEDURE `CreateTask` (	IN _name varchar(255), 	IN _description text, 		IN _startDate datetime, 
 								IN _dueDate datetime, 	IN _creationDate datetime,	IN _creatorId int, 		
-                                IN _projectId int,		IN _calendarId varchar(255) )
+                                IN _projectId int,		IN _calendarId varchar(255), IN _priorityId int)
 BEGIN
 
-	IF(areValidDates(_startDate,_dueDate) = FALSE) THEN
-		SIGNAL sqlstate 'ERROR' SET message_text = 'The start date is greater than the end date.';
-    END IF;
-
-	INSERT INTO task ( name, description, startDate, dueDate, creationDate, creatorId, projectId, calendarId )
-    VALUES ( _name, _description, _startDate, _dueDate, _creationDate, _creatorId, _projectId, _calendarId );
+	DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
     
-	CALL CreateTaskMember(LAST_INSERT_ID(), _creatorId, 1, NOW(), NULL);    
+		GET DIAGNOSTICS CONDITION 1 @sqlstate = RETURNED_SQLSTATE, @errno = MYSQL_ERRNO, @text = MESSAGE_TEXT; 
+			SET @full_error = CONCAT("ERROR ", @errno, " (", @sqlstate, "): ", @text); 
+		ROLLBACK;
+        
+        INSERT INTO esnLog ( errorDescription, dateOfError, personId )
+        VALUES (@full_error, NOW(), _creatorId );
+        
+		SIGNAL sqlstate 'ERROR' SET message_text = @full_error;
+            
+    END;
+
+	START TRANSACTION;
+    
+		IF(areValidDates(_startDate,_dueDate) = FALSE) THEN
+			SIGNAL sqlstate 'ERROR' SET message_text = 'The start date is greater than the end date.';
+		END IF;
+
+		INSERT INTO task ( name, description, startDate, dueDate, creationDate, creatorId, projectId, calendarId, priorityId, progress )
+		VALUES ( _name, _description, _startDate, _dueDate, _creationDate, _creatorId, _projectId, _calendarId,  _priorityId, 0);
+		
+		CALL CreateTaskMember(LAST_INSERT_ID(), _creatorId, 1, NOW(), NULL);   
+		
+		CALL GetTask(LAST_INSERT_ID());
+        
+    COMMIT;        
 
 END$$
 
@@ -974,7 +1012,8 @@ BEGIN
         dueDate = coalesce(_dueDate, dueDate),
         projectId = coalesce(_projectId, projectId),
         stateId = coalesce(_stateId, stateId),
-        calendarId = coalesce(_calendarId, calendarId)
+        calendarId = coalesce(_calendarId, calendarId),
+        lastChanged = NOW()
 	WHERE id = _taskId;
 
 
@@ -985,7 +1024,8 @@ DROP PROCEDURE IF EXISTS `GetTask`$$
 CREATE PROCEDURE `GetTask` ( IN _taskId int )
 BEGIN
 
-	SELECT 	name,
+	SELECT 	id,
+			name,
 			description,
             formatDate(startDate) as startDate,
             formatDate(dueDate) as dueDate,
@@ -996,8 +1036,7 @@ BEGIN
             getPersonAbbr(creatorId) as abbr,
             projectId,
             stateId,
-            calendarId,
-            isPinned
+            calendarId
 	FROM task
     WHERE id = _taskId;
 
@@ -1048,12 +1087,12 @@ CREATE PROCEDURE `CreateTaskMember` (	IN _taskId int, 		IN _personId int, 		IN _
 										IN _startDate datetime, IN _endDate datetime	)
 BEGIN
 
-	IF(areValidDates(_startDate,_endDate) = FALSE) THEN
-		SIGNAL sqlstate 'ERROR' SET message_text = 'The start date is greater than the end date.';
-    END IF;
+		IF(areValidDates(_startDate,_endDate) = FALSE) THEN
+			SIGNAL sqlstate 'ERROR' SET message_text = 'The start date is greater than the end date.';
+		END IF;
 
-	INSERT INTO taskMember ( taskId, personId, roleId, startDate, endDate )
-    VALUES ( _taskId, _personId, _roleId, _startDate, _endDate );
+		INSERT INTO taskMember ( taskId, personId, roleId, startDate, endDate )
+		VALUES ( _taskId, _personId, _roleId, _startDate, _endDate );
 
 END$$
     
@@ -1207,7 +1246,8 @@ BEGIN
 	UPDATE checkList
 	SET title = _title,
 		dueDate = _dueDate,
-        personId = _personId
+        personId = _personId,
+        lastChanged = NOW()
     WHERE id = _checkListId;
 
 END$$
@@ -1262,7 +1302,8 @@ BEGIN
 		dueDate = coalesce(_dueDate,dueDate),
         isChecked = coalesce(_isChecked,isChecked),
         terminatorId = coalesce(_terminatorId,terminatorId),
-        terminationDate = coalesce(_terminationDate,terminationDate)
+        terminationDate = coalesce(_terminationDate,terminationDate),
+        lastChanged = NOW()
     WHERE 	checkListId = _checkListId AND
 			sortNumber = _sortNumber;
 
