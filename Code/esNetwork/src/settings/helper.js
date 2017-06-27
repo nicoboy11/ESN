@@ -31,7 +31,7 @@ class Helper {
     }
 
 	static prettyfyDate(uglyDate) {
-        if (uglyDate === undefined) {
+        if (uglyDate === undefined || uglyDate === null || uglyDate === 'null') {
             return '';
         }
 
@@ -53,7 +53,7 @@ class Helper {
 
         return {
                     color: (diff > 0) ? 'green' : 'red', 
-                    date: date.getDate().toString() + ' ' + texts.accountSettingsmonths[date.getMonth()] + ((date.getYear() !== today.getYear()) ? (', ' + date.getFullYear().toString()) : '')
+                    date: date.getDate().toString() + ' ' + texts.month[date.getMonth()] + ((date.getYear() !== today.getYear()) ? (', ' + date.getFullYear().toString()) : '')
                 };		
 	}
 

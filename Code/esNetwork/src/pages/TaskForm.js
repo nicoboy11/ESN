@@ -40,7 +40,13 @@ class TaskForm extends Component {
         } else if (this.state.status > 299) {
             Alert.alert('Error', 'There was an error with the request.');
         } else {
-            this.setState({ elements: responseData, isLoading: false });
+            this.setState(
+                { 
+                    elements: responseData.concat(this.state.elements), 
+                    isLoading: false, 
+                    newTaskText: '' 
+                }
+            );
         }
     }
 
@@ -53,9 +59,12 @@ class TaskForm extends Component {
     createTask() {
         Database.request(
             'POST', 
-            `task/${data[0].personId}`, 
-            {}, 
-            2,
+            'task', 
+            {
+                name: this.state.newTaskText,
+                creatorId: this.state.personId
+            }, 
+            1,
             this.handleResponse.bind(this), 
             this.onSuccess.bind(this),
             this.onError.bind(this)

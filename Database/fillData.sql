@@ -80,7 +80,6 @@ CALL CreatePerson('Amanda','Washington','','1990-05-01','amanda@testcorp.com','5
 CALL CreatePerson('Erik','Davis','','1985-10-29','erick.davis@testcorp.com','555-5555','','1210','password',1,10,'','token123',3);
 CALL CreatePerson('John','Mark','','1985-10-29','john.mark@testcorp.com','555-5555','','1210','password',1,10,'','token123',3);
 /*---------------------HASTA AQUI ALCANZA---------------------------------*/
-select * from post
 
 CALL CreatePost(1,'This is my first post. Welcome!', 1, NULL, NULL, 1, NULL);
 
