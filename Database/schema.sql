@@ -118,8 +118,8 @@ CREATE TABLE personSettings(
 
 DROP TABLE IF EXISTS followers;
 CREATE TABLE followers(
-	personId int,
-    followerId int,
+	personId int NOT NULL,
+    followerId int NOT NULL,
 	startDate datetime,
 	lastChanged datetime,
     CONSTRAINT FOREIGN KEY (personId) REFERENCES person(id),
@@ -131,9 +131,9 @@ CREATE TABLE followers(
 DROP TABLE IF EXISTS post;
 CREATE TABLE post(
 	id int PRIMARY KEY AUTO_INCREMENT,
-    personId int,
-    message text,
-    messageTypeId int,
+    personId int NOT NULL,
+    message text NOT NULL,
+    messageTypeId int NOT NULL,
     attachment varchar(255),
     attachmentTypeId int,
     creationDate datetime,
@@ -149,8 +149,8 @@ CREATE TABLE post(
 DROP TABLE IF EXISTS postMessage;
 CREATE TABLE postMessage(
 	id int PRIMARY KEY AUTO_INCREMENT,
-    postId int,
-    personId int,
+    postId int NOT NULL,
+    personId int NOT NULL,
     message text,
     messageTypeId int,    
     attachment varchar(255),
@@ -164,8 +164,8 @@ CREATE TABLE postMessage(
 
 DROP TABLE IF EXISTS postMember;
 CREATE TABLE postMember(
-	postId int,
-    personId int,
+	postId int NOT NULL,
+    personId int NOT NULL,
     isSaved bool,
     isLiked bool,
     lastSeen datetime,
@@ -180,7 +180,7 @@ CREATE TABLE postMember(
 DROP TABLE IF EXISTS team;
 CREATE TABLE team(
 	id int PRIMARY KEY AUTO_INCREMENT,
-    name varchar(255),
+    name varchar(255) NOT NULL,
     abbr varchar(10),
     teamGoal text,
     parentTeamId int NULL,
@@ -208,8 +208,8 @@ CREATE TABLE team(
 
 DROP TABLE IF EXISTS teamMember;
 CREATE TABLE teamMember(
-	teamId int,
-    personId int,
+	teamId int NOT NULL,
+    personId int NOT NULL,
     lastSeen datetime,
     startDate datetime,
     endDate datetime,
@@ -224,7 +224,7 @@ CREATE TABLE teamMember(
 DROP TABLE IF EXISTS project;
 CREATE TABLE project(
 	id int PRIMARY KEY AUTO_INCREMENT,
-    name varchar(250),
+    name varchar(250) NOT NULL,
     abbr varchar(10),
     startDate datetime,
     creatorId int,
@@ -236,8 +236,8 @@ CREATE TABLE project(
 
 DROP TABLE IF EXISTS projectTeam;
 CREATE TABLE projectTeam(
-	projectId int,
-    teamId int,
+	projectId int NOT NULL,
+    teamId int NOT NULL,
     startDate datetime,
     endDate datetime,
     lastChanged datetime,
@@ -248,8 +248,8 @@ CREATE TABLE projectTeam(
 
 DROP TABLE IF EXISTS projectMember;
 CREATE TABLE projectMember(
-	projectId int,
-    personId int,
+	projectId int NOT NULL,
+    personId int NOT NULL,
     roleId int,
     lastSeen datetime,
     startDate datetime,
@@ -264,12 +264,12 @@ CREATE TABLE projectMember(
 DROP TABLE IF EXISTS task;
 CREATE TABLE task(
 	id int PRIMARY KEY AUTO_INCREMENT,
-    name varchar(255),
+    name varchar(255) NOT NULL,
     description text,
     startDate datetime,
     dueDate datetime,
     creationDate datetime,
-    creatorId int,
+    creatorId int NOT NULL,
     projectId int,
     stateId int,
     calendarId varchar(255),/*investigar que se ocupa para google calendar*/
@@ -285,8 +285,8 @@ CREATE TABLE task(
 
 DROP TABLE IF EXISTS taskMember;
 CREATE TABLE taskMember(
-	taskId int,
-    personId int,
+	taskId int NOT NULL,
+    personId int NOT NULL,
     roleId int,
     isPinned bool,
     lastSeen datetime,
@@ -300,8 +300,8 @@ CREATE TABLE taskMember(
 
 DROP TABLE IF EXISTS taskMonitor;
 CREATE TABLE taskMonitor (
-	taskId int,
-    personId int,
+	taskId int NOT NULL,
+    personId int NOT NULL,
     sessionNumber int,
     startDate datetime,
     endDate datetime,
@@ -316,9 +316,9 @@ CREATE TABLE taskMonitor (
 DROP TABLE IF EXISTS taskMessage;
 CREATE TABLE taskMessage(
 	id int PRIMARY KEY AUTO_INCREMENT,
-    taskId int,
-    personId int,
-    message text,
+    taskId int NOT NULL,
+    personId int NOT NULL,
+    message text NOT NULL,
     messageTypeId int,
     attachment varchar(255), /*que se ocupa google drive?*/
     attachmentTypeId int,
@@ -333,8 +333,8 @@ CREATE TABLE taskMessage(
 DROP TABLE IF EXISTS checkList;
 CREATE TABLE checkList(
 	id int PRIMARY KEY AUTO_INCREMENT,
-    taskId int ,
-    title varchar(255),
+    taskId int NOT NULL,
+    title varchar(255) NOT NULL,
     dueDate datetime,
     creationDate datetime,
     personId int,
@@ -345,10 +345,10 @@ CREATE TABLE checkList(
 
 DROP TABLE IF EXISTS checkListItem;
 CREATE TABLE checkListItem(
-	checkListId int,
-    item varchar(255),
+	checkListId int NOT NULL,
+    item varchar(255) NOT NULL,
     dueDate datetime,
-    isChecked bool,
+    isChecked bool NOT NULL,
     creatorId int,
     terminatorId int,
     terminationDate datetime,

@@ -1,0 +1,9 @@
+.mainText{
+    color: #7B8092;/*mainText*/
+    color: #1abc9c;/*selected stuff*/
+    color: #3498db;/*clickable stuff*/
+    color: #F7F9FB;/*overall background*/
+    color: #FDFCFF;/*inputs and stuff background active area (e.g. cards)*/
+    color: #D4D4DB;/*disabled texts, less important*/
+    color: #e74c3c;/*errors*/ 
+}

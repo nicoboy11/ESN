@@ -992,7 +992,7 @@ END$$
 DELIMITER $$
 DROP PROCEDURE IF EXISTS `CreateTask`$$
 CREATE PROCEDURE `CreateTask` (	IN _name varchar(255), 	IN _description text, 		IN _startDate datetime, 
-								IN _dueDate datetime, 	IN _creationDate datetime,	IN _creatorId int, 		
+								IN _dueDate datetime, 	IN _creatorId int, 		
                                 IN _projectId int,		IN _calendarId varchar(255), IN _priorityId int)
 BEGIN
 
@@ -1017,7 +1017,7 @@ BEGIN
 		END IF;
 
 		INSERT INTO task ( name, description, startDate, dueDate, creationDate, creatorId, projectId, calendarId, priorityId, progress )
-		VALUES ( _name, _description, _startDate, _dueDate, _creationDate, _creatorId, _projectId, _calendarId,  _priorityId, 0);
+		VALUES ( _name, _description, _startDate, _dueDate, NOW(), _creatorId, _projectId, _calendarId,  _priorityId, 0);
 		
 		CALL CreateTaskMember(LAST_INSERT_ID(), _creatorId, 1, NOW(), NULL);   
 		
@@ -1029,9 +1029,9 @@ END$$
 
 DELIMITER $$
 DROP PROCEDURE IF EXISTS `EditTask`$$
-CREATE PROCEDURE `EditTask` (	IN _taskId int, 		IN _name varchar(255), 		IN _description text, 		IN _startDate datetime, 
-								IN _dueDate datetime, 	IN _creationDate datetime,	IN _creatorId int, 		
-                                IN _projectId int,		IN _stateId int,			IN _calendarId varchar(255) )
+CREATE PROCEDURE `EditTask` (	IN _taskId int, 				IN _name varchar(255), 		IN _description text, 		IN _startDate datetime, 
+								IN _dueDate datetime, 			IN _projectId int,			IN _stateId int,			
+                                IN _calendarId varchar(255),	IN _priorityId int )
 BEGIN
 
 	IF(areValidDates(_startDate,_dueDate) = FALSE) THEN
@@ -1046,9 +1046,9 @@ BEGIN
         projectId = coalesce(_projectId, projectId),
         stateId = coalesce(_stateId, stateId),
         calendarId = coalesce(_calendarId, calendarId),
+        calendarId = coalesce(_priorityId, priorityId),
         lastChanged = NOW()
 	WHERE id = _taskId;
-
 
 END$$
 

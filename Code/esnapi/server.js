@@ -453,6 +453,42 @@ apiRoutes.put('/team',function(req,res){
     }); 
  });
 
+ //  Create a new Task
+apiRoutes.post('/task',function(req,res){
+    reqUpload(req,'postatt','personId', function(fileName, params){
+        db("CALL CreateTask(" + fpVarchar(params.name) + "," + fpVarchar(params.description) + "," + fpDate(params.startDate) +
+                            "," + fpDate(params.dueDate) + "," + fpInt(params.creatorId) + "," + fpInt(params.projectId)+
+                            "," + fpVarchar(params.calendarId) + "," + fpInt(params.priorityId) + ");",
+        conn, function(error, result){
+            if(handle(error,res,true)){
+                var message = JSON.stringify(result[0])
+                if(message === '' || message === undefined){
+                    message = '[{"message": "ok"}]'
+                }
+                res.status(200).end( message );
+            }
+        });
+    });
+});
+
+//  Create a new Task
+apiRoutes.put('/task',function(req,res){
+    reqUpload(req,'postatt','personId', function(fileName, params){
+        db("CALL EditTask(" + fpInt(params.taskId) + "," + fpVarchar(params.name) + "," + fpVarchar(params.description) + "," + fpDate(params.startDate) +
+                            "," + fpDate(params.dueDate) + "," + fpInt(params.projectId) + "," + fpInt(params.stateId) +
+                            "," + fpVarchar(params.calendarId) + "," + fpInt(params.priorityId) + ");",
+        conn, function(error, result){
+            if(handle(error,res,true)){
+                var message = JSON.stringify(result[0])
+                if(message === '' || message === undefined){
+                    message = '[{"message": "ok"}]'
+                }
+                res.status(200).end( message );
+            }
+        });
+    });
+});
+
 //  Get Task Messages
 apiRoutes.get('/taskMessages/:taskId/:personId',function(req,res){
 
@@ -479,7 +515,6 @@ apiRoutes.post('/taskMessages',function(req,res){
             }
         });
     });
-
 });
 
 /*
