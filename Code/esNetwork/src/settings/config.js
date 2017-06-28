@@ -6,10 +6,15 @@ Config.regex = {
 };
 
 Config.colors = {
+    mainDark: '#7B8092',
+    secondText: '#D4D4DB',
+    main: '#1abc9c',
+    error: '#e74c3c',
+
     lightText: '#CED3D9',
-    main: '#3D68EB',
+    //main: '#3D68EB',
     darkMain: '#3457C3',
-    error: '#EF9C7A',
+    //error: '#EF9C7A',
     inactive: '#828486',
     mainText: '#FFF',
     elementBackground: '#FFF',

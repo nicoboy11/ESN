@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { ListView, StyleSheet, Text, View } from 'react-native';
-import { PostCard, TaskCard, ListItem } from './';
+import { PostCard, TaskBasic, ListItem } from './';
 import { Config } from '../settings';
 
 const { colors } = Config;
@@ -37,18 +37,12 @@ class CardList extends Component {
         switch (this.props.type) {
             case 'Task':
                  return (
-                        <TaskCard 
-                            name={data.name}
-                            team={data.teamAbbr}
-                            project={data.projectName}
-                            dueDate={data.dueDate}
-                            creatorAvatar={data.creatorAvatar}
-                            theme={data.theme}
-                            creator={data.creator}
-                            collaborators={data.collaborators}
-                            leader={data.leader}
-                            taskId={data.taskId}
-                        />
+                     <TaskBasic 
+                        name={data.name}
+                        project={data.projectName}
+                        dueDate={data.dueDate}
+                        taskId={data.taskId}
+                     />
                 );
             case 'Post':
                 return ( 

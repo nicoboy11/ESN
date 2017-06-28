@@ -52,7 +52,7 @@ class Helper {
 		} 
 
         return {
-                    color: (diff > 0) ? 'green' : 'red', 
+                    color: (diff > 0) ? colors.main : colors.error, 
                     date: date.getDate().toString() + ' ' + texts.month[date.getMonth()] + ((date.getYear() !== today.getYear()) ? (', ' + date.getFullYear().toString()) : '')
                 };		
 	}

@@ -14,3 +14,4 @@ export * from './ESModal';
 export * from './ListItem';
 export * from './Avatar';
 export * from './NewCard';
+export * from './TaskBasic';
