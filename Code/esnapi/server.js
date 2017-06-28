@@ -78,7 +78,6 @@ apiRoutes.use(function(req,res,next){
 
 });
 
-
 function db(sql,conn,callback){
     try{
         conn.connect(function(err){
@@ -143,36 +142,37 @@ function handleResponse(result,res,errorMessage){
 /**
  * Filter parameters
  */
-function fpVarchar(param){
+    function fpVarchar(param){
 
-    if(param == undefined)  return "NULL";
+        if(param == undefined)  return "NULL";
 
-    return "'" + param + "'";
-}
+        return "'" + param + "'";
+    }
 
-function fpDate(param){
+    function fpDate(param){
 
-    if(param == undefined)  return "NULL";
-    if(param == "") return "NULL";
+        if(param == undefined)  return "NULL";
+        if(param == "") return "NULL";
 
-    return "'" + param + "'";
-}
+        return "'" + param + "'";
+    }
 
-function fpInt(param){
+    function fpInt(param){
 
-    if(param == undefined)  return "NULL";
-    if(param == "") return "NULL";
+        if(param == undefined)  return "NULL";
+        if(param == "") return "NULL";
 
-    return param;
-}
+        return param;
+    }
 
-function fpBool(param){
+    function fpBool(param){
 
-    if(param == undefined)  return "NULL";
-    if(param == "") return "NULL";
+        if(param == undefined)  return "NULL";
+        if(param == "") return "NULL";
 
-    return param;
-}
+        return param;
+    }
+
 
 /**
  * 
