@@ -376,6 +376,41 @@ BEGIN
 END$$
 
 DELIMITER $$
+DROP procedure IF EXISTS `GetNetwork`$$
+CREATE PROCEDURE `GetNetwork` (IN _id int)
+BEGIN
+	
+    SELECT	p.id as personId,
+			p.names,	
+			p.firstLastName,
+			p.secondLastName,
+            getFullName(p.id) as person,
+			formatDate(p.dateOfBirth) as dateOfBirth,
+			p.email,
+            p.mobile,
+            p.genderId,
+            g.description as gender,
+			ifnull(p.phone,'') as phone,
+			ifnull(p.ext,'') as ext,
+			formatDate(p.startDate) as startDate,
+			formatDate(p.endDate) as endDate,
+			p.higherPersonId,
+            getFullName(p.higherPersonId) as higherPerson,
+			formatDate(p.lastLogin) as lastLogin,
+			getAvatar(p.id) as avatar,
+			p.description,
+			p.job,
+			p.roleId,
+			p.abbr,
+            getLevelKey(_id) as levelKey,
+            ifnull(p.theme,'') as theme
+    FROM person as p
+    INNER JOIN gender as g on g.id = p.genderId
+    WHERE p.higherPersonId = ifnull(_id, p.higherPersonId);
+    
+END$$
+
+DELIMITER $$
 DROP procedure IF EXISTS `GetLogin`$$
 CREATE PROCEDURE `GetLogin` (IN _email varchar(255), IN _password varchar(255))
 BEGIN
@@ -1030,7 +1065,7 @@ END$$
 DELIMITER $$
 DROP PROCEDURE IF EXISTS `EditTask`$$
 CREATE PROCEDURE `EditTask` (	IN _taskId int, 				IN _name varchar(255), 		IN _description text, 		IN _startDate datetime, 
-								IN _dueDate datetime, 			IN _projectId int,			IN _stateId int,			
+								IN _dueDate datetime, 			IN _projectId int,			IN _stateId int,			IN _progress int,
                                 IN _calendarId varchar(255),	IN _priorityId int )
 BEGIN
 
@@ -1046,7 +1081,8 @@ BEGIN
         projectId = coalesce(_projectId, projectId),
         stateId = coalesce(_stateId, stateId),
         calendarId = coalesce(_calendarId, calendarId),
-        calendarId = coalesce(_priorityId, priorityId),
+        priorityId = coalesce(_priorityId, priorityId),
+        progress = coalesce(_progress, progress),
         lastChanged = NOW()
 	WHERE id = _taskId;
 
@@ -1057,21 +1093,33 @@ DROP PROCEDURE IF EXISTS `GetTask`$$
 CREATE PROCEDURE `GetTask` ( IN _taskId int )
 BEGIN
 
-	SELECT 	id,
-			name,
-			description,
-            formatDate(startDate) as startDate,
-            formatDate(dueDate) as dueDate,
-            formatDate(creationDate) as creationDate,
-            creatorId,
-            getAvatar(creatorId) as avatar,
-            getFullName(creatorId) as person,
-            getPersonAbbr(creatorId) as abbr,
-            projectId,
-            stateId,
-            calendarId
-	FROM task
-    WHERE id = _taskId;
+    SELECT	t.id as taskId,
+			t.name,
+            t.description,
+            formatDate(t.startDate) as startDate,
+            formatDate(t.dueDate) as dueDate,
+            getJsonMembers(t.creatorId) as creator,
+            p.id as projectId,
+            p.name as projectName,
+            p.abbr as projectabbr,
+            te.id as teamId,
+            te.name as teamName,
+            te.abbr as teamAbbr,
+            getJsonMembers(t.id,3) as collaborators,
+            getJsonMembers(t.id,2) as leader,
+            per.theme,
+            tm.isPinned,
+            'Task' as category,
+            t.stateId,
+            ifnull(t.progress,0) as progress
+    FROM task as t
+    INNER JOIN person as per on per.id = t.creatorId
+    INNER JOIN taskMember as tm on tm.taskId = t.id
+    LEFT JOIN project as p on p.id = t.projectId
+    LEFT JOIN projectTeam as pte on pte.projectId = p.id
+    LEFT JOIN team as te on te.id = pte.teamId
+    WHERE t.id = _taskId
+    ORDER BY tm.isPinned desc;
 
 END$$
 
@@ -1189,10 +1237,7 @@ BEGIN
             t.description,
             formatDate(t.startDate) as startDate,
             formatDate(t.dueDate) as dueDate,
-            t.creatorId,
-            getFullName(t.creatorId) as creator,
-            getPersonAbbr(t.creatorId) as creatorAbbr,
-            getAvatar(t.creatorId) as creatorAvatar,
+            getJsonMembers(t.creatorId,1) as creator,
             p.id as projectId,
             p.name as projectName,
             p.abbr as projectabbr,
@@ -1203,7 +1248,11 @@ BEGIN
             getJsonMembers(t.id,2) as leader,
             per.theme,
             tm.isPinned,
-            'Task' as category
+            'Task' as category,
+            t.stateId,
+            ifnull(t.progress,0) as progress,
+            5 as priorityId,
+            'urgent' as priority
     FROM task as t
     INNER JOIN person as per on per.id = t.creatorId
     INNER JOIN taskMember as tm on tm.taskId = t.id
@@ -1309,7 +1358,7 @@ BEGIN
 
 END$$
     
-    
+
 DELIMITER $$
 DROP PROCEDURE IF EXISTS `CreateCheckListItem`$$
 CREATE PROCEDURE `CreateCheckListItem` ( IN _checkListId int, _item varchar(255), _creatorId int )
@@ -1355,7 +1404,8 @@ DROP PROCEDURE IF EXISTS `GetCheckListItem`$$
 CREATE PROCEDURE `GetCheckListItem` (IN _checkListId int)
 BEGIN
 
-	SELECT 	item,
+	SELECT 	checkListId,
+			item,
 			formatDate(dueDate) as dueDate,
             isChecked,
             sortNumber

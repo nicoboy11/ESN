@@ -10,12 +10,14 @@ Config.colors = {
     secondText: '#D4D4DB',
     main: '#1abc9c',
     error: '#e74c3c',
+    background: '#F7F9FB',
+    clickable: '#3498db',
 
     lightText: '#CED3D9',
     //main: '#3D68EB',
     darkMain: '#3457C3',
     //error: '#EF9C7A',
-    inactive: '#828486',
+    //inactive: '#828486',
     mainText: '#FFF',
     elementBackground: '#FFF',
     alternateColor: '#08C2A5',
@@ -64,6 +66,8 @@ const lang = {
                         newTask: 'New task',
                         comment: 'Comment',
                         teamSelect: 'Select a team',
+                        finished: 'Finished',
+                        active: 'Active',
                         days: {
                                 0: 'Sunday',
                                 1: 'Monday',
@@ -86,7 +90,8 @@ const lang = {
                                 9: 'Oct',
                                 10: 'Nov',
                                 11: 'Dec'                            
-                        }
+                        },
+                        editTask: 'Edit task'
                 },
                 es: {   //Login page
                         email: 'Email',
@@ -121,6 +126,8 @@ const lang = {
                         newTask: 'Nueva Tarea',
                         comment: 'Comentar',
                         teamSelect: 'Seleccione un Equipo',
+                        finished: 'Terminada',
+                        active: 'Activa',                        
                         days: {
                                 0: 'Domingo',
                                 1: 'Lunes',
@@ -143,7 +150,8 @@ const lang = {
                                 9: 'Oct',
                                 10: 'Nov',
                                 11: 'Dic'                            
-                        }
+                        },
+                        editTask: 'Editar tarea'
                 }
 
              };

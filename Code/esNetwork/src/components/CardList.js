@@ -20,6 +20,10 @@ class CardList extends Component {
         this.setDataSource(nextProps);
     }
 
+    onPress(props) {
+        this.props.onPress(props);
+    }
+
     setDataSource({ elements }) {
         const ds = new ListView.DataSource({ 
             rowHasChanged: (r1, r2) => r1 !== r2
@@ -38,10 +42,12 @@ class CardList extends Component {
             case 'Task':
                  return (
                      <TaskBasic 
-                        name={data.name}
-                        project={data.projectName}
-                        dueDate={data.dueDate}
-                        taskId={data.taskId}
+                        title={data.name}
+                        subtitle={data.projectName}
+                        date={data.dueDate}
+                        id={data.taskId}
+                        onPress={(props) => { this.onPress(props); }}
+                        data={data}
                      />
                 );
             case 'Post':

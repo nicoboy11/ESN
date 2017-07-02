@@ -42,13 +42,13 @@ class Helper {
 
 		const diff = this.getDifference(date, today) / (3600 * 24 * 1000);
 		if (diff === 0) {
-			return { color: 'yellow', date: 'Today' };
+			return { color: colors.main, date: 'Today' };
 		} else if (diff === 1) {
-			return { color: 'green', date: 'Tomorrow' };
+			return { color: colors.main, date: 'Tomorrow' };
 		} else if (diff === -1) {
-			return { color: 'red', date: 'Yesterday' };
+			return { color: colors.error, date: 'Yesterday' };
 		} else if (diff > -6 && diff < 6) {
-			return { color: (diff > 0) ? 'green' : 'red', date: this.getDayOfWeek(date) };		
+			return { color: (diff > 0) ? colors.main : colors.error, date: this.getDayOfWeek(date) };		
 		} 
 
         return {

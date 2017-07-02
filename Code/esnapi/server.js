@@ -21,24 +21,40 @@ var clients = [];
 wss.on('connection', function connection(ws){
     console.log('connected ws');
     ws.on('message', function incoming(message){
-        console.log("incoming");
-        if(message.includes('{"newConnectionxxx":0,')) {
-            var json = JSON.parse(message);
-            
-            var obj = { "client":ws, "room":json.taskId, "personId":json.personId }
-            clients.push(obj);
-        }
-        else {
-            var jsonMsg = JSON.parse(message);    
-            clients.forEach(function each(client){
-                if(client.client != ws && client.room === jsonMsg.taskId && client.client.readyState === WebSocket.OPEN){
-                    console.log("sending: " + jsonMsg.message);
-                    client.client.send(message); 
-                }
-            })
+        try {
+            console.log("incoming message: " + message);
+            if(message.includes('{"newConnectionxxx":0,')) {
+                var json = JSON.parse(message);
+                
+                var obj = { "client":ws, "room":json.taskId, "personId":json.personId };
 
+                /*if the person already connected remove it*/
+                clients.pop(clients.filter(function(client){
+                    return client.personId = json.personId;
+                }));
 
+                clients.push(obj);
+                console.log("online clients: " + clients.length)
+            }
+            else if(message.includes('{"disconnectingClient":')){
+                var jsonMsg = JSON.parse(message);
+                clients.pop(clients.filter(function(client){
+                    return client.personId = jsonMsg.disconnectingClient;
+                }));
+            }
+            else {
+                var jsonMsg = JSON.parse(message);    
+                clients.forEach(function each(client){
+                    if(client.client != ws && client.room === jsonMsg.taskId && client.client.readyState === WebSocket.OPEN){
+                        console.log("sending: " + jsonMsg.message);
+                        client.client.send(message); 
+                    }
+                })
+            }            
+        } catch(err) {
+            console.log(err.message);
         }
+
 
     })
 
@@ -124,7 +140,7 @@ function handleResponse(result,res,errorMessage){
     if(result != undefined && result[0] != undefined ){
         if(result[0].length == 0){
             if(errorMessage == ""){
-                res.status(200).end( "{}" );
+                res.status(200).end( "[]" );
             }
             else{
                 res.status(401).end( responseMsg(errorMessage) );
@@ -289,13 +305,20 @@ app.post('/loginUser',function(req,res){
 
 //  Get Person Info
 apiRoutes.get('/person/:id',function(req,res){
-
     db("CALL GetPerson(" + req.params.id + ")",conn,function(error,result){
         if(handle(error,res,true)){
             handleResponse(result,res,"");
         }
     });
+});
 
+//  Get Network Info
+apiRoutes.get('/network/:id',function(req,res){
+    db("CALL GetNetwork(" + req.params.id + ")",conn,function(error,result){
+        if(handle(error,res,true)){
+            handleResponse(result,res,"");
+        }
+    });
 });
 
 //  Edit Person
@@ -441,6 +464,7 @@ apiRoutes.put('/team',function(req,res){
  * 
  * 
  * 
+ * 
  */
 /**
  * TASKS
@@ -475,7 +499,7 @@ apiRoutes.post('/task',function(req,res){
 apiRoutes.put('/task',function(req,res){
     reqUpload(req,'postatt','personId', function(fileName, params){
         db("CALL EditTask(" + fpInt(params.taskId) + "," + fpVarchar(params.name) + "," + fpVarchar(params.description) + "," + fpDate(params.startDate) +
-                            "," + fpDate(params.dueDate) + "," + fpInt(params.projectId) + "," + fpInt(params.stateId) +
+                            "," + fpDate(params.dueDate) + "," + fpInt(params.projectId) + "," + fpInt(params.stateId) + "," + fpInt(params.progress) +
                             "," + fpVarchar(params.calendarId) + "," + fpInt(params.priorityId) + ");",
         conn, function(error, result){
             if(handle(error,res,true)){
@@ -505,6 +529,34 @@ apiRoutes.post('/taskMessages',function(req,res){
     reqUpload(req,'postatt','personId', function(fileName, params){
         db("CALL CreateTaskMessage(" + fpInt(params.taskId) + "," + fpInt(params.personId) + "," + fpVarchar(params.message) +
                             "," + fpInt(params.messageTypeId) + "," + fpVarchar(params.attachment) + "," + fpInt(params.attachmentTypeId) + ");",
+        conn, function(error, result){
+            if(handle(error,res,true)){
+                var message = JSON.stringify(result[0])
+                if(message === '' || message === undefined){
+                    message = '[{"message": "ok"}]'
+                }
+                res.status(200).end( message );
+            }
+        });
+    });
+});
+
+//  Get CheckListItems
+apiRoutes.get('/checkListItem/:id',function(req,res){
+
+    db("CALL GetCheckListItem(" + req.params.id + ")",conn,function(error,result){
+        if(handle(error,res,true)){
+            handleResponse(result,res,"");
+        }
+    });
+
+});
+
+//  Edit CheckList items
+apiRoutes.put('/checkListItem',function(req,res){
+    reqUpload(req,'','checkListId', function(fileName, params){
+        db("CALL EditCheckListItem(" + fpInt(params.checkListId) + "," + fpInt(params.sortNumber) + "," + fpVarchar(params.item) + "," + fpDate(params.dueDate) +
+                            "," + fpBool(params.isChecked) + "," + fpInt(params.terminatorId) + "," + fpDate(params.terminationDate) + ");",
         conn, function(error, result){
             if(handle(error,res,true)){
                 var message = JSON.stringify(result[0])

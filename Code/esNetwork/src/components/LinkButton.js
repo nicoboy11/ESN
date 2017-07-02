@@ -15,7 +15,7 @@ const LinkButton = ({ title, onPress, style }) => {
 
 const styles = {
     textStyle: {
-        color: colors.main
+        color: colors.clickable
     }
 };
 

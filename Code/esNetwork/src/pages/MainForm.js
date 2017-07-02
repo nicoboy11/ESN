@@ -4,7 +4,7 @@ import { Actions } from 'react-native-router-flux';
 import { CardList, Menu, Header, Form } from '../components';
 import { Database, Config } from '../settings';
 
-const { texts } = Config;
+const { texts, colors } = Config;
 
 class MainForm extends Component {
 
@@ -95,7 +95,7 @@ class MainForm extends Component {
                     ]
                 }
             >
-                <ScrollView style={{ backgroundColor: '#EFEFEF' }}>
+                <ScrollView style={{ backgroundColor: colors.background }}>
                     {this.renderList()}    
                 </ScrollView>                
             </Form>            

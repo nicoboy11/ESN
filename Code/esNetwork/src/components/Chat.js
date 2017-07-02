@@ -65,10 +65,17 @@ class Chat extends Component {
         this.scrollToBottom();
     }
 
-    onError(error) {
-        Alert.alert('Error', error.message);
+    componentWillUnmount() {
+        this.ws.send(`{"disconnectingClient":${this.state.personId}}`);
+        this.ws.close();
     }
-    
+
+    onHandleResponse(response) {
+        console.log(response.status);
+        this.setState({ status: response.status });
+        return response.json();
+    }
+
     onSuccess(responseData) {
         if (this.state.status > 299) {
             console.log('error');
@@ -85,6 +92,10 @@ class Chat extends Component {
         this.getMessages(this.state.personId);
     }
 
+    onError(error) {
+        Alert.alert('Error', error.message);
+    }
+
     onTextChanged(text) {
         this.setState({ input: text });
     }
@@ -95,16 +106,11 @@ class Chat extends Component {
             `taskMessages/${this.props.taskId}/${personId}`, 
             {}, 
             2,
-            this.handleResponse.bind(this), 
+            this.onHandleResponse.bind(this), 
             this.onSuccess.bind(this),
             this.onError.bind(this)
         );
     }
-
-    handleResponse(response) {
-        console.log(response.status);
-        return response.json();
-    } 
 
     scrollToBottom() {
        /* const self = this;
@@ -137,7 +143,7 @@ class Chat extends Component {
                 messageTypeId: 1
             }, 
             1,
-            this.handleResponse.bind(this), 
+            this.onHandleResponse.bind(this), 
             this.onSuccessPost.bind(this),
             this.onError.bind(this)
         );

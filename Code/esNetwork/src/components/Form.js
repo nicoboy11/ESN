@@ -96,6 +96,8 @@ class Form extends Component {
         const {
             leftIcon,
             rightIcon,
+            leftColor,
+            rightColor,
             title
         } = this.props;
 
@@ -118,7 +120,9 @@ class Form extends Component {
                         onPressLeft={this.onLeft.bind(this)}
                         onPressRight={this.onRight.bind(this)}
                         rightIcon={rightIcon}
+                        rightColor={rightColor}
                         leftIcon={leftIcon}
+                        leftColor={leftColor}
                         title={title}
                         isVisible={isVisible}
                     />                

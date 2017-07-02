@@ -4,17 +4,30 @@ import { Config, Helper } from '../settings';
 
 const { colors } = Config;
 
-const TaskBasic = ({ name, dueDate, project, taskId }) => {
-    const { containerStyle, infoContainerStyle, dateContainerStyle, projectTextStyle, taskTextStyle } = styles;
+const TaskBasic = (props) => {
+    const { title, date, subtitle, id, onPress } = props;
+
+    const { 
+        containerStyle, 
+        infoContainerStyle, 
+        dateContainerStyle, 
+        projectTextStyle, 
+        taskTextStyle 
+    } = styles;
+
     return (
-        <TouchableNativeFeedback>
-            <View key={taskId} style={containerStyle}>
+        <TouchableNativeFeedback key={id} onPress={() => onPress(props)}>
+            <View style={containerStyle}>
                 <View style={infoContainerStyle}>
-                    <Text style={projectTextStyle}>{project}</Text>
-                    <Text style={taskTextStyle}>{name}</Text>
+                    <Text style={projectTextStyle}>{subtitle}</Text>
+                    <Text style={taskTextStyle}>{title}</Text>
                 </View>
                 <View style={dateContainerStyle}>
-                    <Text style={{ color: Helper.prettyfyDate(dueDate).color }}>{Helper.prettyfyDate(dueDate).date}</Text>
+                    <Text 
+                        style={{ color: Helper.prettyfyDate(date).color }}
+                    >
+                        {Helper.prettyfyDate(date).date}
+                    </Text>
                 </View>
             </View>
         </TouchableNativeFeedback>

@@ -8,6 +8,7 @@ const Avatar = ({ avatar, color, name, size }) => {
     const sizes = {
         mini: 15,
         small: 20,
+        medium: 24,
         big: 40,
         huge: 120
     };
@@ -18,14 +19,15 @@ const Avatar = ({ avatar, color, name, size }) => {
             height: sizes[size],
             borderRadius: sizes[size] / 2,
             justifyContent: 'center',
-            alignItems: 'center'
+            alignItems: 'center',
+            borderWidth: StyleSheet.hairlineWidth,
+            borderColor: colors.mainDark
         },
         containerStyle: {
             flexDirection: 'row'          
         },
         nameStyle: {
-            fontSize: 12,
-            marginLeft: 5
+            fontSize: 12
         },
         abbrStyle: {
             color: colors.mainText,

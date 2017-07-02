@@ -4,7 +4,7 @@ import { Actions } from 'react-native-router-flux';
 import { Form, CardList, NewCard } from '../components';
 import { Config, Database } from '../settings';
 
-const { texts, network } = Config;
+const { texts, network, colors } = Config;
 const data = Database.realm('Session', { }, 'select', '');
 
 class TaskForm extends Component {
@@ -50,6 +50,10 @@ class TaskForm extends Component {
         }
     }
 
+    openComments(props) {
+        Actions.taskMessage(props.data);
+    } 
+
     handleResponse(response) {
         console.log(response.status);
         this.setState({ status: response.status });
@@ -80,6 +84,7 @@ class TaskForm extends Component {
             <CardList 
                 type='Task'
                 elements={this.state.elements}
+                onPress={(props) => { this.openComments(props); }}
             />
         );        
     }
@@ -95,7 +100,7 @@ class TaskForm extends Component {
                     ]
                 }
             >
-                <ScrollView style={{ backgroundColor: '#EFEFEF' }}>
+                <ScrollView style={{ backgroundColor: colors.background }}>
                     {/*Aqui va para la nueva tarea*/} 
                     <NewCard
                         name={`${data[0].names} ${data[0].firstLastName}`} 
