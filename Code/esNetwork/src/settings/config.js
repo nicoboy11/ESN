@@ -66,6 +66,7 @@ const lang = {
                         newTask: 'New task',
                         comment: 'Comment',
                         teamSelect: 'Select a team',
+                        projectSelect: 'Select a project',
                         finished: 'Finished',
                         active: 'Active',
                         days: {
@@ -91,7 +92,11 @@ const lang = {
                                 10: 'Nov',
                                 11: 'Dec'                            
                         },
-                        editTask: 'Edit task'
+                        editTask: 'Edit task',
+                        taskName: 'Name',
+                        taskDesc: 'Descripcion',
+                        taskStart: 'Start date',
+                        taskDue: 'Due date'
                 },
                 es: {   //Login page
                         email: 'Email',
@@ -126,6 +131,7 @@ const lang = {
                         newTask: 'Nueva Tarea',
                         comment: 'Comentar',
                         teamSelect: 'Seleccione un Equipo',
+                        projectSelect: 'Seleccione un proyecto',
                         finished: 'Terminada',
                         active: 'Activa',                        
                         days: {
@@ -151,7 +157,11 @@ const lang = {
                                 10: 'Nov',
                                 11: 'Dic'                            
                         },
-                        editTask: 'Editar tarea'
+                        editTask: 'Editar tarea',
+                        taskName: 'Nombre',
+                        taskDesc: 'Descripción',
+                        taskStart: 'Fecha de Inicio',
+                        taskDue: 'Fecha límite'
                 }
 
              };

@@ -12,6 +12,9 @@ class ESModal extends Component {
     state = { selectedItem: null, elements: [] };
 
     componentWillMount() {
+        if (this.props.selectedItem !== undefined && this.props.selectedItem !== null) {
+            this.setState({ selectedItem: this.props.selectedItem });
+        }
         this.setState({ visible: this.props.visible });
     }
     
@@ -23,6 +26,12 @@ class ESModal extends Component {
                 case 'teams':
                     request = `teams/${data[0].personId}`;
                     break;
+                case 'projects':
+                    request = `projects/${data[0].personId}`;
+                    break;    
+                case 'stateTypes':
+                    request = 'stateTypes/null';
+                    break;                                        
                 default:
                     break;
             }

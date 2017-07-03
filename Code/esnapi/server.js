@@ -436,6 +436,22 @@ apiRoutes.get('/teams/:personId',function(req,res){
     });
 });
 
+apiRoutes.get('/projects/:personId',function(req,res){
+    db("CALL GetPersonProjects(" + req.params.personId + ");",conn,function(error,result){
+        if(handle(error,res,true)){
+            handleResponse(result,res,"");
+        }
+    });
+});
+
+apiRoutes.get('/stateTypes/:stateTypeId',function(req,res){
+    db("CALL GetStateType(" + req.params.stateTypeId + ");",conn,function(error,result){
+        if(handle(error,res,true)){
+            handleResponse(result,res,"");
+        }
+    });
+});
+
 /*
 apiRoutes.put('/team',function(req,res){
     db("CALL EditTeam(" +   fpInt(req.body.teamId) + "," + fpInt(req.body.name) + "," + fpInt(req.body.abbr) + "," + 

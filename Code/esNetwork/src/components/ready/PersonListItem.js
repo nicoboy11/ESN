@@ -8,7 +8,7 @@ const { colors } = Config;
 class PersonListItem extends Component {
 
     onSelection() {
-        this.props.onSelection(this.props.title, this.props.id);
+        this.props.onSelection(this.props.title, this.props.id, this.props);
     }
 
     render() {

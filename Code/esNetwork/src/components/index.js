@@ -22,3 +22,5 @@ export * from './ready/SimpleModal';
 export * from './ready/PersonListItem';
 export * from './ready/PersonSelect';
 export * from './ready/ModalView';
+export * from './ready/SplitButton';
+export * from './ready/PersonSelect2';

@@ -80,7 +80,7 @@ class DatePicker extends Component {
                     style={
                         [
                             styles.validInputStyle, 
-                            { color: '#444', borderBottomWidth: this.state.borderLine }
+                            { color: colors.mainDark, borderBottomWidth: this.state.borderLine }
                         ]}
                 >
                     {this.state.date}
@@ -150,7 +150,7 @@ const styles = StyleSheet.create({
         fontWeight: '600'
     },
     inactiveLabelStyle: {
-        color: colors.inactive
+        color: colors.main
     },
     validInputStyle: {
         borderBottomColor: colors.lightText,

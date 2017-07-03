@@ -106,7 +106,7 @@ class Input extends Component {
         return (
             <View style={{ flex: 1 }}>
                 <TextInput 
-                    style={[inputStyle, !this.state.isError ? validInputStyle : invalidInputStyle]}
+                    style={[inputStyle, { height: this.props.height }, !this.state.isError ? validInputStyle : invalidInputStyle]}
                     autoCorrect={false}                  
                     underlineColorAndroid='transparent'                       
                     placeholderTextColor={colors.lightText}
@@ -114,12 +114,14 @@ class Input extends Component {
                     keyboardType={this.state.keyboardType}
                     secureTextEntry={this.state.secureTextEntry}
                     onChangeText={this.onTextChanged.bind(this)}
+                    onContentSizeChange={this.props.onContentSizeChange}
                     onBlur={this.onBlur.bind(this)}
                     onFocus={this.onFocus.bind(this)}
                     onSubmitEditing={this.onSubmitEditing.bind(this)}
                     autoCapitalize={this.props.autoCapitalize}
                     returnKeyType={this.props.returnKeyType}
                     placeholder={this.props.label}
+                    multiline={this.props.multiline}
                 />
                 <Text style={styles.errorTextStyle} >{this.renderError()}</Text>
             </View>
@@ -165,6 +167,7 @@ const styles = StyleSheet.create({
     },
     labelTextStyle: {
         fontSize: 12,
+        fontFamily: 'Roboto',
         height: 15,
     },
     activeLabelStyle: {
@@ -172,7 +175,8 @@ const styles = StyleSheet.create({
         fontWeight: '600'
     },
     inactiveLabelStyle: {
-        color: colors.inactive
+        color: colors.main,
+        fontWeight: '200'
     },    
     errorTextStyle: {
         color: colors.error,
@@ -184,7 +188,9 @@ const styles = StyleSheet.create({
         lineHeight: 24,
         padding: 0,
         fontSize: 18,
-        color: '#444'
+        color: colors.mainDark,
+        fontFamily: 'Roboto',
+        fontWeight: '200'
     },
     validInputStyle: {
         borderBottomColor: colors.lightText,

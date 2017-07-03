@@ -59,7 +59,7 @@ class FlatListe extends Component {
                         subtitle={item.higherPerson}
                         icon={item.icon}
                         id={item.personId}
-                        onSelection={(text, value) => this.props.onPress(text, value)}
+                        onSelection={(text, value, data) => this.props.onPress(text, value, data)}
                     />
                 );
             default:
@@ -75,7 +75,7 @@ class FlatListe extends Component {
     }
 
     render() {
-        const { keyEx, data } = this.props;
+        const { keyEx, data, style } = this.props;
 
         return (
             <FlatList 
@@ -83,6 +83,7 @@ class FlatListe extends Component {
                 data={data}
                 ItemSeparatorComponent={this.renderSeparator.bind(this)}                         
                 renderItem={this.renderItem.bind(this)}
+                style={style}
             />
         );
     }

@@ -897,6 +897,25 @@ BEGIN
 
 END$$
 
+DELIMITER $$
+DROP PROCEDURE IF EXISTS `GetPersonProjects`$$
+CREATE PROCEDURE `GetPersonProjects` (	IN _personId int )
+BEGIN
+
+	SELECT 	DISTINCT 
+			p.id as value,
+			p.name as text,
+			p.abbr,
+			p.startDate,
+			p.creatorId,
+			p.dueDate,
+			p.logo
+	FROM project as p
+    LEFT JOIN task as t on t.projectId = p.id
+	WHERE p.creatorId = _personId;
+
+END$$
+
 /*--------------------Project Teams--------------------------*/
 DELIMITER $$
 DROP PROCEDURE IF EXISTS `CreateProjectTeam`$$

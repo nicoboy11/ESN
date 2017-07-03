@@ -31,7 +31,7 @@ CALL CreateStateType('Active');
 CALL CreateStateType('Inactive');
 CALL CreateStateType('In progress');
 CALL CreateStateType('Ready');
-CALL CreateStateType('Finished');
+CALL CreateStateType('Completed');
 CALL CreateStateType('Public');
 CALL CreateStateType('Private');
 
