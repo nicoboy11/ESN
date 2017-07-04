@@ -89,7 +89,7 @@ class SplitButton extends Component {
 const styles = StyleSheet.create({
     containerStyle: {
         flexDirection: 'row', 
-        borderWidth: StyleSheet.hairlineWidth,
+        borderWidth: 1,
         borderColor: colors.main,
         justifyContent: 'space-around',
         margin: 5,
@@ -102,10 +102,11 @@ const styles = StyleSheet.create({
     textStyle: {
         textAlign: 'center',
         paddingTop: 5,
-        paddingBottom: 5
+        paddingBottom: 5,
+        fontFamily: 'Roboto'
     },
     itemTextStyle: {
-        color: colors.secondText
+        color: colors.main
     },
     selectedStyle: {
         backgroundColor: colors.main

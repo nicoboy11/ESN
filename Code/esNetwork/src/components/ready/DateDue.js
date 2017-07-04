@@ -6,7 +6,7 @@ const { colors } = Config;
 
 class DateDue extends Component {
     state = {
-        date: null,
+        date: this.props.date,
         updating: false
     }
 
@@ -48,12 +48,13 @@ class DateDue extends Component {
                         style={{
                             color: (this.state.date !== null) ? 
                                     Helper.prettyfyDate(this.state.date).color :
-                                    colors.clickable 
+                                    colors.clickable,
+                            fontFamily: 'Roboto'
                         }}
                     >
                         {(this.state.date !== null) ? 
                         Helper.prettyfyDate(this.state.date).date : 
-                        'Set date...'}
+                        'Set date'}
                     </Text>
                 </TouchableOpacity>
             </View>

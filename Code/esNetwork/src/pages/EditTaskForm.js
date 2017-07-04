@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
-import { ScrollView, View, Slider, Image, TouchableOpacity, Text, StyleSheet } from 'react-native';
-import { Input, DatePicker, ESModal, SplitButton, PersonSelect2 } from '../components';
+import { ScrollView, View, Slider, Image, TouchableOpacity, Text, StyleSheet, Alert } from 'react-native';
+import { Input, DatePicker, ESModal, SplitButton, PersonSelect2, ListItem2, DateDue, Avatar } from '../components';
 import { Config, Helper } from '../settings';
 const { texts, colors } = Config;
 
@@ -36,7 +36,59 @@ class EditTaskForm extends Component {
         const { rowStyle } = styles;
         return (
             <ScrollView>
-                <View 
+                <ListItem2 title='NAME' editable>
+                    <Text style={{ color: colors.darkGray, fontFamily: 'Roboto' }} >{this.state.name}</Text>
+                </ListItem2>
+                <ListItem2 title='DESCRIPTION' editable>
+                    <Text style={{ color: colors.darkGray, fontFamily: 'Roboto' }} >{this.state.description}</Text>
+                </ListItem2>         
+                <ListItem2 title='START DATE:'>
+                    <DateDue 
+                        date={this.state.startDate} 
+                        selectedDate={() => console.log('date changed')}
+                    />
+                </ListItem2>    
+                <ListItem2 title='DUE DATE:'>
+                    <DateDue 
+                        date={this.state.dueDate} 
+                        selectedDate={() => console.log('date changed')}
+                    />
+                </ListItem2>
+                <ListItem2 title='PROGRESS:' style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+                    <View style={{ flex: 4 }}>  
+                        <Slider 
+                            minimumValue={0}
+                            maximumValue={100}
+                            thumbTintColor={colors.main}
+                            minimumTrackTintColor={colors.main}
+                        />
+                    </View>
+                    <View style={{ flex: 1 }}>
+                        <Text fontFamily='Roboto'>50%</Text>
+                    </View>
+                </ListItem2>    
+                <ListItem2 title='PRIORITY:'>
+                    <SplitButton 
+                        elements={
+                            [
+                                { text: 'None', id: 1 },
+                                { text: 'Low', id: 2 },
+                                { text: 'Medium', id: 3 },
+                                { text: 'High', id: 4, isSelected: true },
+                                { text: 'Urgent', id: 5 },
+                            ]
+                        }
+                    />
+                </ListItem2>            
+                <ListItem2 title='Leader:' editable>
+                    {<Avatar 
+                        avatar={JSON.parse(this.state.leader)[0].avatar}
+                        color={JSON.parse(this.state.leader)[0].theme}
+                        name={JSON.parse(this.state.leader)[0].person}
+                        size='small'
+                    />}
+                </ListItem2>                                                                           
+                {/*<View 
                     style={[
                                 rowStyle, 
                                 { 
@@ -202,7 +254,7 @@ class EditTaskForm extends Component {
                             ]
                         }
                     />
-                </View>
+                </View>*/}
             </ScrollView>
         );
     }

@@ -15,7 +15,8 @@ const LinkButton = ({ title, onPress, style }) => {
 
 const styles = {
     textStyle: {
-        color: colors.clickable
+        color: colors.clickable,
+        fontFamily: 'Roboto'
     }
 };
 
