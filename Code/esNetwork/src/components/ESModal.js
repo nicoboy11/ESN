@@ -29,8 +29,8 @@ class ESModal extends Component {
                 case 'projects':
                     request = `projects/${data[0].personId}`;
                     break;    
-                case 'stateTypes':
-                    request = 'stateTypes/null';
+                case 'stateType':
+                    request = 'stateType/null';
                     break;                                        
                 default:
                     break;

@@ -72,6 +72,18 @@ class PersonSelect extends Component {
         this.setState({ elements: (newSelection) ? this.state.network : this.state.company });
     }
 
+    filter(text) {
+        let result = [];
+        
+        if (text !== '') {
+            result = this.state.elements.filter(
+                (person) => person.person.toLowerCase().includes(text.toLowerCase())
+            );
+        }
+
+        this.setState({ elements: result });        
+    }
+
     render() {
         const { mainStyle, tabStyle, tabItemStyle, tabItemText } = styles;
 

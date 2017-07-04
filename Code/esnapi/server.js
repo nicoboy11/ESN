@@ -444,8 +444,40 @@ apiRoutes.get('/projects/:personId',function(req,res){
     });
 });
 
-apiRoutes.get('/stateTypes/:stateTypeId',function(req,res){
+apiRoutes.get('/stateType/:stateTypeId',function(req,res){
     db("CALL GetStateType(" + req.params.stateTypeId + ");",conn,function(error,result){
+        if(handle(error,res,true)){
+            handleResponse(result,res,"");
+        }
+    });
+});
+
+apiRoutes.get('/gender/:genderId',function(req,res){
+    db("CALL GetGender(" + req.params.genderId + ");",conn,function(error,result){
+        if(handle(error,res,true)){
+            handleResponse(result,res,"");
+        }
+    });
+});
+
+apiRoutes.get('/priority/:priorityId',function(req,res){
+    db("CALL GetPriority(" + req.params.priorityId + ");",conn,function(error,result){
+        if(handle(error,res,true)){
+            handleResponse(result,res,"");
+        }
+    });
+});
+
+apiRoutes.get('/scopeType/:scopeTypeId',function(req,res){
+    db("CALL GetScopeType(" + req.params.scopeTypeId + ");",conn,function(error,result){
+        if(handle(error,res,true)){
+            handleResponse(result,res,"");
+        }
+    });
+});
+
+apiRoutes.get('/roleType/:roleTypeId',function(req,res){
+    db("CALL GetRoleType(" + req.params.roleTypeId + ");",conn,function(error,result){
         if(handle(error,res,true)){
             handleResponse(result,res,"");
         }

@@ -11,6 +11,17 @@ BEGIN
     
 END$$
 
+DELIMITER $$
+DROP procedure IF EXISTS `GetGender`$$
+CREATE PROCEDURE `GetGender` (IN _id varchar(255))
+BEGIN
+
+    SELECT id,description
+    FROM gender
+    WHERE id = coalesce(_id,id);
+    
+END$$
+
 /*================PRIORITY==============================*/
 
 DELIMITER $$
@@ -21,6 +32,17 @@ BEGIN
 	INSERT INTO priority(description) VALUES(_description);
 
     SELECT LAST_INSERT_ID() as id;
+    
+END$$
+
+DELIMITER $$
+DROP procedure IF EXISTS `GetPriority`$$
+CREATE PROCEDURE `GetPriority` (IN _id varchar(255))
+BEGIN
+
+    SELECT id,description
+    FROM priority
+    WHERE id = coalesce(_id,id);
     
 END$$
 
@@ -1271,13 +1293,18 @@ BEGIN
             t.stateId,
             ifnull(t.progress,0) as progress,
             5 as priorityId,
-            'urgent' as priority
+            'urgent' as priority,
+            taskNotif, 
+            chatNotif, 
+            checkNotif,
+            taskNotif + chatNotif + checkNotif as allNotif
     FROM task as t
     INNER JOIN person as per on per.id = t.creatorId
     INNER JOIN taskMember as tm on tm.taskId = t.id
     LEFT JOIN project as p on p.id = t.projectId
     LEFT JOIN projectTeam as pte on pte.projectId = p.id
     LEFT JOIN team as te on te.id = pte.teamId
+    LEFT JOIN vwTaskNotifications as tn on tn.taskId = t.id AND tn.personId = tm.personId
     WHERE tm.personId = _personId
     ORDER BY tm.isPinned desc;
 
@@ -1394,8 +1421,8 @@ BEGIN
     FROM checkListItem
     WHERE checkListId = _checkListId;
 
-	INSERT INTO checkListItem (checkListId, item, dueDate, creatorId, isChecked, sortNumber)
-    VALUES(_checkListId, _item, _dueDate, _creatorId, false, _sortNumber );
+	INSERT INTO checkListItem (checkListId, item, dueDate, creatorId, isChecked, sortNumber, lastChanged)
+    VALUES(_checkListId, _item, _dueDate, _creatorId, false, _sortNumber, NOW() );
 
 END$$
 

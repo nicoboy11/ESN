@@ -11,12 +11,6 @@ CALL CreatePriority('Medium');
 CALL CreatePriority('High');
 CALL CreatePriority('Urgent');
 
-CALL CreateGender('None');
-CALL CreateGender('Low');
-CALL CreateGender('Medium');
-CALL CreateGender('High');
-CALL CreateGender('Urgent');
-
 CALL CreateScopeType('All');
 CALL CreateScopeType('Team');
 CALL CreateScopeType('Project');
