@@ -104,7 +104,6 @@ BEGIN
     
 END$$
 
-
 DELIMITER $$
 DROP FUNCTION IF EXISTS validateLevelLoop$$
 CREATE FUNCTION validateLevelLoop(_id int,_newHigherPersonId int) RETURNS int
@@ -188,7 +187,7 @@ BEGIN
 
 	DECLARE fullName varchar(255) DEFAULT '';
 
-	SELECT concat(	names,' ',firstLastName,ifnull(concat(' ',secondLastName),'')	) INTO fullName
+	SELECT concat(	names,' ',firstLastName/*,ifnull(concat(' ',secondLastName),'')*/	) INTO fullName
     FROM person
     WHERE id = _personId;
 
@@ -280,38 +279,50 @@ BEGIN
 END$$
 
 DELIMITER $$
+DROP VIEW IF EXISTS vwSeenNotification$$
+CREATE VIEW vwSeenNotification AS
+
+	SELECT 	t.id as taskId,
+			tm.personId,
+			SUM(areValidDates(ifnull(tm.lastSeen, '1900-01-02'),ifnull(t.creationDate, '1900-01-01'))) as taskNotif
+	FROM task as t
+	INNER JOIN taskMember as tm on tm.taskId = t.id
+	GROUP BY t.id, tm.personId;
+    
+DELIMITER $$
+DROP VIEW IF EXISTS vwMessageNotification$$
+CREATE VIEW vwMessageNotification AS
+
+	SELECT 	t.id as taskId,
+			tm.personId,
+			SUM(areValidDates(ifnull(tm.lastSeen, '1900-01-02'),ifnull(tmsg.messageDate, '1900-01-01'))) as chatNotif
+	FROM task as t
+	INNER JOIN taskMember as tm on tm.taskId = t.id
+	LEFT JOIN taskMessage as tmsg on tmsg.taskId = t.id
+	GROUP BY t.id, tm.personId;
+
+DELIMITER $$
+DROP VIEW IF EXISTS vwCheckListNotification$$
+CREATE VIEW vwCheckListNotification AS
+
+	SELECT 	t.id as taskId,
+			tm.personId,
+			SUM(areValidDates(ifnull(tm.lastSeen, '1900-01-02'),ifnull(chi.lastChanged, '1900-01-01'))) as checkNotif
+	FROM task as t
+	INNER JOIN taskMember as tm on tm.taskId = t.id
+	LEFT JOIN checkList as ch on ch.taskId = t.id
+	LEFT JOIN checkListItem as chi on chi.checkListId = ch.id
+	GROUP BY t.id, tm.personId;
+
+
+DELIMITER $$
 DROP VIEW IF EXISTS vwTaskNotifications$$
 CREATE VIEW vwTaskNotifications AS
 
 	SELECT SC1.taskId, SC1.personId, taskNotif, chatNotif, checkNotif
 	FROM task as tk
 	INNER JOIN taskMember as tm on tm.taskId = tk.id
-	LEFT JOIN (
-			SELECT 	t.id as taskId,
-					tm.personId,
-					SUM(areValidDates(ifnull(tm.lastSeen, '1900-01-02'),ifnull(t.creationDate, '1900-01-01'))) as taskNotif
-			FROM task as t
-			INNER JOIN taskMember as tm on tm.taskId = t.id
-			GROUP BY t.id, tm.personId
-		) AS SC1 on tk.id = SC1.taskId and SC1.personId = tm.personId
-	LEFT JOIN (    
-			SELECT 	t.id as taskId,
-					tm.personId,
-					SUM(areValidDates(ifnull(tm.lastSeen, '1900-01-02'),ifnull(tmsg.messageDate, '1900-01-01'))) as chatNotif
-			FROM task as t
-			INNER JOIN taskMember as tm on tm.taskId = t.id
-			LEFT JOIN taskMessage as tmsg on tmsg.taskId = t.id
-			GROUP BY t.id, tm.personId
-			) AS SC2 on tk.id = SC2.taskId and SC2.personId = tm.personId
-	LEFT JOIN (        
-			SELECT 	t.id as taskId,
-					tm.personId,
-					SUM(areValidDates(ifnull(tm.lastSeen, '1900-01-02'),ifnull(chi.lastChanged, '1900-01-01'))) as checkNotif
-			FROM task as t
-			INNER JOIN taskMember as tm on tm.taskId = t.id
-			LEFT JOIN checkList as ch on ch.taskId = t.id
-			LEFT JOIN checkListItem as chi on chi.checkListId = ch.id
-			GROUP BY t.id, tm.personId
-			) AS SC3 on tk.id = SC3.taskId and SC3.personId = tm.personId;
-
+	LEFT JOIN vwSeenNotification AS SC1 on tk.id = SC1.taskId and SC1.personId = tm.personId
+	LEFT JOIN vwMessageNotification AS SC2 on tk.id = SC2.taskId and SC2.personId = tm.personId
+	LEFT JOIN vwCheckListNotification AS SC3 on tk.id = SC3.taskId and SC3.personId = tm.personId;
 

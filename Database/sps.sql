@@ -312,9 +312,9 @@ BEGIN
 	DECLARE _isLoop int; 
     
     SET _abbr = getAbbr(_names,_firstLastName);
-    SET _isLoop = 0;
+    SET _isLoop = 1;
     
-    SELECT validateLevelLoop(_id,_higherPersonId) INTO @isLoop;
+    SELECT validateLevelLoop(_id,_higherPersonId) INTO _isLoop;
 
 	IF _isLoop = 0 THEN
     
@@ -398,8 +398,42 @@ BEGIN
 END$$
 
 DELIMITER $$
-DROP procedure IF EXISTS `GetNetwork`$$
-CREATE PROCEDURE `GetNetwork` (IN _id int)
+DROP procedure IF EXISTS `GetFreeHierarchy`$$
+CREATE PROCEDURE `GetFreeHierarchy` ()
+BEGIN
+
+    SELECT	p.id as personId,
+			p.names,	
+			p.firstLastName,
+			p.secondLastName,
+            getFullName(p.id) as person,
+			formatDate(p.dateOfBirth) as dateOfBirth,
+			p.email,
+            p.mobile,
+            p.genderId,
+            g.description as gender,
+			ifnull(p.phone,'') as phone,
+			ifnull(p.ext,'') as ext,
+			formatDate(p.startDate) as startDate,
+			formatDate(p.endDate) as endDate,
+			p.higherPersonId,
+            getFullName(p.higherPersonId) as higherPerson,
+			formatDate(p.lastLogin) as lastLogin,
+			getAvatar(p.id) as avatar,
+			p.description,
+			p.job,
+			p.roleId,
+			p.abbr,
+            ifnull(p.theme,'') as theme
+    FROM person as p
+    INNER JOIN gender as g on g.id = p.genderId
+    WHERE p.higherPersonId is NULL AND p.roleId = 3;
+
+END$$
+
+DELIMITER $$
+DROP procedure IF EXISTS `GetHierarchy`$$
+CREATE PROCEDURE `GetHierarchy` (IN _id int)
 BEGIN
 	
     SELECT	p.id as personId,
@@ -443,8 +477,12 @@ BEGIN
     FROM person
     WHERE email = _email AND password = _password;
     
-    CALL GetPerson(_id);
-
+	IF(_id is null) THEN
+		SIGNAL sqlstate 'ERROR' SET message_text = 'The password or email address is incorrect.';
+	ELSE
+		CALL GetPerson(_id);
+    END IF;
+    
 END$$
 
 /*CALL GetLogin('even.sosa@gmail.com','passwerd');*/
@@ -502,22 +540,39 @@ BEGIN
 
 END$$
 
-
-
 DELIMITER $$
-DROP procedure IF EXISTS `GetHierarchy`$$
-CREATE PROCEDURE `GetHierarchy` (IN _personId varchar(255))
+DROP procedure IF EXISTS `GetNetwork`$$
+CREATE PROCEDURE `GetNetwork` (IN _personId varchar(255))
 BEGIN
-
-	SELECT 	id,
-			getFullName(id) as person,
-			email,
-            getLevelKey(id) as levelKey,
-            getAvatar(id) as avatar
-    FROM person
-	WHERE getLevelKey(id) like concat('%',getLevelKey(_personId),'%')
-    ORDER BY levelKey,person;
-
+   
+    SELECT	p.id as personId,
+			p.names,	
+			p.firstLastName,
+			p.secondLastName,
+            getFullName(p.id) as person,
+			formatDate(p.dateOfBirth) as dateOfBirth,
+			p.email,
+            p.mobile,
+            p.genderId,
+            g.description as gender,
+			ifnull(p.phone,'') as phone,
+			ifnull(p.ext,'') as ext,
+			formatDate(p.startDate) as startDate,
+			formatDate(p.endDate) as endDate,
+			p.higherPersonId,
+            getFullName(p.higherPersonId) as higherPerson,
+			formatDate(p.lastLogin) as lastLogin,
+			getAvatar(p.id) as avatar,
+			p.description,
+			p.job,
+			p.roleId,
+			p.abbr,
+            getLevelKey(p.id) as levelKey,
+            ifnull(p.theme,'') as theme
+    FROM person as p
+    INNER JOIN gender as g on g.id = p.genderId
+	WHERE getLevelKey(p.id) like concat('%',getLevelKey(_personId),'%')
+    ORDER BY levelKey,person;  
 
 END$$
 
@@ -1202,19 +1257,39 @@ BEGIN
 END$$
 
 /*------Task Member----------*/
-    
 DELIMITER $$
 DROP PROCEDURE IF EXISTS `CreateTaskMember`$$
 CREATE PROCEDURE `CreateTaskMember` (	IN _taskId int, 		IN _personId int, 		IN _roleId int, 
-										IN _startDate datetime, IN _endDate datetime	)
+										IN _startDate datetime, IN _endDate datetime,   IN _sessionId int	)
 BEGIN
 
+	DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+    
+		GET DIAGNOSTICS CONDITION 1 @sqlstate = RETURNED_SQLSTATE, @errno = MYSQL_ERRNO, @text = MESSAGE_TEXT; 
+			SET @full_error = CONCAT("ERROR ", @errno, " (", @sqlstate, "): ", @text); 
+		ROLLBACK;
+        
+        INSERT INTO esnLog ( errorDescription, dateOfError, personId )
+        VALUES (@full_error, NOW(), _sessionId );
+        
+		SIGNAL sqlstate 'ERROR' SET message_text = @full_error;
+            
+    END;
+
+	START TRANSACTION;
+    
 		IF(areValidDates(_startDate,_endDate) = FALSE) THEN
 			SIGNAL sqlstate 'ERROR' SET message_text = 'The start date is greater than the end date.';
 		END IF;
 
-		INSERT INTO taskMember ( taskId, personId, roleId, startDate, endDate )
-		VALUES ( _taskId, _personId, _roleId, _startDate, _endDate );
+		INSERT INTO taskMember ( taskId, personId, roleId, startDate, endDate, lastEditorId )
+		VALUES ( _taskId, _personId, _roleId, ifnull(_startDate,NOW()), _endDate, NOW() );
+
+		INSERT INTO taskMessage (taskId, personId, message, messageTypeId, attachment, attachmentTypeId, messageDate)
+		VALUES(_taskId, _sessionId, CONCAT(getFullName(_sessionId),' added ', getFullName(_personId)), 2, NULL, NULL, NOW() );   
+        
+    COMMIT; 
 
 END$$
     
@@ -1240,13 +1315,78 @@ BEGIN
 END$$
 
 DELIMITER $$
-DROP PROCEDURE IF EXISTS `DeleteTaskMember`$$
-CREATE PROCEDURE `DeleteTaskMember` ( IN _taskId int, IN _personId int )
+DROP PROCEDURE IF EXISTS `ChangeLeader`$$
+CREATE PROCEDURE `ChangeLeader` ( IN _taskId int, IN _newLeaderId int, IN _sessionId int )
 BEGIN
 
-	DELETE FROM taskMember 
-	WHERE 	taskId = _taskId AND
-			personId = _personId;
+	DECLARE _oldLeaderId int;
+
+	DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+    
+		GET DIAGNOSTICS CONDITION 1 @sqlstate = RETURNED_SQLSTATE, @errno = MYSQL_ERRNO, @text = MESSAGE_TEXT; 
+			SET @full_error = CONCAT("ERROR ", @errno, " (", @sqlstate, "): ", @text); 
+		ROLLBACK;
+        
+        INSERT INTO esnLog ( errorDescription, dateOfError, personId )
+        VALUES (@full_error, NOW(), _sessionId );
+        
+		SIGNAL sqlstate 'ERROR' SET message_text = @full_error;
+            
+    END;
+
+	START TRANSACTION;
+
+        SELECT personId INTO _oldLeaderId
+        FROM taskMember
+        WHERE taskId = _taskId AND roleId = 2;
+
+		DELETE FROM taskMember 
+		WHERE 	taskId = _taskId AND
+				personId = _newLeaderId;   
+
+		CALL CreateTaskMember( _taskId, _newLeaderId, 2, NOW(), NULL);
+
+		DELETE FROM taskMember 
+		WHERE 	taskId = _taskId AND
+				personId = _oldLeaderId;
+		
+		INSERT INTO taskMessage (taskId, personId, message, messageTypeId, attachment, attachmentTypeId, messageDate)
+		VALUES(_taskId, _sessionId, CONCAT(getFullName(_sessionId),' changed leadership from ', getFullName(_oldLeaderId), ' to ', getFullName(_newLeaderId)), 2, NULL, NULL, NOW() );   
+        
+    COMMIT; 
+
+END$$
+
+DELIMITER $$
+DROP PROCEDURE IF EXISTS `DeleteTaskMember`$$
+CREATE PROCEDURE `DeleteTaskMember` ( IN _taskId int, IN _personId int, _sessionId int )
+BEGIN
+
+	DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+    
+		GET DIAGNOSTICS CONDITION 1 @sqlstate = RETURNED_SQLSTATE, @errno = MYSQL_ERRNO, @text = MESSAGE_TEXT; 
+			SET @full_error = CONCAT("ERROR ", @errno, " (", @sqlstate, "): ", @text); 
+		ROLLBACK;
+        
+        INSERT INTO esnLog ( errorDescription, dateOfError, personId )
+        VALUES (@full_error, NOW(), _sessionId );
+        
+		SIGNAL sqlstate 'ERROR' SET message_text = @full_error;
+            
+    END;
+
+	START TRANSACTION;
+    
+		DELETE FROM taskMember 
+		WHERE 	taskId = _taskId AND
+				personId = _personId;
+                
+		INSERT INTO taskMessage (taskId, personId, message, messageTypeId, attachment, attachmentTypeId, messageDate)
+		VALUES(_taskId, _sessionId, CONCAT(getFullName(_sessionId),' removed ', getFullName(_personId)), 2, NULL, NULL, NOW());                   
+
+    COMMIT;                 
 
 END$$
 
@@ -1293,18 +1433,18 @@ BEGIN
             t.stateId,
             ifnull(t.progress,0) as progress,
             t.priorityId,
-            pr.description as priority/*,
+            pr.description as priority,
             taskNotif, 
             chatNotif, 
             checkNotif,
-            taskNotif + chatNotif + checkNotif as allNotif*/
+            taskNotif + chatNotif + checkNotif as allNotif
     FROM task as t
     INNER JOIN person as per on per.id = t.creatorId
     INNER JOIN taskMember as tm on tm.taskId = t.id
     LEFT JOIN project as p on p.id = t.projectId
     LEFT JOIN projectTeam as pte on pte.projectId = p.id
     LEFT JOIN team as te on te.id = pte.teamId
-    /*LEFT JOIN vwTaskNotifications as tn on tn.taskId = t.id AND tn.personId = tm.personId*/
+    LEFT JOIN vwTaskNotifications as tn on tn.taskId = t.id AND tn.personId = tm.personId
     LEFT JOIN priority as pr on pr.id = t.priorityId
     WHERE tm.personId = _personId
     ORDER BY tm.isPinned desc;

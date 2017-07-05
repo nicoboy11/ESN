@@ -282,7 +282,6 @@ CREATE TABLE task(
     CONSTRAINT FOREIGN KEY (priorityId) REFERENCES priority(id)
 );
 
-
 DROP TABLE IF EXISTS taskMember;
 CREATE TABLE taskMember(
 	taskId int NOT NULL,
@@ -292,6 +291,7 @@ CREATE TABLE taskMember(
     lastSeen datetime,
     startDate datetime,
     endDate datetime,
+    lastEditorId int,
     CONSTRAINT FOREIGN KEY (taskId) REFERENCES task(id),
     CONSTRAINT FOREIGN KEY (personId) REFERENCES person(id),
     CONSTRAINT FOREIGN KEY (roleId) REFERENCES roleType(id),

@@ -41,7 +41,7 @@ CALL CreateMessageType('Log');
 
 
 /*--------------------------MINIMAL UNTIL HERE---------------------------------------------------*/
-
+UPDATE person SET higherPersonId = NULL where id = 1
 CALL CreatePerson('Even','Sosa','Rodríguez','1985-10-23','even.sosa@gmail.com','07731917608','','','password',1,NULL,'','token123',1);
 CALL CreatePerson('Paulina','Orihuela','Pérez','1988-04-20','paulina_o_16@hotmail.com','0448341414939','','1334','password',2,1,'','token123',1);
 
@@ -73,6 +73,7 @@ CALL CreatePerson('Erick','Green','','1982-09-09','erick@testcorp.com','555-3333
 CALL CreatePerson('Amanda','Washington','','1990-05-01','amanda@testcorp.com','555-4444','','1210','password',2,10,'','token123',3);
 CALL CreatePerson('Erik','Davis','','1985-10-29','erick.davis@testcorp.com','555-5555','','1210','password',1,10,'','token123',3);
 CALL CreatePerson('John','Mark','','1985-10-29','john.mark@testcorp.com','555-5555','','1210','password',1,10,'','token123',3);
+CALL CreatePerson('Joshua','Charles','','1985-10-29','joshua.charles@testcorp.com','555-5555','','1210','password',1,NULL,'','token123',3);
 /*---------------------HASTA AQUI ALCANZA---------------------------------*/
 
 CALL CreatePost(1,'This is my first post. Welcome!', 1, NULL, NULL, 1, NULL);
