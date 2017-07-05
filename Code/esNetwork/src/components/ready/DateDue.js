@@ -22,7 +22,7 @@ class DateDue extends Component {
                 const dateISO = Helper.getDateISO(year, month, day);
                 this.setState({ date: dateISO, updating: true });
                 if (this.props.selectedDate !== undefined) {
-                    this.props.selectedDate();
+                    this.props.selectedDate(dateISO);
                 }
             }
         } catch ({ code, message }) {

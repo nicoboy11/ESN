@@ -81,7 +81,8 @@ const style = StyleSheet.create({
         fontSize: 23,
         color: Config.colors.mainDark,
         textAlign: 'center',
-        flex: 3
+        flex: 3,
+        fontFamily: 'Roboto-Light'
     },
     buttonStyles: {
         flex: 1

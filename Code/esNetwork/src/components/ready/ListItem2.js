@@ -5,6 +5,9 @@ import { Config } from '../../settings';
 const { colors } = Config;
 
 class ListItem2 extends Component {
+    onPress() {
+        this.props.onPress();
+    }
 
     render() {
         const { containerStyle, headStyle, contentStyle, titleStyle } = styles;
@@ -13,7 +16,9 @@ class ListItem2 extends Component {
             <View style={containerStyle}>
                 <View style={headStyle}>
                     <Text style={titleStyle}>{this.props.title}:</Text>
-                    {(this.props.editable) ? <LinkButton title='Edit' /> : <View />}
+                    {(this.props.editable) ? 
+                    <LinkButton title='Edit' onPress={this.onPress.bind(this)} /> : 
+                    <View />}
                 </View>
                 <View style={[contentStyle, this.props.style]}>
                     {this.props.children}

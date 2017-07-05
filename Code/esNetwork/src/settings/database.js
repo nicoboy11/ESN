@@ -4,7 +4,8 @@ import { Config } from './';
 /** Local database REALM
  * 
  *  
- *      Here all schemas that will be used in the local database are loaded, they should have an equivalent
+ *      Here all schemas that will be used in the local database are loaded, 
+ *      they should have an equivalent
  *      table in the mysql server. A class should be defined and then the schema
  */
     class Session {}
@@ -31,7 +32,7 @@ import { Config } from './';
     };
 
     class Person {}
-    Session.schema = {
+    Person.schema = {
         personId: 'int',
 		names: 'string',	
 		firstLastName: 'string',
@@ -56,7 +57,7 @@ import { Config } from './';
 		abbr: 'string',
         levelKey: 'string',
         theme: 'string'
-    }    
+    };    
 
     class ScopeType {}
     ScopeType.schema = {
@@ -65,7 +66,7 @@ import { Config } from './';
             id: 'int',
             description: 'string'
         }
-    }
+    };
 
     class RoleType {}
     RoleType.schema = {
@@ -74,7 +75,7 @@ import { Config } from './';
             id: 'int',
             description: 'string'
         }        
-    }
+    };
 
     class StateType {}
     StateType.schema = {
@@ -83,7 +84,7 @@ import { Config } from './';
             id: 'int',
             description: 'string'
         }        
-    }
+    };
 
     class AttachmentType {}
     AttachmentType.schema = {
@@ -92,7 +93,7 @@ import { Config } from './';
             id: 'int',
             description: 'string'
         }
-    }
+    };
 
     class Gender {}
     Gender.schema = {
@@ -101,7 +102,7 @@ import { Config } from './';
             id: 'int',
             description: 'string'
         }
-    }
+    };
 
     class Priority {}
     Priority.schema = {
@@ -110,7 +111,7 @@ import { Config } from './';
             id: 'int',
             description: 'string'
         }
-    }
+    };
 
     class MessageType {}
     MessageType.schema = {
@@ -119,7 +120,7 @@ import { Config } from './';
             id: 'int',
             description: 'string'
         }
-    }        
+    };       
 
 
 /** Database class
@@ -196,7 +197,20 @@ import { Config } from './';
             .catch(onError);  
         }
 
+        static getClass(table) {
+            switch (table) {
+                case 'Session':
+                    return Session;
+                case 'Priority':
+                    return Priority;
+                default:
+                    return Session;
+            }
+        }
+
         static realm(table, fields, action, filter) {
+
+
             const realm = new Realm({ 
                 schema: [Session]   
             });

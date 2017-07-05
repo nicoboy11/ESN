@@ -4,53 +4,51 @@ import { Database } from './settings';
 
 export default class App extends Component {
   componentWillMount() {
-
-      Database.request('GET', 'gender/null', {}, 2,
+      Database.request('GET', 'gender/null', {}, 0,
           this.onHandleResponse.bind(this), 
           this.onSuccessGender.bind(this),
           this.onError.bind(this)
       );  
 
-      Database.request('GET', 'attachmentType/null', {}, 2,
+      Database.request('GET', 'attachmentType/null', {}, 0,
           this.onHandleResponse.bind(this), 
           this.onSuccessAttachmentType.bind(this),
           this.onError.bind(this)
       );  
 
-      Database.request('GET', 'scopeType/null', {}, 2,
+      Database.request('GET', 'scopeType/null', {}, 0,
           this.onHandleResponse.bind(this), 
           this.onSuccessScopeType.bind(this),
           this.onError.bind(this)
       );  
 
-      Database.request('GET', 'roleType/null', {}, 2,
+      Database.request('GET', 'roleType/null', {}, 0,
           this.onHandleResponse.bind(this), 
           this.onSuccessRoleType.bind(this),
           this.onError.bind(this)
       );  
 
-      Database.request('GET', 'stateType/null', {}, 2,
+      Database.request('GET', 'stateType/null', {}, 0,
           this.onHandleResponse.bind(this), 
           this.onSuccessStateType.bind(this),
           this.onError.bind(this)
       );  
 
-      Database.request('GET', 'messageType/null', {}, 2,
+      Database.request('GET', 'messageType/null', {}, 0,
           this.onHandleResponse.bind(this), 
           this.onSuccessMessageType.bind(this),
           this.onError.bind(this)
       );  
 
-      Database.request('GET', 'priority/null', {}, 2,
+      Database.request('GET', 'priority/null', {}, 0,
           this.onHandleResponse.bind(this), 
           this.onSuccessPriority.bind(this),
           this.onError.bind(this)
       );                          
-
   }
 
   onHandleResponse(response) {
-      let data = { response: {}, status: {}};
+      let data = { response: {}, status: {} };
       data.response = response.json();
       data.status = response.status;
       return data;
@@ -113,7 +111,7 @@ export default class App extends Component {
   }            
 
   onError(error) {
-      Alert.alert('Error', error.message);
+      console.log(error.message);
   }
 
   render() {

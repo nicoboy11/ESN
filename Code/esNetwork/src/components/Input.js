@@ -167,7 +167,7 @@ const styles = StyleSheet.create({
     },
     labelTextStyle: {
         fontSize: 12,
-        fontFamily: 'Roboto',
+        fontFamily: 'Roboto-Light',
         height: 15,
     },
     activeLabelStyle: {
@@ -189,7 +189,7 @@ const styles = StyleSheet.create({
         padding: 0,
         fontSize: 18,
         color: colors.mainDark,
-        fontFamily: 'Roboto',
+        fontFamily: 'Roboto-Light',
         fontWeight: '200'
     },
     validInputStyle: {

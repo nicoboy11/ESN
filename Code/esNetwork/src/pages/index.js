@@ -8,3 +8,5 @@ export * from './TaskMessageForm';
 export * from './Dummy';
 export * from './CheckListForm';
 export * from './EditTaskForm';
+export * from './EditTextForm';
+export * from './SelectPersonForm';

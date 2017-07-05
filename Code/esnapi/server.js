@@ -444,7 +444,7 @@ apiRoutes.get('/projects/:personId',function(req,res){
     });
 });
 
-apiRoutes.get('/stateType/:stateTypeId',function(req,res){
+app.get('/stateType/:stateTypeId',function(req,res){
     db("CALL GetStateType(" + req.params.stateTypeId + ");",conn,function(error,result){
         if(handle(error,res,true)){
             handleResponse(result,res,"");
@@ -452,7 +452,7 @@ apiRoutes.get('/stateType/:stateTypeId',function(req,res){
     });
 });
 
-apiRoutes.get('/gender/:genderId',function(req,res){
+app.get('/gender/:genderId',function(req,res){
     db("CALL GetGender(" + req.params.genderId + ");",conn,function(error,result){
         if(handle(error,res,true)){
             handleResponse(result,res,"");
@@ -460,7 +460,7 @@ apiRoutes.get('/gender/:genderId',function(req,res){
     });
 });
 
-apiRoutes.get('/priority/:priorityId',function(req,res){
+app.get('/priority/:priorityId',function(req,res){
     db("CALL GetPriority(" + req.params.priorityId + ");",conn,function(error,result){
         if(handle(error,res,true)){
             handleResponse(result,res,"");
@@ -468,7 +468,7 @@ apiRoutes.get('/priority/:priorityId',function(req,res){
     });
 });
 
-apiRoutes.get('/scopeType/:scopeTypeId',function(req,res){
+app.get('/scopeType/:scopeTypeId',function(req,res){
     db("CALL GetScopeType(" + req.params.scopeTypeId + ");",conn,function(error,result){
         if(handle(error,res,true)){
             handleResponse(result,res,"");
@@ -476,7 +476,7 @@ apiRoutes.get('/scopeType/:scopeTypeId',function(req,res){
     });
 });
 
-apiRoutes.get('/roleType/:roleTypeId',function(req,res){
+app.get('/roleType/:roleTypeId',function(req,res){
     db("CALL GetRoleType(" + req.params.roleTypeId + ");",conn,function(error,result){
         if(handle(error,res,true)){
             handleResponse(result,res,"");
@@ -484,6 +484,21 @@ apiRoutes.get('/roleType/:roleTypeId',function(req,res){
     });
 });
 
+app.get('/attachmentType/:attachmentTypeId',function(req,res){
+    db("CALL GetAttachmentType(" + req.params.attachmentTypeId + ");",conn,function(error,result){
+        if(handle(error,res,true)){
+            handleResponse(result,res,"");
+        }
+    });
+});
+
+app.get('/messageType/:messageTypeId',function(req,res){
+    db("CALL GetMessageType(" + req.params.messageTypeId + ");",conn,function(error,result){
+        if(handle(error,res,true)){
+            handleResponse(result,res,"");
+        }
+    });
+});
 /*
 apiRoutes.put('/team',function(req,res){
     db("CALL EditTeam(" +   fpInt(req.body.teamId) + "," + fpInt(req.body.name) + "," + fpInt(req.body.abbr) + "," + 
@@ -544,9 +559,9 @@ apiRoutes.post('/task',function(req,res){
 });
 
 //  Create a new Task
-apiRoutes.put('/task',function(req,res){
-    reqUpload(req,'postatt','personId', function(fileName, params){
-        db("CALL EditTask(" + fpInt(params.taskId) + "," + fpVarchar(params.name) + "," + fpVarchar(params.description) + "," + fpDate(params.startDate) +
+apiRoutes.put('/task/:taskId',function(req,res){
+    reqUpload(req,'postatt',req.params.taskId, function(fileName, params){
+        db("CALL EditTask(" + fpInt(req.params.taskId) + "," + fpVarchar(params.name) + "," + fpVarchar(params.description) + "," + fpDate(params.startDate) +
                             "," + fpDate(params.dueDate) + "," + fpInt(params.projectId) + "," + fpInt(params.stateId) + "," + fpInt(params.progress) +
                             "," + fpVarchar(params.calendarId) + "," + fpInt(params.priorityId) + ");",
         conn, function(error, result){

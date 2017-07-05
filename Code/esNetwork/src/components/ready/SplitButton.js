@@ -14,10 +14,8 @@ class SplitButton extends Component {
         let elements = this.state.elements;
 
         for (let item of elements) {
-            item.isSelected = false;
-
             if (item.id === element.id) {
-                item.isSelected = true;
+                this.setState({ selectedItem: item.id });
             }
         }
 
@@ -50,7 +48,7 @@ class SplitButton extends Component {
                     style={
                         [
                             itemStyle,
-                            (element.isSelected) ? selectedStyle : {},
+                            (element.id === this.state.selectedItem) ? selectedStyle : {},
                             this.props.style
                         ]
                      }
@@ -62,11 +60,11 @@ class SplitButton extends Component {
                             style={
                                 [
                                     textStyle,
-                                    (element.isSelected) ? selectedTextStyle : itemTextStyle
+                                    (element.id === this.state.selectedItem) ? selectedTextStyle : itemTextStyle
                                 ]
                                 
                             }                    
-                        >{element.text}</Text>
+                        >{(element.text) ? element.text : element.description}</Text>
                     </TouchableOpacity>
                 </View>                
             )

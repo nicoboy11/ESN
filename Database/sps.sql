@@ -1292,19 +1292,20 @@ BEGIN
             'Task' as category,
             t.stateId,
             ifnull(t.progress,0) as progress,
-            5 as priorityId,
-            'urgent' as priority,
+            t.priorityId,
+            pr.description as priority/*,
             taskNotif, 
             chatNotif, 
             checkNotif,
-            taskNotif + chatNotif + checkNotif as allNotif
+            taskNotif + chatNotif + checkNotif as allNotif*/
     FROM task as t
     INNER JOIN person as per on per.id = t.creatorId
     INNER JOIN taskMember as tm on tm.taskId = t.id
     LEFT JOIN project as p on p.id = t.projectId
     LEFT JOIN projectTeam as pte on pte.projectId = p.id
     LEFT JOIN team as te on te.id = pte.teamId
-    LEFT JOIN vwTaskNotifications as tn on tn.taskId = t.id AND tn.personId = tm.personId
+    /*LEFT JOIN vwTaskNotifications as tn on tn.taskId = t.id AND tn.personId = tm.personId*/
+    LEFT JOIN priority as pr on pr.id = t.priorityId
     WHERE tm.personId = _personId
     ORDER BY tm.isPinned desc;
 
