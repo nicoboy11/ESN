@@ -561,7 +561,7 @@ BEGIN
 			ifnull(formatDate(p.endDate), '2100-01-01') as endDate,
 			ifnull(p.higherPersonId,0) as higherPersonId,
             getFullName(p.higherPersonId) as higherPerson,
-            ifnull(getLevelKey(p.higherPersonId),'') as parentKey,
+            ifnull(getLevelKey(p.higherPersonId),'') as parentLevelKey,
 			ifnull(formatDate(p.lastLogin), '2000-01-01') as lastLogin,
 			getAvatar(p.id) as avatar,
 			ifnull(p.description, '') as description,
