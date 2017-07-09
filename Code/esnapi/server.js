@@ -16,11 +16,10 @@ app.use(express.static('uploads'))
 
 var WebSocket = require('ws');
 var wss = new WebSocket.Server({ port: 9998, path:'/task' });
-
 var clients = [];
 
 /** WEB SOCKETS
- * 
+ * tNull = typing is over
  */
     wss.on('connection', function connection(ws){
         console.log('connected ws');
@@ -34,11 +33,20 @@ var clients = [];
 
                     /*if the person already connected remove it*/
                     clients.pop(clients.filter(function(client){
-                        return client.personId = json.personId;
+                        return client.personId === json.personId;
                     }));
 
                     clients.push(obj);
                     console.log("online clients: " + clients.length)
+
+                    /** Mark task as 'seen' */
+                    data.db("CALL EditTaskMember(" + helper.fpInt(json.taskId) + "," + helper.fpInt(json.personId) + ",NULL," + helper.fpDate(helper.getTodayISO()) + 
+                                        ",NULL,NULL,NULL);",
+                    conn, function(error, result){
+                        console.log(JSON.stringify(result[0]));
+                    });
+
+
                 }
                 else if(message.includes('{"disconnectingClient":')){
                     var jsonMsg = JSON.parse(message);
@@ -49,6 +57,7 @@ var clients = [];
                 else {
                     var jsonMsg = JSON.parse(message);    
                     clients.forEach(function each(client){
+                        console.log(client.personId);
                         if(client.client != ws && client.room === jsonMsg.taskId && client.client.readyState === WebSocket.OPEN){
                             console.log("sending: " + jsonMsg.message);
                             client.client.send(message); 
@@ -474,7 +483,7 @@ var apiRoutes = express.Router();
     apiRoutes.post('/taskMessages',function(req,res){
         data.reqUpload(req,'postatt','personId', function(fileName, params){
             data.db("CALL CreateTaskMessage(" + helper.fpInt(params.taskId) + "," + helper.fpInt(params.personId) + "," + helper.fpVarchar(params.message) +
-                                "," + helper.fpInt(params.messageTypeId) + "," + helper.fpVarchar(params.attachment) + "," + helper.fpInt(params.attachmentTypeId) + ");",
+                                "," + helper.fpInt(params.messageTypeId) + "," + helper.fpVarchar(params.fileName) + "," + helper.fpInt(params.attachmentTypeId) + ");",
             conn, function(error, result){
                 if(data.handle(error,res,true)){
                     var message = JSON.stringify(result[0])
@@ -558,8 +567,25 @@ var apiRoutes = express.Router();
  * 
  */
     apiRoutes.delete('/taskMember',function(req,res){
+        data.db("CALL DeleteTaskMember(" + helper.fpInt(req.body.taskId) + "," + helper.fpInt(req.body.personId) + "," + helper.fpInt(req.decoded.personId) + ");",
+        conn, function(error, result){
+            if(data.handle(error,res,true)){
+                var message = JSON.stringify(result[0])
+                if(message === '' || message === undefined){
+                    message = '[{"message": "ok"}]'
+                }
+                res.status(200).end( message );
+            }
+        });
+    });
+/** PUT - TASK MEMBER
+ * 
+ */    
+    apiRoutes.put('/taskMember',function(req,res){
         data.reqUpload(req,'postatt','personId', function(fileName, params){
-            data.db("CALL DeleteTaskMember(" + helper.fpInt(params.taskId) + "," + helper.fpInt(params.personId) + "," + helper.fpInt(req.decoded.personId) + ");",
+            data.db("CALL EditTaskMember(" + helper.fpInt(params.taskId) + "," + helper.fpInt(params.personId) + "," + helper.fpInt(params.roleId) +
+                                        "," + helper.fpDate(params.lastSeen) + 
+                                "," + helper.fpDate(params.startDate) + "," + helper.fpDate(params.endDate) + "," + helper.fpBool(params.isPinned) + ");",
             conn, function(error, result){
                 if(data.handle(error,res,true)){
                     var message = JSON.stringify(result[0])
@@ -570,7 +596,7 @@ var apiRoutes = express.Router();
                 }
             });
         });
-    });
+    });    
 /** =================== FEED ====================================
  * 
  */

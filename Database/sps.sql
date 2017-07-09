@@ -558,25 +558,27 @@ BEGIN
 			ifnull(p.phone,'') as phone,
 			ifnull(p.ext,'') as ext,
 			formatDate(p.startDate) as startDate,
-			formatDate(p.endDate) as endDate,
-			p.higherPersonId,
+			ifnull(formatDate(p.endDate), '2100-01-01') as endDate,
+			ifnull(p.higherPersonId,0) as higherPersonId,
             getFullName(p.higherPersonId) as higherPerson,
-			formatDate(p.lastLogin) as lastLogin,
+            ifnull(getLevelKey(p.higherPersonId),'') as parentKey,
+			ifnull(formatDate(p.lastLogin), '2000-01-01') as lastLogin,
 			getAvatar(p.id) as avatar,
-			p.description,
-			p.job,
+			ifnull(p.description, '') as description,
+			ifnull(p.job, '') as job,
 			p.roleId,
 			p.abbr,
             getLevelKey(p.id) as levelKey,
-            ifnull(p.theme,'') as theme
+            ifnull(p.theme,'') as theme,
+            isParent(p.id) as isParent
     FROM person as p
     INNER JOIN gender as g on g.id = p.genderId
-	WHERE getLevelKey(p.id) like concat('%',getLevelKey(_personId),'%')
+	WHERE getLevelKey(p.id) like concat('%',getLevelKey(_personId),'%') 
     ORDER BY levelKey,person;  
 
 END$$
 
-
+CALL GetNetwork(1);
 /*===================================================================================================*/
 /*===================================================================================================*/
 /*=========================================POSTS ============================================*/
@@ -1126,7 +1128,7 @@ CREATE PROCEDURE `CreateTask` (	IN _name varchar(255), 	IN _description text, 		
 								IN _dueDate datetime, 	IN _creatorId int, 		
                                 IN _projectId int,		IN _calendarId varchar(255), IN _priorityId int)
 BEGIN
-
+	DECLARE _taskId int;
 	DECLARE EXIT HANDLER FOR SQLEXCEPTION
     BEGIN
     
@@ -1150,9 +1152,11 @@ BEGIN
 		INSERT INTO task ( name, description, startDate, dueDate, creationDate, creatorId, projectId, calendarId, priorityId, progress )
 		VALUES ( _name, _description, _startDate, _dueDate, NOW(), _creatorId, _projectId, _calendarId,  _priorityId, 0);
 		
-		CALL CreateTaskMember(LAST_INSERT_ID(), _creatorId, 1, NOW(), NULL);   
+        SET _taskId = LAST_INSERT_ID();
+        
+		CALL CreateTaskMember(_taskId, _creatorId, 1, NOW(), NULL, _creatorId);   
 		
-		CALL GetTask(LAST_INSERT_ID());
+		CALL GetTask(_taskId);
         
     COMMIT;        
 
@@ -1194,7 +1198,7 @@ BEGIN
             t.description,
             formatDate(t.startDate) as startDate,
             formatDate(t.dueDate) as dueDate,
-            getJsonMembers(t.creatorId) as creator,
+            getJsonMembers(t.creatorId,1) as creator,
             p.id as projectId,
             p.name as projectName,
             p.abbr as projectabbr,
@@ -1284,10 +1288,12 @@ BEGIN
 		END IF;
 
 		INSERT INTO taskMember ( taskId, personId, roleId, startDate, endDate, lastEditorId )
-		VALUES ( _taskId, _personId, _roleId, ifnull(_startDate,NOW()), _endDate, NOW() );
+		VALUES ( _taskId, _personId, _roleId, ifnull(_startDate,NOW()), _endDate, _sessionId );
 
 		INSERT INTO taskMessage (taskId, personId, message, messageTypeId, attachment, attachmentTypeId, messageDate)
 		VALUES(_taskId, _sessionId, CONCAT(getFullName(_sessionId),' added ', getFullName(_personId)), 2, NULL, NULL, NOW() );   
+        
+		CALL GetPerson(_personId);        
         
     COMMIT; 
 
@@ -1311,6 +1317,12 @@ BEGIN
         isPinned = coalesce(_isPinned, isPinned)
 	WHERE 	taskId = _taskId AND
 			personId = _personId;
+            
+	IF(_lastSeen is not null) THEN
+		SELECT taskId, concat('Seen by: ', group_concat( getFullName(personId) separator ', ' )) as seen
+		FROM vwMessageNotification
+		WHERE taskId = _taskId and chatNotif = 0;
+    END IF;
 
 END$$
 
@@ -1345,7 +1357,7 @@ BEGIN
 		WHERE 	taskId = _taskId AND
 				personId = _newLeaderId;   
 
-		CALL CreateTaskMember( _taskId, _newLeaderId, 2, NOW(), NULL);
+		CALL CreateTaskMember( _taskId, _newLeaderId, 2, NOW(), NULL, _sessionId);
 
 		DELETE FROM taskMember 
 		WHERE 	taskId = _taskId AND
@@ -1353,6 +1365,8 @@ BEGIN
 		
 		INSERT INTO taskMessage (taskId, personId, message, messageTypeId, attachment, attachmentTypeId, messageDate)
 		VALUES(_taskId, _sessionId, CONCAT(getFullName(_sessionId),' changed leadership from ', getFullName(_oldLeaderId), ' to ', getFullName(_newLeaderId)), 2, NULL, NULL, NOW() );   
+        
+        CALL GetPerson(_newLeaderId);
         
     COMMIT; 
 

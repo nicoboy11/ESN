@@ -33,30 +33,36 @@ import { Config } from './';
 
     class Person {}
     Person.schema = {
-        personId: 'int',
-		names: 'string',	
-		firstLastName: 'string',
-		secondLastName: 'string',
-        person: 'string',
-		dateOfBirth: 'date',
-		email: 'string',
-        mobile: 'string',
-        genderId: 'int',
-        gender: 'string',
-		phone: 'string',
-		ext: 'string',
-		startDate: 'date',
-		endDate: 'date',
-		higherPersonId: 'int',
-        higherPerson: 'string',
-		lastLogin: 'date',
-		avatar: 'string',
-		description: 'string',
-		job: 'string',
-		roleId: 'int',
-		abbr: 'string',
-        levelKey: 'string',
-        theme: 'string'
+        name: 'Person',
+        properties: {
+            personId: 'int',
+            names: 'string',	
+            firstLastName: 'string',
+            secondLastName: 'string',
+            person: 'string',
+            dateOfBirth: 'date',
+            email: 'string',
+            mobile: 'string',
+            genderId: 'int',
+            gender: 'string',
+            phone: 'string',
+            ext: 'string',
+            startDate: 'date',
+            endDate: { type: 'date', optional: true },
+            higherPersonId: 'int',
+            higherPerson: 'string',
+            parentLevelKey: 'string',
+            lastLogin: 'date',
+            avatar: 'string',
+            description: 'string',
+            job: 'string',
+            roleId: 'int',
+            abbr: 'string',
+            levelKey: 'string',
+            theme: 'string',
+            isParent: 'bool',
+            isSync: 'bool'
+        }
     };    
 
     class ScopeType {}
@@ -127,6 +133,34 @@ import { Config } from './';
  *      This class controlls communication between the app and the databases (both local and remote)
  */
     class Database {
+        static sync(table, data, callback) {
+            switch (table) {
+                case 'person':
+                    for (let i = 0; i < data.length; i++) {
+                        let formBody = new FormData();
+                        formBody.append('higherPersonId', data[i].higherPersonId.toString());
+
+                        fetch(`${Config.network.server}person/${data[i].personId}`, { 
+                            method: 'PUT', 
+                            headers: Database.getHeader(1),
+                            body: formBody
+                        })
+                        .then((response) => response.json())
+                        .then((responseJson) => {
+                            Database.realm(
+                                'Person', 
+                                { isSync: true }, 
+                                'edit', 
+                                `personId=${responseJson[0].personId}`
+                            );
+                            callback(true, responseJson);
+                        })
+                        .catch((error) => callback(false, error)); 
+                    }
+                    return;
+                default: return;
+            }
+        }
 
         static getHeader(headerType) {
             const data = Database.realm('Session', { }, 'select', '');
@@ -156,7 +190,7 @@ import { Config } from './';
             }
         }
 
-        /**
+        /** REQUESTS TO NODE SERVER
          * 
          * @param {*} type is it a POST, GET, POST or DELETE?
          * @param {*} sp Which procedure is being called?
@@ -166,36 +200,36 @@ import { Config } from './';
          * @param {*} onSuccess 
          * @param {*} onError 
          */
-        static request(type, sp, params, headerType, onStart, onSuccess, onError) {
-            let data = (Object.keys(params).length === 0) ? null : JSON.stringify(params);
-            
-            if (type === 'POST' || type === 'PUT') {
-                if (headerType === 1) {
-                    data = new FormData();
-                    const keys = Object.keys(params);
-                    
-                    for (let i = 0; i < keys.length; i++) {
-                        const key = keys[i];                    
-                        if (params[key] !== undefined) {
-                            data.append(key, params[key]);
+            static request(type, sp, params, headerType, onStart, onSuccess, onError) {
+                let data = (Object.keys(params).length === 0) ? null : JSON.stringify(params);
+                
+                if (type === 'POST' || type === 'PUT') {
+                    if (headerType === 1) {
+                        data = new FormData();
+                        const keys = Object.keys(params);
+                        
+                        for (let i = 0; i < keys.length; i++) {
+                            const key = keys[i];                    
+                            if (params[key] !== undefined) {
+                                data.append(key, params[key]);
+                            }
                         }
                     }
                 }
-            }
 
-            if (type === 'GET') {
-                data = null;
-            }
+                if (type === 'GET') {
+                    data = null;
+                }
 
-            fetch(Config.network.server + sp, { 
-                method: type, 
-                headers: Database.getHeader(headerType),
-                body: data
-            })
-            .then(onStart)
-            .then(onSuccess)
-            .catch(onError);  
-        }
+                fetch(Config.network.server + sp, { 
+                    method: type, 
+                    headers: Database.getHeader(headerType),
+                    body: data
+                })
+                .then(onStart)
+                .then(onSuccess)
+                .catch(onError);  
+            }
 
         static getClass(table) {
             switch (table) {
@@ -203,43 +237,96 @@ import { Config } from './';
                     return Session;
                 case 'Priority':
                     return Priority;
+                case 'Person':
+                    return Person;
                 default:
                     return Session;
             }
         }
 
-        static realm(table, fields, action, filter) {
+        static realmToObject(data) {
+            let array = [];
+            for (let i = 0; i < data.length; i++) {
+                let object = {};
 
+                for (let property in Person.schema.properties) {
+                    object[property] = data[i][property];
+                }
 
-            const realm = new Realm({ 
-                schema: [Session]   
-            });
-
-            let data = realm.objects(table);
-
-            switch (action) {
-                case 'create':
-                    realm.write(() => {
-                        if (data[0] === undefined) {
-                            realm.create(table, fields);
-                        } else {
-                            data[0].token = fields.token;
-                            data[0].personId = fields.personId;
-                        }
-                    });
-
-                    return data[0].token;
-                case 'select':
-                    return data;
-                case 'delete':
-                    realm.write(() => {
-                        realm.delete(data);
-                    });      
-                    return data;          
-                default:
-                    return data;
+                array.push(object);
             }
+
+            return array;
         }
+
+        /** editRealm - update a realm object
+         *  
+         * @param {*} object the object to edit
+         * @param {*} fields the data to edit
+         */
+        static editRealm(table, object, fields) {
+            let objClass = Database.getClass(table);
+
+            for (let property in fields) {
+                object[property]
+            }
+
+            return object;
+        }
+
+        /** REALM - Manage local database
+         * 
+         * @param {*} table 
+         * @param {*} fields 
+         * @param {*} action 
+         * @param {*} filter 
+         */
+            static realm(table, fields, action, filter) {
+                const realm = new Realm({ 
+                    schema: [Session, Person]   
+                });
+
+                let data;
+
+                if (filter !== undefined && filter !== '') {
+                    data = realm.objects(table).filtered(filter);
+                } else {
+                    data = realm.objects(table);
+                }
+
+                switch (action) {
+                    case 'create':
+                        realm.write(() => {
+                            if (data[0] === undefined) {
+                                fields.forEach((row) => {
+                                    realm.create(table, row);
+                                    console.log('inserted: ' + row.names);
+                                });
+                            } else {
+                                data[0].token = fields.token;
+                                data[0].personId = fields.personId;
+                            }
+                        });
+
+                        return data[0].token;
+                    case 'select':
+                        return data;
+                    case 'edit':
+                        realm.write(() => {
+                            for (let property in fields) {
+                                data[0][property] = fields[property];
+                            }                            
+                        });
+                        return data;
+                    case 'delete':
+                        realm.write(() => {
+                            realm.delete(data);
+                        });      
+                        return data;          
+                    default:
+                        return data;
+                }
+            }
 
     }
 

@@ -4,7 +4,7 @@ import { Database } from './settings';
 
 export default class App extends Component {
   componentWillMount() {
-      Database.request('GET', 'gender/null', {}, 0,
+     /* Database.request('GET', 'gender/null', {}, 0,
           this.onHandleResponse.bind(this), 
           this.onSuccessGender.bind(this),
           this.onError.bind(this)
@@ -44,7 +44,7 @@ export default class App extends Component {
           this.onHandleResponse.bind(this), 
           this.onSuccessPriority.bind(this),
           this.onError.bind(this)
-      );                          
+      );                      */       
   }
 
   onHandleResponse(response) {
@@ -52,6 +52,14 @@ export default class App extends Component {
       data.response = response.json();
       data.status = response.status;
       return data;
+  }
+
+  onSuccessNetwork(responseData) {
+      if (responseData.status > 299) {
+          console.log('error');
+      } else {
+          Database.realm('Person', responseData.response, 'create', '');
+      }
   }
 
   onSuccessGender(responseData) {

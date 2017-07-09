@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { ScrollView, ActivityIndicator, Alert } from 'react-native';
 import { Actions } from 'react-native-router-flux';
-import { Form, CardList, NewCard } from '../components';
+import { Form, CardList, NewCard, FlatListe } from '../components';
 import { Config, Database } from '../settings';
 
 const { texts, network, colors } = Config;
@@ -81,11 +81,13 @@ class TaskForm extends Component {
         }
 
         return (
-            <CardList 
-                type='Task'
-                elements={this.state.elements}
+            <FlatListe 
+                keyEx='taskId'
+                itemType='task'
+                data={this.state.elements}
+                initialNumToRender={3}
                 onPress={(props) => { this.openComments(props); }}
-            />
+            />                       
         );        
     }
 
@@ -100,7 +102,7 @@ class TaskForm extends Component {
                     ]
                 }
             >
-                <ScrollView style={{ backgroundColor: colors.background }}>
+                <ScrollView style={{  }}>
                     {/*Aqui va para la nueva tarea*/} 
                     <NewCard
                         name={`${data[0].names} ${data[0].firstLastName}`} 

@@ -22,10 +22,13 @@ class TaskMessageForm extends Component {
                 newSliderValue: this.props.progress,
                 isChatVisible: true,
                 isEditVisible: false,
-                isLeaderVisible: false
+                isLeaderVisible: false,
+                taskData: this.props
             }
 
-
+    onUpdateChild(updatedTask) {
+        this.setState({ taskData: updatedTask });
+    }
 
     renderForm() {
         if (this.state.isChatVisible) {
@@ -33,7 +36,7 @@ class TaskMessageForm extends Component {
         } else if (this.state.isCheckVisible) {
             return <CheckListForm />;
         } else if (this.state.isEditVisible) {
-            return <EditTaskForm taskData={this.props} />;
+            return <EditTaskForm onUpdateChild={this.onUpdateChild.bind(this)} taskData={this.props} />;
         }
 
         return <View />;
@@ -46,7 +49,9 @@ class TaskMessageForm extends Component {
         return (
             <Form
                 leftIcon='back'
-                title={this.props.name}
+                data={this.state.taskData}
+                title={this.state.taskData.name}
+                shadow={false}
             >
                 <View style={mainContainerStyle}>
                     <TouchableOpacity

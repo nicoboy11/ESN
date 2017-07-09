@@ -17,7 +17,9 @@ class SelectPersonForm extends Component {
     }
 
     onPressLeft() {
-        this.props.close();
+        if (this.props.onClose) {
+            this.props.onClose();
+        }
     }
 
     render() {

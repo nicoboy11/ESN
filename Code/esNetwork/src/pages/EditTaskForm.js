@@ -9,7 +9,8 @@ import {
     ListItem2, 
     DateDue, 
     Avatar, 
-    LinkButton
+    LinkButton,
+    FlatListe
 } from '../components';
 import { EditTextForm, SelectPersonForm } from './';
 import { Config, Helper, Database } from '../settings';
@@ -32,19 +33,46 @@ class EditTaskForm extends Component {
             isNameEditorVisible: false,
             isDescriptionEditorVisible: false,
             isLeaderEditorVisible: false,
+            isCollaboratorEditorVisible: false,
             processingProgress: false,
             project: { text: props.taskData.projectName, value: props.taskData.projectId },
             showAll: false,
-            priority
+            priority,
+            collaborator2Del: null
         };
     }
 
     componentWillMount() {
-
+        this.setState({ leader: JSON.parse(this.state.leader)[0] });
+        this.setState({ collaborators: JSON.parse(this.state.collaborators) });
     }
 
     onLeaderSelected(text, value) {
-        
+        Database.request(
+            'PUT',
+            `task/${this.state.taskId}/leader/${value}`, 
+            { personId: value },
+            1,
+            this.onResponse.bind(this),
+            this.onSuccessLeader.bind(this),
+            this.onError.bind(this)
+        );        
+    }
+
+    onCollaboratorSelected(text, value) {
+        Database.request(
+            'POST',
+            'taskMember', 
+            { 
+                taskId: this.state.taskId,
+                personId: value,
+                roleId: 3
+            },
+            1,
+            this.onResponse.bind(this),
+            this.onSuccessCollaborator.bind(this),
+            this.onError.bind(this)
+        );          
     }
 
     onChangeDateStart(date) {
@@ -58,6 +86,7 @@ class EditTaskForm extends Component {
     }
 
     onPrioritySelection(priorityId) {
+        this.state({ priorityId });
         this.saveTask({ priorityId });
     }
 
@@ -76,22 +105,59 @@ class EditTaskForm extends Component {
         this.saveTask({ progress: this.state.progress });        
     }
 
+    onPress2Delete(name, id) {
+        Alert.alert(
+            'Remove',
+            `Are you sure you want to remove ${name}`,
+            [
+                { text: 'Yes', onPress: () => this.removeCollaborator(id) },
+                { text: 'No', onPress: () => console.log('no') }
+            ]
+        );
+    }
+
     onResponse(response) {
-        let data = { response: {}, status: {} };
-        data.response = response.json();
-        data.status = response.status;
-        return data;
+        this.setState({ status: response.status });
+        return response.json();
     }  
 
     onError(error) {
-        Alert.alert('Error', error.message);
         if (this.state.status === 403) {
             Alert.alert('Authentication Error');
         } else {
-            Alert.alert('Unable to save the data');
+            Alert.alert('Unable to save the data.', `Code: ${this.state.status}, ${error.message}`);
             this.startDate.updating = false;
             this.dueDate.updating = false;
         }
+    }
+
+    onSuccessLeader(responseData) {
+        if (this.state.status > 299) {
+            console.log('error');
+        } else {
+            this.setState({ leader: responseData[0], isLeaderEditorVisible: false });
+        }        
+    }
+
+    onSuccessCollaborator(responseData) {
+        if (this.state.status > 299) {
+            console.log('error');
+        } else {
+            this.setState({ collaborators: [...this.state.collaborators, responseData[0]], isCollaboratorEditorVisible: false });
+        }        
+    }
+
+    onSuccessDelete(responseData) {
+        // Get new array without the removed element
+        const result = this.state.collaborators.filter(
+            (person) => person.personId !== this.state.collaborator2Del
+        );        
+
+        if (this.state.status > 299) {
+            console.log('error');
+        } else {
+            this.setState({ collaborators: result, isCollaboratorEditorVisible: false });
+        }        
     }
 
     onSuccess(responseData) {
@@ -114,8 +180,23 @@ class EditTaskForm extends Component {
 
             this.startDate.updating = false;
             this.dueDate.updating = false;
+            this.updateParent();
         }
     }    
+
+    updateParent() {
+        const newState = {
+                name: this.state.name, 
+                description: this.state.description, 
+                startDate: this.state.newStartDate,
+                dueDate: this.state.newDueDate,
+                collaborators: this.state.collaborators,
+                leader: this.state.leader,
+                progress: this.state.progress,
+                priorityId: this.state.priorityId
+        };
+        this.props.onUpdateChild(newState);
+    }
 
     saveTask(data) {
         Database.request(
@@ -127,6 +208,22 @@ class EditTaskForm extends Component {
             this.onSuccess.bind(this),
             this.onError.bind(this)
         );
+    }
+
+    removeCollaborator(personId) {
+        this.setState({ collaborator2Del: personId });
+        Database.request(
+            'DELETE',
+            'taskMember', 
+            { 
+                taskId: this.state.taskId,
+                personId
+            },
+            2,
+            this.onResponse.bind(this),
+            this.onSuccessDelete.bind(this),
+            this.onError.bind(this)
+        );           
     }
 
     projectSelected(text, value) {
@@ -220,36 +317,54 @@ class EditTaskForm extends Component {
                         />
                     </ListItem2>
                 {/* Leader */}         
-                <ListItem2 
-                    title='LEADER:' 
-                    editable
-                    onPress={() => this.setState({ isLeaderEditorVisible: true })}
-                >
-                    {<Avatar 
-                        avatar={JSON.parse(this.state.leader)[0].avatar}
-                        color={JSON.parse(this.state.leader)[0].theme}
-                        name={JSON.parse(this.state.leader)[0].person}
-                        size='medium'
-                    />}
-                </ListItem2>         
-                <Modal
-                    animationType='slide'
-                    onRequestClose={() => console.log('closing')}
-                    visible={this.state.isLeaderEditorVisible}                
-                >
-                    <SelectPersonForm 
-                        title='Select a leader' 
-                        onSelection={this.onLeaderSelected.bind(this)}
-                    />
-                </Modal>
-                <ListItem2 title='COLLABORATORS:' editable>
-                    {<Avatar 
-                        avatar={JSON.parse(this.state.collaborators)[1].avatar}
-                        color={JSON.parse(this.state.collaborators)[1].theme}
-                        name={JSON.parse(this.state.collaborators)[1].person}
-                        size='medium'
-                    />}
-                </ListItem2>
+                    <ListItem2 
+                        title='LEADER:' 
+                        editable
+                        onPress={() => this.setState({ isLeaderEditorVisible: true })}
+                    >
+                        {<Avatar 
+                            avatar={this.state.leader.avatar}
+                            color={this.state.leader.theme}
+                            name={this.state.leader.person}
+                            size='medium'
+                        />}
+                    </ListItem2>         
+                    <Modal
+                        animationType='slide'
+                        onRequestClose={() => console.log('closing')}
+                        visible={this.state.isLeaderEditorVisible}                
+                    >
+                        <SelectPersonForm 
+                            title='Select a leader' 
+                            onSelection={this.onLeaderSelected.bind(this)}
+                            onClose={() => this.setState({ isLeaderEditorVisible: false })}
+                        />
+                    </Modal>
+                {/* Collaborators */}    
+                    <ListItem2 
+                        title='COLLABORATORS:' 
+                        editable
+                        onPress={() => this.setState({ isCollaboratorEditorVisible: true })}
+                    >
+                        <FlatListe 
+                            keyEx='personId'
+                            data={this.state.collaborators}
+                            itemType='avatar'
+                            horizontal
+                            onPress={this.onPress2Delete.bind(this)}
+                        />
+                    </ListItem2>
+                    <Modal
+                        animationType='slide'
+                        onRequestClose={() => console.log('closing')}
+                        visible={this.state.isCollaboratorEditorVisible}                
+                    >
+                        <SelectPersonForm 
+                            title='Select a collaborator' 
+                            onSelection={this.onCollaboratorSelected.bind(this)}
+                            onClose={() => this.setState({ isCollaboratorEditorVisible: false })}
+                        />
+                    </Modal>                
                 <ListItem2 title='PROJECT:'>
                     {
                     <View>

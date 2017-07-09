@@ -232,6 +232,18 @@ BEGIN
 	RETURN date_format(_date,'%Y-%m-%d %T');
 END$$
 
+DELIMITER $$
+DROP FUNCTION IF EXISTS isParent$$
+CREATE FUNCTION isParent(_personId int) RETURNS bool
+BEGIN
+	DECLARE _isParent bool DEFAULT false;
+    
+	SELECT 	CASE WHEN count(*) > 0 THEN true ELSE false END INTO _isParent
+	FROM person
+	WHERE higherPersonId = _personId;
+    
+    RETURN _isParent;
+END$$
 
 DELIMITER $$
 DROP FUNCTION IF EXISTS isValidMessenger$$
@@ -259,7 +271,7 @@ CREATE FUNCTION getJsonMembers(_taskId int, _roleId int) RETURNS text
 BEGIN
 
 	DECLARE _members text;
-
+	SET SESSION group_concat_max_len = 1000000;
     SELECT concat('[',
 					group_concat( concat(
                     '{',
@@ -287,7 +299,7 @@ CREATE VIEW vwSeenNotification AS
 			SUM(areValidDates(ifnull(tm.lastSeen, '1900-01-02'),ifnull(t.creationDate, '1900-01-01'))) as taskNotif
 	FROM task as t
 	INNER JOIN taskMember as tm on tm.taskId = t.id
-	GROUP BY t.id, tm.personId;
+	GROUP BY t.id, tm.personId;$$
     
 DELIMITER $$
 DROP VIEW IF EXISTS vwMessageNotification$$
@@ -299,7 +311,7 @@ CREATE VIEW vwMessageNotification AS
 	FROM task as t
 	INNER JOIN taskMember as tm on tm.taskId = t.id
 	LEFT JOIN taskMessage as tmsg on tmsg.taskId = t.id
-	GROUP BY t.id, tm.personId;
+	GROUP BY t.id, tm.personId;$$
 
 DELIMITER $$
 DROP VIEW IF EXISTS vwCheckListNotification$$
@@ -312,7 +324,7 @@ CREATE VIEW vwCheckListNotification AS
 	INNER JOIN taskMember as tm on tm.taskId = t.id
 	LEFT JOIN checkList as ch on ch.taskId = t.id
 	LEFT JOIN checkListItem as chi on chi.checkListId = ch.id
-	GROUP BY t.id, tm.personId;
+	GROUP BY t.id, tm.personId;$$
 
 
 DELIMITER $$
@@ -324,5 +336,11 @@ CREATE VIEW vwTaskNotifications AS
 	INNER JOIN taskMember as tm on tm.taskId = tk.id
 	LEFT JOIN vwSeenNotification AS SC1 on tk.id = SC1.taskId and SC1.personId = tm.personId
 	LEFT JOIN vwMessageNotification AS SC2 on tk.id = SC2.taskId and SC2.personId = tm.personId
-	LEFT JOIN vwCheckListNotification AS SC3 on tk.id = SC3.taskId and SC3.personId = tm.personId;
+	LEFT JOIN vwCheckListNotification AS SC3 on tk.id = SC3.taskId and SC3.personId = tm.personId;$$
+
+
+
+
+
+
 

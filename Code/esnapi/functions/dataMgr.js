@@ -1,4 +1,5 @@
 var formidable = require("formidable");
+var config = require('../config.json');
 
 var self = module.exports = {
         

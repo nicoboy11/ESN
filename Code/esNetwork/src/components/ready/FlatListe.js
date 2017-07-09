@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
-import { View, FlatList, StyleSheet } from 'react-native';
-import { CheckListItem, ListItem, PersonListItem } from '../';
+import { View, FlatList, StyleSheet, TouchableOpacity } from 'react-native';
+import { CheckListItem, ListItem, PersonListItem, Avatar, TaskCard3 } from '../';
 import { Config } from '../../settings';
 
 const { colors } = Config;
@@ -9,9 +9,9 @@ const { colors } = Config;
  *  Props:
  *      separator - boolean - Should a separator be rendered? 
  *      key - value - a unique id for each cell (will be extracted from the data)
- *      data - the datasource (an array of objects)
- *      onPress - function for when button is pressed
- *      itemType - checkList
+ *      data - the datasource (an array of objects) (mandatory)
+ *      onPress - function for when item is pressed
+ *      itemType - checkList, people, avatar 
  * 
  * ---CheckListItem
  *      chkListProcessing 
@@ -53,14 +53,46 @@ class FlatListe extends Component {
                         avatar={{
                                 avatar: item.avatar,
                                 color: item.theme,
-                                size: 'big'
+                                size: 'medium'
                         }}
                         title={item.person}
-                        subtitle={item.higherPerson}
-                        icon={item.icon}
+                        subtitle={item.levelKey}
+                        icon={this.props.icon}
+                        onIconPress={(rawData) => this.props.onIconPress(rawData)}
                         id={item.personId}
-                        onSelection={(text, value, data) => this.props.onPress(text, value, data)}
+                        isParent={item.isParent}
+                        chevron={this.props.chevron}
+                        isOpen={item.isOpen}
+                        rawData={item}
+                        onPress={(text, value, data) => this.props.onPress(text, value, data)}
                     />
+                );
+            case 'avatar':
+                return (
+                    <View
+                        style={{ marginRight: 5 }}
+                    >
+                        <TouchableOpacity
+                            onPress={() => this.props.onPress(item.person, item.personId)}
+                        >  
+                            <Avatar 
+                                avatar={item.avatar}
+                                color={item.theme}
+                                size='medium'
+                            />
+                        </TouchableOpacity>
+                    </View>
+                );
+            case 'task':
+                return (
+                     <TaskCard3 
+                        title={item.name}
+                        subtitle={item.projectName}
+                        date={item.dueDate}
+                        id={item.taskId}
+                        onPress={(props) => { this.props.onPress(props); }}
+                        data={item}
+                     />
                 );
             default:
                 return (
@@ -75,7 +107,7 @@ class FlatListe extends Component {
     }
 
     render() {
-        const { keyEx, data, style } = this.props;
+        const { keyEx, data, style, horizontal, initialNumToRender } = this.props;
 
         return (
             <FlatList 
@@ -84,6 +116,8 @@ class FlatListe extends Component {
                 ItemSeparatorComponent={this.renderSeparator.bind(this)}                         
                 renderItem={this.renderItem.bind(this)}
                 style={style}
+                horizontal={horizontal}
+                initialNumToRender={initialNumToRender}
             />
         );
     }

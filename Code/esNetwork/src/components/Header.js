@@ -5,10 +5,10 @@ import { Config } from '../settings';
 
 const { colors } = Config;
 
-class Header extends Component{
+class Header extends Component {
     onPressLeft() {
-        if (this.props.leftIcon === 'back') {
-            Actions.pop();
+        if (this.props.leftIcon === 'back' && this.props.onPressLeft === undefined) {
+            Actions.pop({ refresh: { dataFromChild: this.props.data } });
         } else {
             this.props.onPressLeft();
         }
@@ -33,19 +33,27 @@ class Header extends Component{
             default:
                 return <Text style={{ color: colors.mainText }}>{icon}</Text>;
         }*/
-        return <Image tintColor={(!color) ? colors.clickable : color} style={imageStyle} source={{ uri: icon }} />;
+        return (
+            <Image 
+                tintColor={(!color) ? colors.clickable : color} 
+                style={imageStyle} 
+                source={{ uri: icon }} 
+            />
+        );
     }
 
     render() {
-        const { containerStyle, titleStyle } = style;
-        const { rightIcon, rightColor, leftIcon, leftColor, title, onPress, isVisible } = this.props;
+        const { containerStyle, titleStyle, shadow } = style;
+        const { rightIcon, rightColor, leftIcon, leftColor, title, isVisible } = this.props;
 
         if (!isVisible) {
             return null;
         }
 
+        const hasShadow = (this.props.shadow === undefined) ? true : this.props.shadow;
+
         return (
-            <View style={[containerStyle]}>
+            <View style={[containerStyle, (hasShadow) ? shadow : {}]}>
                 <TouchableOpacity style={{ width: 44 }} onPress={this.onPressLeft.bind(this)} >
                     {this.renderButton(leftIcon, leftColor)}
                 </TouchableOpacity>
@@ -69,7 +77,14 @@ const style = StyleSheet.create({
         alignContent: 'center',
         justifyContent: 'space-between',
         alignItems: 'center',
-        alignSelf: 'flex-start'
+        alignSelf: 'flex-start',
+    },
+    shadow: {
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.2,
+        elevation: 2,
+        position: 'relative'
     },
     imageStyle: {
         width: 23,
@@ -78,11 +93,11 @@ const style = StyleSheet.create({
         marginRight: 10
     },
     titleStyle: {
-        fontSize: 23,
+        fontSize: 18,
         color: Config.colors.mainDark,
-        textAlign: 'center',
+        textAlign: 'left',
         flex: 3,
-        fontFamily: 'Roboto-Light'
+        fontFamily: 'Roboto'
     },
     buttonStyles: {
         flex: 1

@@ -10,3 +10,5 @@ export * from './CheckListForm';
 export * from './EditTaskForm';
 export * from './EditTextForm';
 export * from './SelectPersonForm';
+export * from './HierarchyForm';
+export * from './EditHierarchyForm';

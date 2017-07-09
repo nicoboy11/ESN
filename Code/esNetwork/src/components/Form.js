@@ -7,7 +7,8 @@ import {
     Animated,
     TouchableOpacity,
     Dimensions,
-    Easing
+    Easing,
+    Alert
 } from 'react-native';
 import { Actions } from 'react-native-router-flux';
 import { Config, Helper } from '../settings';
@@ -32,7 +33,7 @@ class Form extends Component {
                 this.toogle();
                 return; 
             default:
-                this.props.onPressLeft();
+                this.props.onPressLeft(this.props.data);
                 return;
         }
     }
@@ -125,6 +126,7 @@ class Form extends Component {
                         leftColor={leftColor}
                         title={title}
                         isVisible={isVisible}
+                        shadow={this.props.shadow}
                     />                
                     <View style={{ flex: 1 }}>
                         {this.props.children}

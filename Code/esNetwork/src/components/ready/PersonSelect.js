@@ -10,25 +10,33 @@ class PersonSelect extends Component {
     state = { elements: [], network: [], company: [], selection: true }
 
     componentWillMount() {
-        Database.request(
-            'GET', 
-            `network/${session[0].personId}`, 
-            {}, 
-            2,
-            this.onResponse.bind(this), 
-            this.onSuccessMyNetwork.bind(this),
-            this.onError.bind(this)
-        );
 
-        Database.request(
-            'GET', 
-            'network/null', 
-            {}, 
-            2,
-            this.onResponse.bind(this), 
-            this.onSuccessCompany.bind(this),
-            this.onError.bind(this)
-        );        
+        const company = Database.realm('Person', { }, 'select', '');
+        const network = Database.realm('Person', { }, 'select', `levelKey BEGINSWITH "${session[0].levelKey}"`);
+
+        if (network[0] === undefined) {
+            Database.request(
+                'GET', 
+                `network/${session[0].personId}`, 
+                {}, 
+                2,
+                this.onResponse.bind(this), 
+                this.onSuccessMyNetwork.bind(this),
+                this.onError.bind(this)
+            );
+
+            Database.request(
+                'GET', 
+                'network/null', 
+                {}, 
+                2,
+                this.onResponse.bind(this), 
+                this.onSuccessCompany.bind(this),
+                this.onError.bind(this)
+            );  
+        } else {
+            this.loadPeople(Database.realmToObject(network), Database.realmToObject(company));
+        }
     }
 
     onResponse(response) {
@@ -66,6 +74,14 @@ class PersonSelect extends Component {
         this.props.onSelection(text, value);
     }
 
+    loadPeople(network, company) {
+        this.setState({
+            network,
+            company,
+            elements: network
+        });        
+    }
+
     toogleTab() {
         const newSelection = !this.state.selection;
         this.setState({ selection: newSelection });
@@ -74,14 +90,21 @@ class PersonSelect extends Component {
 
     filter(text) {
         let result = [];
+        let selectedSource = this.state.network;
+
+        if (!this.state.selection) {
+            selectedSource = this.state.company;
+        }
         
         if (text !== '') {
-            result = this.state.elements.filter(
+            result = selectedSource.filter(
                 (person) => person.person.toLowerCase().includes(text.toLowerCase())
             );
-        }
 
-        this.setState({ elements: result });        
+            this.setState({ elements: result });             
+        } else {
+            this.setState({ elements: selectedSource });
+        }       
     }
 
     render() {
@@ -132,7 +155,9 @@ class PersonSelect extends Component {
 
 const styles = new StyleSheet.create({
     mainStyle: {
-        backgroundColor: colors.background
+        backgroundColor: colors.elementBackground,
+        borderTopWidth: StyleSheet.hairlineWidth,
+        borderTopColor: colors.mainDatk
     },
     tabStyle: {
         flexDirection: 'row',

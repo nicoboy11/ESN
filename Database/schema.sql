@@ -298,7 +298,7 @@ CREATE TABLE taskMember(
     CONSTRAINT UNIQUE KEY (taskId,personId)    
 );
 
-DROP TABLE IF EXISTS taskMonitor;
+DROP TABLE IF EXISTS taskMonitor;/*Para medir el tiempo trabajado en la task*/
 CREATE TABLE taskMonitor (
 	taskId int NOT NULL,
     personId int NOT NULL,

@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { ListView, StyleSheet, Text, View } from 'react-native';
-import { PostCard, TaskBasic, ListItem } from './';
+import { PostCard, TaskBasic, TaskCard3, ListItem } from './';
 import { Config } from '../settings';
 
 const { colors } = Config;
@@ -41,7 +41,7 @@ class CardList extends Component {
         switch (this.props.type) {
             case 'Task':
                  return (
-                     <TaskBasic 
+                     <TaskCard3 
                         title={data.name}
                         subtitle={data.projectName}
                         date={data.dueDate}

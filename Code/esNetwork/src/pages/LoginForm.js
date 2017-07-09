@@ -36,7 +36,7 @@ class LoginForm extends Component {
             /**
              * Create DataBase object for user
              */
-             const data = {
+             const data = [{
                 token: responseData[0].token,
                 personId: responseData[0].personId,
                 names: responseData[0].names,
@@ -53,7 +53,7 @@ class LoginForm extends Component {
                 levelKey: responseData[0].levelKey,
                 theme: responseData[0].theme,
                 isSync: true
-            };
+            }];
 
             Database.realm('Session', data, 'create', '');
             /** Go to main screen */

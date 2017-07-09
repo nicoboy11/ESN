@@ -25,3 +25,4 @@ export * from './ready/ModalView';
 export * from './ready/SplitButton';
 export * from './ready/PersonSelect2';
 export * from './ready/ListItem2';
+export * from './ready/TaskCard3';

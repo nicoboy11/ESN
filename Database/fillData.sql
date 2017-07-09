@@ -41,7 +41,6 @@ CALL CreateMessageType('Log');
 
 
 /*--------------------------MINIMAL UNTIL HERE---------------------------------------------------*/
-UPDATE person SET higherPersonId = NULL where id = 1
 CALL CreatePerson('Even','Sosa','Rodríguez','1985-10-23','even.sosa@gmail.com','07731917608','','','password',1,NULL,'','token123',1);
 CALL CreatePerson('Paulina','Orihuela','Pérez','1988-04-20','paulina_o_16@hotmail.com','0448341414939','','1334','password',2,1,'','token123',1);
 
@@ -154,15 +153,22 @@ CALL CreateTask('September Conference', 'Review everything wrt the conference', 
 CALL CreateTask('Organizing data', 'Organize all data in folders', '2016-12-21', '2017-06-21', 1, 2, NULL,5);
 CALL CreateTask('Create new method', 'create new method', '2016-12-21', '2017-06-21', 1, 2, NULL,5);
 
-CALL EditTask(1, 'Prepare Enterprise Social Network', 'Write requirements, design database and application', NULL, NULL, NULL, NULL, NULL, NULL);
-CALL EditTask(1, 'Prepare ESN App', 'Write requirements, design database and applicatio', '2017-01-01', '2017-09-15', 2, 1, NULL, NULL);
+CALL EditTask(1, 'Prepare Enterprise Social Network', 'Write requirements, design database and application', NULL, NULL, NULL, NULL, NULL, NULL,NULL);
+CALL EditTask(1, 'Prepare ESN App', 'Write requirements, design database and applicatio', '2017-01-01', '2017-09-15', 2, 1, NULL, NULL,NULL);
+/*
+DELETE FROM taskMessage WHERE taskId < 99;
+DELETE FROM taskMember WHERE taskId < 99;
+DELETE FROM task WHERE id < 99;
 
-CALL CreateTaskMember(1, 2, 2, NOW(), '2017-09-01');
-CALL CreateTaskMember(1, 3, 3, NOW(), '2017-09-01');
+ALTER TABLE task AUTO_INCREMENT = 1;
+ALTER TABLE taskMember AUTO_INCREMENT = 1;
+ALTER TABLE taskMessage AUTO_INCREMENT = 1;*/
+CALL CreateTaskMember(1, 2, 2, NOW(), '2017-09-01',1);
+CALL CreateTaskMember(1, 3, 3, NOW(), '2017-09-01',1);
 
-CALL CreateTaskMember(1, 6, 3, NOW(), '2017-09-01');
-CALL CreateTaskMember(1, 7, 3, NOW(), '2017-09-01');
-CALL CreateTaskMember(1, 8, 3, NOW(), '2017-09-01');
+CALL CreateTaskMember(1, 6, 3, NOW(), '2017-09-01',1);
+CALL CreateTaskMember(1, 7, 3, NOW(), '2017-09-01',1);
+CALL CreateTaskMember(1, 8, 3, NOW(), '2017-09-01',1);
 
 CALL CreateTaskMessage(1, 1, 'Welcome everyone', 1, NULL, NULL);
 

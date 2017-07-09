@@ -10,6 +10,7 @@ import {
     ProfileImage,
     TaskForm,
     TaskMessageForm,
+    HierarchyForm,
     Dummy
 } from './pages';
 import { Config } from './settings';
@@ -39,7 +40,7 @@ class RouterComponent extends Component {
                 leftButtonIconStyle={{ tintColor: 'white' }}
                 titleStyle={styles.textStyle}
             > 
-                <Scene initial key='authentication' type={ActionConst.RESET}>
+                <Scene  key='authentication' type={ActionConst.RESET}>
                     <Scene 
                         key='login' 
                         navigationBarStyle={{ opacity: 0 }} 
@@ -53,16 +54,16 @@ class RouterComponent extends Component {
                         title='Register'
                     />                 
                 </Scene>   
-                <Scene key='tabbar' tabs={true} tabBarStyle={styles.tabBarStyle} >
-                    <Scene 
-                        key='profileForm' 
-                        component={MainForm} 
+                <Scene initial key='tabbar' tabs={true} tabBarStyle={styles.tabBarStyle} >
+                    <Scene initial
+                        key='hierarchy' 
+                        component={HierarchyForm} 
                         hideNavBar
                         title='profile'
                         icon={TabIcon}
                         style={{ paddingBottom: 46 }}
                     />                     
-                    <Scene initial
+                    <Scene 
                         key='tasks' 
                         component={TaskForm} 
                         hideNavBar

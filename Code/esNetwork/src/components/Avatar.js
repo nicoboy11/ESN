@@ -8,7 +8,7 @@ const Avatar = ({ avatar, color, name, size }) => {
     const sizes = {
         mini: 15,
         small: 20,
-        medium: 24,
+        medium: 30,
         big: 40,
         huge: 120
     };
@@ -24,10 +24,11 @@ const Avatar = ({ avatar, color, name, size }) => {
             borderColor: colors.mainDark
         },
         containerStyle: {
-            flexDirection: 'row'          
+            flexDirection: 'row',
+            alignItems: 'center'
         },
         nameStyle: {
-            fontSize: 12
+            fontSize: 14
         },
         abbrStyle: {
             color: colors.mainText,

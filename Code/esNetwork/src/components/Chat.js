@@ -9,8 +9,9 @@ import {
     FlatList, 
     Alert
 } from 'react-native';
+import ImagePicker from 'react-native-image-picker';
 import { CardList } from './';
-import { Config, Database } from '../settings';
+import { Config, Database, Helper } from '../settings';
 
 const { colors } = Config;
 //get current log in
@@ -23,7 +24,9 @@ class Chat extends Component {
 
         this.state = { elements: [], 
                         input: '',
-                        personId: data[0].personId };
+                        personId: data[0].personId,
+                        showLog: true
+                    };
     }              
 
     componentWillMount() {
@@ -36,20 +39,24 @@ class Chat extends Component {
 
         this.ws.onmessage = function (e) {
             const messageObj = JSON.parse(e.data);
-            const newMessage = 
-                        { 
-                            message: messageObj.message,
-                            person: messageObj.person,
-                            theme: messageObj.theme,
-                            messageDate: messageObj.messageDate,
-                            messageTypeId: messageObj.messageTypeId,
-                            taskId: messageObj.taskId,
-                            taskMessageId: messageObj.taskMessageId,
-                            personId: messageObj.personId
-                        };
+            if (messageObj.isTyping) {
+                self.setState({ typing: messageObj.message });
+            } else {
+                const newMessage = 
+                            { 
+                                message: messageObj.message,
+                                person: messageObj.person,
+                                theme: messageObj.theme,
+                                messageDate: messageObj.messageDate,
+                                messageTypeId: messageObj.messageTypeId,
+                                taskId: messageObj.taskId,
+                                taskMessageId: messageObj.taskMessageId,
+                                personId: messageObj.personId
+                            };
 
-            self.setState({ elements: [...self.state.elements, newMessage] });
-            setTimeout(self.chatList.scrollToEnd(), 0);
+                self.setState({ elements: [...self.state.elements, newMessage], typing: '' });
+                setTimeout(() => self.chatList.scrollToEnd(), 2000);   
+            }
         };
 
         this.ws.onopen = function () {
@@ -62,10 +69,11 @@ class Chat extends Component {
     }
 
     componentDidUpdate() {
-        this.scrollToBottom();
+
     }
 
     componentWillUnmount() {
+        this.ws.send(`{"taskId":${this.props.taskId},"isTyping": true, "message":""}`);        
         this.ws.send(`{"disconnectingClient":${this.state.personId}}`);
         this.ws.close();
     }
@@ -84,6 +92,9 @@ class Chat extends Component {
                 elements: responseData
             });
         }
+
+        const self = this;
+        setTimeout(() => self.chatList.scrollToEnd(), 2000);        
     }
 
     onSuccessPost(responseData) {
@@ -98,6 +109,11 @@ class Chat extends Component {
 
     onTextChanged(text) {
         this.setState({ input: text });
+        if (text !== '') {
+            this.ws.send(`{"taskId":${this.props.taskId},"isTyping": true, "message":"${data[0].names} is typing..."}`);
+        } else {
+            this.ws.send(`{"taskId":${this.props.taskId},"isTyping": true, "message":""}`);
+        }
     }
 
     getMessages(personId) {
@@ -117,8 +133,49 @@ class Chat extends Component {
         setTimeout(self.chatList.scrollToEnd(), 100);*/
     }
 
+    imageAction() {
+        const options = {
+            title: 'Select your profile photo',
+            customButtons: [
+                { name: 'fb', title: 'Photos from facebook' },
+            ],
+            storageOptions: {
+                skipBackup: true,
+                path: 'images'
+            }
+        };
+
+        ImagePicker.showImagePicker(options, (response) => {
+            if (response.didCancel) {
+                console.log('canceled');
+            } else if (response.error) {
+                console.log('error');
+            } else if (response.customButton) {
+                console.log('customButton', response.customButton);
+            } else {
+                const source = { uri: response.uri };
+                this.setState({
+                    imgSource: source,
+                    imgFileName: response.fileName,
+                    imgFileType: response.type
+                });
+            }
+        });
+    }  
+
     sendMessage() {
         const personId = this.state.personId;
+        let attachment;
+        let attachmentTypeId;
+        
+        if (this.state.imgFileName !== undefined) {
+            attachment = {
+                        uri: this.state.imgSource.uri,
+                        name: this.state.imgFileName,
+                        type: this.state.imgFileType
+                    };                
+            attachmentTypeId = 2;
+        }  
 
         const newMessage = {
                     category: 'Chat',
@@ -128,10 +185,10 @@ class Chat extends Component {
                     personId: this.state.personId,
                     message: this.state.input,
                     messageTypeId: 1,
-                    attachment: null,
-                    attachmentTypeId: null,
+                    attachment,
+                    attachmentTypeId: 2,
                     messageDate: 'Sending...'
-                };
+                };              
 
         Database.request(
             'POST', 
@@ -140,7 +197,9 @@ class Chat extends Component {
                 taskId: this.props.taskId,
                 personId,
                 message: this.state.input,
-                messageTypeId: 1
+                messageTypeId: 1,
+                attachment,
+                attachmentTypeId
             }, 
             1,
             this.onHandleResponse.bind(this), 
@@ -158,16 +217,38 @@ class Chat extends Component {
             dateBubble,
             personBubble,
             bubbleRightStyle,
-            spacer
+            spacer,
+            logStyle,
+            bubbleImgStyle
         } = styles;
         
+        if (item.messageTypeId === 2) {
+            if (this.state.showLog) {
+                return (
+                    <View>
+                        <Text
+                            style={logStyle}
+                        >
+                            {item.message}
+                        </Text>
+                    </View>
+                );
+            }
+
+            return <View />;
+        } 
+
         if (item.personId === this.state.personId) {
             return (
                     <View style={{ flexDirection: 'row' }} >
                         <View style={spacer} />                        
                         <View style={[bubbleRightStyle, (item.key === 'loading') ? { opacity: 0.5 } : {}]}>
+                            <Image 
+                                style={(item.attachment) ? bubbleImgStyle : {}} 
+                                source={{ uri: Config.network.server + item.attachment }} 
+                            />
                             <Text style={{ color: colors.mainText }}>{item.message}</Text>
-                            <Text style={dateBubble}>{item.messageDate}</Text>
+                            <Text style={dateBubble}>{Helper.prettyfyDate(item.messageDate).date}</Text>
                         </View> 
                     </View>
             );  
@@ -177,8 +258,12 @@ class Chat extends Component {
                 <View style={{ flexDirection: 'row' }} >          
                     <View style={bubbleLeftStyle}>
                         <Text style={[personBubble, { color: item.theme }]}>{item.person}</Text>
+                        <Image 
+                            style={(item.attachment) ? bubbleImgStyle : {}} 
+                            source={{ uri: Config.network.server + item.attachment }} 
+                        />                        
                         <Text>{item.message}</Text>
-                        <Text style={dateBubble}>{item.messageDate}</Text>
+                        <Text style={dateBubble}>{Helper.prettyfyDate(item.messageDate).date}</Text>
                     </View>
                     <View style={spacer} />                        
                 </View>
@@ -204,6 +289,16 @@ class Chat extends Component {
                         renderItem={this.renderMessages.bind(this)}
                     />
                 </View>
+                <View>
+                    <Text>
+                        {this.state.seen}
+                    </Text>
+                </View>                
+                <View>
+                    <Text>
+                        {this.state.typing}
+                    </Text>
+                </View>
                 <View style={typingContainerStyle}>
                     <TextInput 
                         placeholder='Type your message' 
@@ -212,8 +307,15 @@ class Chat extends Component {
                         onChangeText={this.onTextChanged.bind(this)}
                         multiline={true}
                     />
-                    <TouchableOpacity style={imageStyle}>
-                        <Image />
+                    <TouchableOpacity 
+                        style={imageStyle}
+                        onPress={this.imageAction.bind(this)}
+                    >
+                        <Image 
+                            tintColor={colors.main} 
+                            style={{ width: 24, height: 24 }} 
+                            source={{ uri: 'attachment' }} 
+                        />
                     </TouchableOpacity>
                     <TouchableOpacity 
                         style={imageStyle}
@@ -293,7 +395,21 @@ const styles = new StyleSheet.create({
     personBubble: {
         fontSize: 12,
         alignSelf: 'flex-start'
-    }       
+    },
+    logStyle: {
+        fontSize: 10,
+        color: colors.mainDark,
+        textAlign: 'center',
+        fontFamily: 'Roboto'
+    },
+    bubbleImgStyle: {
+        flex: 1,
+        width: 150,
+        height: 150,
+        resizeMode: 'contain',
+        borderRadius: 10,
+        alignSelf: 'center'
+    }
 });
 
 export { Chat };
