@@ -3,7 +3,7 @@ import { View, TouchableOpacity, Text, Image, StyleSheet } from 'react-native';
 import { Actions } from 'react-native-router-flux';
 import { Config } from '../settings';
 
-const { colors } = Config;
+const { colors, font } = Config;
 
 class Header extends Component {
     onPressLeft() {
@@ -97,7 +97,7 @@ const style = StyleSheet.create({
         color: Config.colors.mainDark,
         textAlign: 'left',
         flex: 3,
-        fontFamily: 'Roboto'
+        fontFamily: font.normal
     },
     buttonStyles: {
         flex: 1

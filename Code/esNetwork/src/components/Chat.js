@@ -13,7 +13,7 @@ import ImagePicker from 'react-native-image-picker';
 import { CardList } from './';
 import { Config, Database, Helper } from '../settings';
 
-const { colors } = Config;
+const { colors, font } = Config;
 //get current log in
 const data = Database.realm('Session', { }, 'select', '');
 
@@ -400,7 +400,7 @@ const styles = new StyleSheet.create({
         fontSize: 10,
         color: colors.mainDark,
         textAlign: 'center',
-        fontFamily: 'Roboto'
+        fontFamily: font.normal
     },
     bubbleImgStyle: {
         flex: 1,

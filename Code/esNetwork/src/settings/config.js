@@ -1,8 +1,15 @@
+import { Platform } from 'react-native';
+
 class Config {}
 
 Config.regex = {
     email: /^[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$/i,
     textOnly: /[^a-zA-Z0-9áéíóúÁÉÍÓÚüÜñÑ\s]/g
+};
+
+Config.font = {
+        normal: (Platform.OS !== 'ios') ? 'Roboto' : 'Arial',
+        light: (Platform.OS !== 'ios') ? 'Roboto-Light' : 'Avenir-Light'
 };
 
 Config.colors = {
@@ -28,7 +35,7 @@ Config.colors = {
 };
 
 Config.network = {
-    server: 'http://143.167.71.24:3001/',
+    server: 'http://143.167.201.96:3001/',
     wsServer: 'ws://143.167.71.24:9998/task'
 };
 

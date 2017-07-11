@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { View, Text, TouchableOpacity, DatePickerAndroid, StyleSheet } from 'react-native';
 import { Helper, Config } from '../../settings';
 
-const { colors } = Config;
+const { colors, font } = Config;
 
 class DateDue extends Component {
     state = {
@@ -49,7 +49,7 @@ class DateDue extends Component {
                             color: (this.state.date !== null) ? 
                                     Helper.prettyfyDate(this.state.date).color :
                                     colors.clickable,
-                            fontFamily: 'Roboto'
+                            fontFamily: font.normal
                         }}
                     >
                         {(this.state.date !== null) ? 

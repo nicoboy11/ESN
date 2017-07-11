@@ -1,8 +1,8 @@
 import React, { Component } from 'react';
 import { View, Text, TextInput, StyleSheet } from 'react-native';
-import { Config, Helper } from '../settings';
+import { Config, Helper } from '../../settings';
 
-const { colors, texts, regex } = Config;
+const { colors, texts, regex, font } = Config;
 
 class Input extends Component {
 
@@ -106,7 +106,7 @@ class Input extends Component {
         return (
             <View style={{ flex: 1 }}>
                 <TextInput 
-                    style={[inputStyle, { height: this.props.height }, !this.state.isError ? validInputStyle : invalidInputStyle]}
+                    style={[inputStyle, (this.props.height) ? { height: this.props.height } : {}, !this.state.isError ? validInputStyle : invalidInputStyle]}
                     autoCorrect={false}                  
                     underlineColorAndroid='transparent'                       
                     placeholderTextColor={colors.lightText}
@@ -167,7 +167,7 @@ const styles = StyleSheet.create({
     },
     labelTextStyle: {
         fontSize: 12,
-        fontFamily: 'Roboto-Light',
+        fontFamily: font.light,
         height: 15,
     },
     activeLabelStyle: {
@@ -189,7 +189,7 @@ const styles = StyleSheet.create({
         padding: 0,
         fontSize: 18,
         color: colors.mainDark,
-        fontFamily: 'Roboto-Light',
+        fontFamily: font.light,
         fontWeight: '200'
     },
     validInputStyle: {

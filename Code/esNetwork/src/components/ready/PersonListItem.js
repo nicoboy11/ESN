@@ -1,10 +1,10 @@
 import React, { Component } from 'react';
-import { View, Text, Image, StyleSheet, TouchableNativeFeedback, TouchableOpacity } from 'react-native';
-import { Avatar } from '../';
+import { View, Text, Image, StyleSheet } from 'react-native';
+import { Avatar, Touchable } from '../';
 import { Config, Database } from '../../settings';
 const session = Database.realm('Session', { }, 'select', '');
 
-const { colors } = Config;
+const { colors, font } = Config;
 const space = 38;
 
 class PersonListItem extends Component {
@@ -58,7 +58,7 @@ class PersonListItem extends Component {
         } = styles;
 
         return (
-            <TouchableNativeFeedback
+            <Touchable
                 onPress={this.onPress.bind(this)}
             >
                 <View 
@@ -96,7 +96,8 @@ class PersonListItem extends Component {
                         <View />
                     }
                     {(icon) ? <View style={imageContainer}>
-                        <TouchableOpacity
+                        <Touchable
+                            forceOpacity
                             onPress={() => this.props.onIconPress(this.props.rawData)}
                         >
                             <Image 
@@ -104,10 +105,10 @@ class PersonListItem extends Component {
                                 style={iconStyle}
                                 source={{ uri: icon }}
                             />
-                        </TouchableOpacity>
+                        </Touchable>
                     </View> : <View />}
                 </View>
-            </TouchableNativeFeedback>        
+            </Touchable>        
         );
     }
 }
@@ -149,7 +150,7 @@ const styles = new StyleSheet.create({
     titleStyle: {
         fontSize: 18,
         color: colors.mainDark,
-        fontFamily: 'Roboto-Light'
+        fontFamily: font.light
     },
     subtitleStyle: {
         fontSize: 14,

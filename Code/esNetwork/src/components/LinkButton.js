@@ -2,7 +2,7 @@ import React from 'react';
 import { Text, TouchableOpacity } from 'react-native';
 import { Config } from '../settings';
 
-const { colors } = Config;
+const { colors, font } = Config;
 
 const LinkButton = ({ title, onPress, style }) => {
     const { touchableStyle, textStyle } = styles;
@@ -16,7 +16,7 @@ const LinkButton = ({ title, onPress, style }) => {
 const styles = {
     textStyle: {
         color: colors.clickable,
-        fontFamily: 'Roboto-Light'
+        fontFamily: font.light
     }
 };
 
