@@ -189,3 +189,30 @@ CALL CreateCheckListItem (1, 'Do this third', 1);
 CALL EditCheckListItem (1,3,NULL,NULL,true,2,NOW());
 
 
+UPDATE person SET theme = '#00BFA5' WHERE id = 1;
+UPDATE person SET theme = '#00C853' WHERE id = 2;
+UPDATE person SET theme = '#304FFE' WHERE id = 3;
+UPDATE person SET theme = '#D50000' WHERE id = 4;
+UPDATE person SET theme = '#FF6D00' WHERE id = 5;
+UPDATE person SET theme = '#AA00FF' WHERE id = 6;
+UPDATE person SET theme = '#00BFA5' WHERE id = 7;
+UPDATE person SET theme = '#00C853' WHERE id = 8;
+UPDATE person SET theme = '#304FFE' WHERE id = 9;
+UPDATE person SET theme = '#D50000' WHERE id = 10;
+UPDATE person SET theme = '#00BFA5' WHERE id = 11;
+UPDATE person SET theme = '#00C853' WHERE id = 12;
+UPDATE person SET theme = '#304FFE' WHERE id = 13;
+UPDATE person SET theme = '#D50000' WHERE id = 14;
+UPDATE person SET theme = '#00BFA5' WHERE id = 15;
+UPDATE person SET theme = '#00C853' WHERE id = 16;
+UPDATE person SET theme = '#304FFE' WHERE id = 17;
+UPDATE person SET theme = '#D50000' WHERE id = 18;
+UPDATE person SET theme = '#00BFA5' WHERE id = 19;
+UPDATE person SET theme = '#00C853' WHERE id = 21;
+UPDATE person SET theme = '#304FFE' WHERE id = 22;
+UPDATE person SET theme = '#00BFA5' WHERE id = 23;
+UPDATE person SET theme = '#00C853' WHERE id = 24;
+UPDATE person SET theme = '#304FFE' WHERE id = 25;
+UPDATE person SET theme = '#FF6D00' WHERE id = 26;
+
+

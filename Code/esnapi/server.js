@@ -111,481 +111,496 @@ var apiRoutes = express.Router();
  * 
  */
 
-/** Register User
- * 
- */
-    app.post('/person',function(req,res){
+    /** Register User
+     * 
+     */
+        app.post('/person',function(req,res){
 
-        data.db("CALL CreatePerson(" + helper.fpVarchar(req.body.names) + "," + helper.fpVarchar(req.body.firstLastName) + "," + helper.fpVarchar(req.body.secondLastName) + 
-                            "," + helper.fpDate(req.body.dateOfBirth) + "," + helper.fpVarchar(req.body.email) + "," + helper.fpVarchar(req.body.mobile) + "," + helper.fpVarchar(req.body.phone) + "," + helper.fpVarchar(req.body.ext) + 
-                            "," + helper.fpVarchar(req.body.password) + "," + helper.fpInt(req.body.genderId) + "," + helper.fpInt(req.body.highestPersonId) + 
-                            "," + helper.fpVarchar(req.body.avatar) + "," + helper.fpVarchar(req.body.token) + "," + helper.fpInt(req.body.roleId) + ");",
+            data.db("CALL CreatePerson(" + helper.fpVarchar(req.body.names) + "," + helper.fpVarchar(req.body.firstLastName) + "," + helper.fpVarchar(req.body.secondLastName) + 
+                                "," + helper.fpDate(req.body.dateOfBirth) + "," + helper.fpVarchar(req.body.email) + "," + helper.fpVarchar(req.body.mobile) + "," + helper.fpVarchar(req.body.phone) + "," + helper.fpVarchar(req.body.ext) + 
+                                "," + helper.fpVarchar(req.body.password) + "," + helper.fpInt(req.body.genderId) + "," + helper.fpInt(req.body.highestPersonId) + 
+                                "," + helper.fpVarchar(req.body.avatar) + "," + helper.fpVarchar(req.body.token) + "," + helper.fpInt(req.body.roleId) + ");",
 
-        conn,function(error,result){
-            if(data.handle(error,res,true)){
-                res.status(200).end( JSON.stringify(result[0]) );
-            }
-            
-        });
-
-    });
-
-/** Log In
- *
- */
-    app.post('/loginUser',function(req,res){
-        data.db("CALL GetLogin(" + helper.fpVarchar(req.body.email) + "," + helper.fpVarchar(req.body.password) + ")",conn,function(error,result){
-            //Check response from Database
-            if(data.handle(error,res,true)){
-                //Get token and send back to client
-                var token = jwt.sign(
-                                {"email":req.body.email, "password":req.body.password, "personId": result[0][0]["personId"]}, 
-                                config.auth.secret,
-                                {expiresIn: 36000}
-                );
-
-                result[0][0]["token"] = token;
-                res.status(200).end( JSON.stringify(result[0]) );
-            }
-        });    
-    });
-
-/** GET - PERSON BY ID
- * 
- */
-    apiRoutes.get('/person/:id',function(req,res){
-        data.db("CALL GetPerson(" + req.params.id + ")",conn,function(error,result){
-            if(data.handle(error,res,true)){
-                data.handleResponse(result,res,"");
-            }
-        });
-    });
-
-/** GET - NETWORK BY ID
- *      Get all the people in your network meaning all your employees
- */
-    apiRoutes.get('/network/:id',function(req,res){
-        data.db("CALL GetNetwork(" + req.params.id + ")",conn,function(error,result){
-            if(data.handle(error,res,true)){
-                data.handleResponse(result,res,"");
-            }
-        });
-    });
-
-/** PUT - PERSON BY ID
- *      Edit any person data ID in parameter and the rest in BODY
- */
-    apiRoutes.put('/person/:id',function(req,res){
-
-        data.reqUpload(req,'avatar', helper.fpInt(req.params.id), function(fileName,params){
-            data.db("CALL EditPerson(" + helper.fpInt(req.params.id) +
-                                "," + helper.fpVarchar(params.names) + "," + helper.fpVarchar(params.firstLastName) + "," + helper.fpVarchar(params.secondLastName) + 
-                                "," + helper.fpDate(params.dateOfBirth) + "," + helper.fpVarchar(params.email) + "," + helper.fpVarchar(params.mobile) + "," + helper.fpVarchar(params.phone) + 
-                                "," + helper.fpVarchar(params.ext) + "," + helper.fpVarchar(params.password) + "," + helper.fpInt(params.genderId) + 
-                                "," + helper.fpDate(params.startDate) + "," + helper.fpDate(params.endDate) + "," + helper.fpInt(params.higherPersonId) + 
-                                "," + helper.fpDate(params.lastLogin) + "," + helper.fpVarchar(params.fileName) + "," + helper.fpVarchar(params.description) + 
-                                "," + helper.fpVarchar(params.job) + "," + helper.fpInt(params.roleId) + "," + helper.fpVarchar(params.theme) + 
-                                "," + helper.fpVarchar(params.token) + "," + helper.fpBool(params.isIosSync) + "," + helper.fpBool(params.isAndroidSync) + 
-                                "," + helper.fpVarchar(params.os_android) + "," + helper.fpVarchar(params.os_ios) + "," + helper.fpVarchar(params.os_chrome) + "," + helper.fpVarchar(params.os_safari) + ");",
             conn,function(error,result){
+                if(data.handle(error,res,true)){
+                    res.status(200).end( JSON.stringify(result[0]) );
+                }
+                
+            });
+
+        });
+
+    /** Log In
+     *
+     */
+        app.post('/loginUser',function(req,res){
+            data.db("CALL GetLogin(" + helper.fpVarchar(req.body.email) + "," + helper.fpVarchar(req.body.password) + ")",conn,function(error,result){
+                //Check response from Database
+                if(data.handle(error,res,true)){
+                    //Get token and send back to client
+                    var token = jwt.sign(
+                                    {"email":req.body.email, "password":req.body.password, "personId": result[0][0]["personId"]}, 
+                                    config.auth.secret,
+                                    {expiresIn: 36000}
+                    );
+
+                    result[0][0]["token"] = token;
+                    res.status(200).end( JSON.stringify(result[0]) );
+                }
+            });    
+        });
+
+    /** GET - PERSON BY ID
+     * 
+     */
+        apiRoutes.get('/person/:id',function(req,res){
+            data.db("CALL GetPerson(" + req.params.id + ")",conn,function(error,result){
                 if(data.handle(error,res,true)){
                     data.handleResponse(result,res,"");
                 }
             });
         });
-    });
 
-/** GET - HIERARCHY BY ID
- *      Get immediate employees
- */
-    apiRoutes.get('/hierarchy/:id',function(req,res){
-        data.db("CALL GetHierarchy(" + helper.fpInt(req.params.id) + ");",conn,function(error,result){
-            if(data.handle(error,res,true)){
-                data.handleResponse(result,res);
-            }
-        });       
-    });
-/** GET - FREE HIERARCHY BY ID
- *      Get immediate employees
- */
-    apiRoutes.get('/freeHierarchy',function(req,res){
-        data.db("CALL GetFreeHierarchy();",conn,function(error,result){
-            if(data.handle(error,res,true)){
-                data.handleResponse(result,res);
-            }
-        });       
-    });    
+    /** GET - NETWORK BY ID
+     *      Get all the people in your network meaning all your employees
+     */
+        apiRoutes.get('/network/:id',function(req,res){
+            data.db("CALL GetNetwork(" + req.params.id + ")",conn,function(error,result){
+                if(data.handle(error,res,true)){
+                    data.handleResponse(result,res,"");
+                }
+            });
+        });
+
+    /** PUT - PERSON BY ID
+     *      Edit any person data ID in parameter and the rest in BODY
+     */
+        apiRoutes.put('/person/:id',function(req,res){
+            data.reqUpload(req,'avatar', helper.fpInt(req.params.id), function(fileName,params){
+                data.db("CALL EditPerson(" + helper.fpInt(req.params.id) +
+                                    "," + helper.fpVarchar(params.names) + "," + helper.fpVarchar(params.firstLastName) + "," + helper.fpVarchar(params.secondLastName) + 
+                                    "," + helper.fpDate(params.dateOfBirth) + "," + helper.fpVarchar(params.email) + "," + helper.fpVarchar(params.mobile) + "," + helper.fpVarchar(params.phone) + 
+                                    "," + helper.fpVarchar(params.ext) + "," + helper.fpVarchar(params.password) + "," + helper.fpInt(params.genderId) + 
+                                    "," + helper.fpDate(params.startDate) + "," + helper.fpDate(params.endDate) + "," + helper.fpInt(params.higherPersonId) + 
+                                    "," + helper.fpDate(params.lastLogin) + "," + helper.fpVarchar(params.fileName) + "," + helper.fpVarchar(params.description) + 
+                                    "," + helper.fpVarchar(params.job) + "," + helper.fpInt(params.roleId) + "," + helper.fpVarchar(params.theme) + 
+                                    "," + helper.fpVarchar(params.token) + "," + helper.fpBool(params.isIosSync) + "," + helper.fpBool(params.isAndroidSync) + 
+                                    "," + helper.fpVarchar(params.os_android) + "," + helper.fpVarchar(params.os_ios) + "," + helper.fpVarchar(params.os_chrome) + "," + helper.fpVarchar(params.os_safari) + ");",
+                conn,function(error,result){
+                    if(data.handle(error,res,true)){
+                        data.handleResponse(result,res,"");
+                    }
+                });
+            });
+        });
+
+    /** GET - HIERARCHY BY ID
+     *      Get immediate employees
+     */
+        apiRoutes.get('/hierarchy/:id',function(req,res){
+            data.db("CALL GetHierarchy(" + helper.fpInt(req.params.id) + ");",conn,function(error,result){
+                if(data.handle(error,res,true)){
+                    data.handleResponse(result,res);
+                }
+            });       
+        });
+    /** GET - FREE HIERARCHY BY ID
+     *      Get immediate employees
+     */
+        apiRoutes.get('/freeHierarchy',function(req,res){
+            data.db("CALL GetFreeHierarchy();",conn,function(error,result){
+                if(data.handle(error,res,true)){
+                    data.handleResponse(result,res);
+                }
+            });       
+        });    
 
 /** =================== FOLLOWERS ===============================
  * 
  */
-/** POST - PERSON/FOLLOWS
- *      Person 'A' will start following person 'B'
- */
-    apiRoutes.post('/person/:a/follows/:b',function(req,res){
-        data.db("CALL CreateFollower(" + helper.fpInt(req.params.a) + "," + helper.fpInt(req.params.b) + ")",conn,function(error,result){
-            if(data.handle(error,res,true)){
-                data.handleResponse(result,res);
-            }
-        });     
-    });
-/** DELETE - PERSON/FOLLOWS
- *      Person 'A' will stop following person 'B'
- */
-    apiRoutes.delete('/person/:a/follows/:b',function(req,res){
-        data.db("CALL DeleteFollower(" + helper.fpInt(req.params.a) + "," + helper.fpInt(req.params.b) + ")",conn,function(error,result){
-            if(data.handle(error,res,true)){
-                data.handleResponse(result,res);
-            }
-        });        
-    });
-/** GET - PERSON/FOLLOWS
- *      Get all the people that person 'A' follows
- */
-    apiRoutes.get('/person/:a/follows',function(req,res){
-        data.db("CALL GetFollows(" + helper.fpInt(req.params.a) + ")",conn,function(error,result){
-            if(data.handle(error,res,true)){
-                data.handleResponse(result,res);
-            }
-        });       
-    });
-/** GET - PERSON/FOLLOWERS
- *      Get all the people that follows person 'A'
- */
-    apiRoutes.get('/person/:a/followers',function(req,res){
-        data.db("CALL GetFollowers(" + helper.fpInt(req.params.a) + ")",conn,function(error,result){
-            if(data.handle(error,res,true)){
-                data.handleResponse(result,res);
-            }
-        });       
-    });
+    /** POST - PERSON/FOLLOWS
+     *      Person 'A' will start following person 'B'
+     */
+        apiRoutes.post('/person/:a/follows/:b',function(req,res){
+            data.db("CALL CreateFollower(" + helper.fpInt(req.params.a) + "," + helper.fpInt(req.params.b) + ")",conn,function(error,result){
+                if(data.handle(error,res,true)){
+                    data.handleResponse(result,res);
+                }
+            });     
+        });
+    /** DELETE - PERSON/FOLLOWS
+     *      Person 'A' will stop following person 'B'
+     */
+        apiRoutes.delete('/person/:a/follows/:b',function(req,res){
+            data.db("CALL DeleteFollower(" + helper.fpInt(req.params.a) + "," + helper.fpInt(req.params.b) + ")",conn,function(error,result){
+                if(data.handle(error,res,true)){
+                    data.handleResponse(result,res);
+                }
+            });        
+        });
+    /** GET - PERSON/FOLLOWS
+     *      Get all the people that person 'A' follows
+     */
+        apiRoutes.get('/person/:a/follows',function(req,res){
+            data.db("CALL GetFollows(" + helper.fpInt(req.params.a) + ")",conn,function(error,result){
+                if(data.handle(error,res,true)){
+                    data.handleResponse(result,res);
+                }
+            });       
+        });
+    /** GET - PERSON/FOLLOWERS
+     *      Get all the people that follows person 'A'
+     */
+        apiRoutes.get('/person/:a/followers',function(req,res){
+            data.db("CALL GetFollowers(" + helper.fpInt(req.params.a) + ")",conn,function(error,result){
+                if(data.handle(error,res,true)){
+                    data.handleResponse(result,res);
+                }
+            });       
+        });
 /** =================== POSTS ===================================
  * 
  */
-/** POST - POSTS
- *      Create a new post
- */
-    apiRoutes.post('/post',function(req,res){
-        data.reqUpload(req,'postatt','personId', function(fileName, params){
-            data.db("CALL CreatePost(" + helper.fpInt(params.personId) + "," + helper.fpVarchar(params.message) + "," + helper.fpInt(params.messageTypeId) +
-                                "," + helper.fpVarchar(params.fileName) + "," + helper.fpInt(params.attachmentTypeId) + "," + helper.fpInt(params.scopeTypeId) +
-                                "," + helper.fpInt(params.scopeId) + ");",
-            conn, function(error, result){
-                if(data.handle(error,res,true)){
-                    res.status(200).end( JSON.stringify(result[0]) );
-                }
-            });
-        });
-
-    });
-/** GET - POSTS
- *     Get all posts relevant to a person
- * 
- */
-    apiRoutes.get('/post/:id',function(req,res){
-        data.db("CALL GetPost(" + req.params.id + ");",conn,function(error,result){
-            if(data.handle(error,res,true)){
-                data.handleResponse(result,res,"");
-            }
-        });
-    });
-/** PUT - POSTS
- *      Edit a post with an Id
- */
-    apiRoutes.put('/post/:id',function(req,res){
-        data.reqUpload(req,'postatt',req.params.id, function(fileName, params){
-            data.db("CALL EditPost(" + helper.fpInt(req.params.id) + "," + helper.fpVarchar(params.message) + "," + helper.fpVarchar(params.fileName) + "," +
-                                helper.fpInt(params.attachmentTypeId) + "," + helper.fpInt(params.scopeTypeId) + "," + helper.fpInt(params.scopeId) + ");",
-            conn,function(error,result){
-                if(data.handle(error,res,true)){
-                    res.status(200).end( responseMsg("Updated") );
-                }
-            });
-        });
-    });
-
-/** =================== TEAMS ===================================
- *  
- */
-/** GET - TEAMS
- *      Get teams a person is part of
- */
-    apiRoutes.get('/teams/:personId',function(req,res){
-        data.db("CALL GetPersonTeam(" + req.params.personId + ");",conn,function(error,result){
-            if(data.handle(error,res,true)){
-                data.handleResponse(result,res,"");
-            }
-        });
-    });
-/** =================== PROJECTS ================================
- * 
- */
-/** GET - PROJECTS BY ID
- *      All projects relevant to a person
- */
-    apiRoutes.get('/projects/:personId',function(req,res){
-        data.db("CALL GetPersonProjects(" + req.params.personId + ");",conn,function(error,result){
-            if(data.handle(error,res,true)){
-                data.handleResponse(result,res,"");
-            }
-        });
-    });
-/** =================== MISC =====================================
- * 
- */
-/** GET - StateType
- * 
- */
-    app.get('/stateType/:stateTypeId',function(req,res){
-        data.db("CALL GetStateType(" + req.params.stateTypeId + ");",conn,function(error,result){
-            if(data.handle(error,res,true)){
-                data.handleResponse(result,res,"");
-            }
-        });
-    });
-
-/** GET - Gender
- * 
- */
-    app.get('/gender/:genderId',function(req,res){
-        data.db("CALL GetGender(" + req.params.genderId + ");",conn,function(error,result){
-            if(data.handle(error,res,true)){
-                data.handleResponse(result,res,"");
-            }
-        });
-    });
-
-/** GET - Priority
- * 
- */
-    app.get('/priority/:priorityId',function(req,res){
-        data.db("CALL GetPriority(" + req.params.priorityId + ");",conn,function(error,result){
-            if(data.handle(error,res,true)){
-                data.handleResponse(result,res,"");
-            }
-        });
-    });
-
-/** GET - ScopeType
- * 
- */
-    app.get('/scopeType/:scopeTypeId',function(req,res){
-        data.db("CALL GetScopeType(" + req.params.scopeTypeId + ");",conn,function(error,result){
-            if(data.handle(error,res,true)){
-                data.handleResponse(result,res,"");
-            }
-        });
-    });
-
-/** GET - RoleType
- * 
- */
-    app.get('/roleType/:roleTypeId',function(req,res){
-        data.db("CALL GetRoleType(" + req.params.roleTypeId + ");",conn,function(error,result){
-            if(data.handle(error,res,true)){
-                data.handleResponse(result,res,"");
-            }
-        });
-    });
-
-/** GET - AttachmentType
- * 
- */
-    app.get('/attachmentType/:attachmentTypeId',function(req,res){
-        data.db("CALL GetAttachmentType(" + req.params.attachmentTypeId + ");",conn,function(error,result){
-            if(data.handle(error,res,true)){
-                data.handleResponse(result,res,"");
-            }
-        });
-    });
-
-/** GET - Messagetype
- * 
- */
-    app.get('/messageType/:messageTypeId',function(req,res){
-        data.db("CALL GetMessageType(" + req.params.messageTypeId + ");",conn,function(error,result){
-            if(data.handle(error,res,true)){
-                data.handleResponse(result,res,"");
-            }
-        });
-    });
-
-/** =================== TASKS ===================================
- * 
- */
-/** GET - TASKS
- *      Get tasks relevant to a person
- */
-    apiRoutes.get('/personTasks/:personId', function(req,res){
-        data.db("CALL GetPersonTasks(" + helper.fpInt(req.params.personId) + ")",conn,function(error,result){
-            if(data.handle(error,res,true)){
-                data.handleResponse(result,res);
-            }
-        }); 
-    });
-
-/** POST - TASKS
- *     Create new Task
- */
-    apiRoutes.post('/task',function(req,res){
-        data.reqUpload(req,'postatt','personId', function(fileName, params){
-            data.db("CALL CreateTask(" + helper.fpVarchar(params.name) + "," + helper.fpVarchar(params.description) + "," + helper.fpDate(params.startDate) +
-                                "," + helper.fpDate(params.dueDate) + "," + helper.fpInt(params.creatorId) + "," + helper.fpInt(params.projectId)+
-                                "," + helper.fpVarchar(params.calendarId) + "," + helper.fpInt(params.priorityId) + ");",
-            conn, function(error, result){
-                if(data.handle(error,res,true)){
-                    var message = JSON.stringify(result[0])
-                    if(message === '' || message === undefined){
-                        message = '[{"message": "ok"}]'
+    /** POST - POSTS
+     *      Create a new post
+     */
+        apiRoutes.post('/post',function(req,res){
+            data.reqUpload(req,'postatt','personId', function(fileName, params){
+                data.db("CALL CreatePost(" + helper.fpInt(params.personId) + "," + helper.fpVarchar(params.message) + "," + helper.fpInt(params.messageTypeId) +
+                                    "," + helper.fpVarchar(params.fileName) + "," + helper.fpInt(params.attachmentTypeId) + "," + helper.fpInt(params.scopeTypeId) +
+                                    "," + helper.fpInt(params.scopeId) + ");",
+                conn, function(error, result){
+                    if(data.handle(error,res,true)){
+                        res.status(200).end( JSON.stringify(result[0]) );
                     }
-                    res.status(200).end( message );
-                }
+                });
             });
+
         });
-    });
-
-/** PUT - TASKS
- *      Edit Tasks
- */
-    apiRoutes.put('/task/:taskId',function(req,res){
-        data.reqUpload(req,'postatt',req.params.taskId, function(fileName, params){
-            data.db("CALL EditTask(" + helper.fpInt(req.params.taskId) + "," + helper.fpVarchar(params.name) + "," + helper.fpVarchar(params.description) + "," + helper.fpDate(params.startDate) +
-                                "," + helper.fpDate(params.dueDate) + "," + helper.fpInt(params.projectId) + "," + helper.fpInt(params.stateId) + "," + helper.fpInt(params.progress) +
-                                "," + helper.fpVarchar(params.calendarId) + "," + helper.fpInt(params.priorityId) + ");",
-            conn, function(error, result){
-                if(data.handle(error,res,true)){
-                    var message = JSON.stringify(result[0])
-                    if(message === '' || message === undefined){
-                        message = '[{"message": "ok"}]'
-                    }
-                    res.status(200).end( message );
-                }
-            });
-        });
-    });
-
-/** GET - TASK MESSAGES
- * 
- */
-    apiRoutes.get('/taskMessages/:taskId/:personId',function(req,res){
-
-        data.db("CALL GetTaskMessages(" + req.params.taskId + "," + req.params.personId + ",NULL)",conn,function(error,result){
-            if(data.handle(error,res,true)){
-                data.handleResponse(result,res,"");
-            }
-        });
-
-    });
-
-/** POST - TASK MESSAGES
- * 
- */
-    apiRoutes.post('/taskMessages',function(req,res){
-        data.reqUpload(req,'postatt','personId', function(fileName, params){
-            data.db("CALL CreateTaskMessage(" + helper.fpInt(params.taskId) + "," + helper.fpInt(params.personId) + "," + helper.fpVarchar(params.message) +
-                                "," + helper.fpInt(params.messageTypeId) + "," + helper.fpVarchar(params.fileName) + "," + helper.fpInt(params.attachmentTypeId) + ");",
-            conn, function(error, result){
-                if(data.handle(error,res,true)){
-                    var message = JSON.stringify(result[0])
-                    if(message === '' || message === undefined){
-                        message = '[{"message": "ok"}]'
-                    }
-                    res.status(200).end( message );
-                }
-            });
-        });
-    });
-
-/** GET - CHECKLIST ITEMS
- * 
- */
-    apiRoutes.get('/checkListItem/:id',function(req,res){
-
-        data.db("CALL GetCheckListItem(" + req.params.id + ")",conn,function(error,result){
-            if(data.handle(error,res,true)){
-                data.handleResponse(result,res,"");
-            }
-        });
-
-    });
-
-/** PUT - CHECKLIST ITEMS
- *      Edit checklist item
- */
-    apiRoutes.put('/checkListItem',function(req,res){
-        data.reqUpload(req,'','checkListId', function(fileName, params){
-            data.db("CALL EditCheckListItem(" + helper.fpInt(params.checkListId) + "," + helper.fpInt(params.sortNumber) + "," + helper.fpVarchar(params.item) + "," + helper.fpDate(params.dueDate) +
-                                "," + helper.fpBool(params.isChecked) + "," + helper.fpInt(params.terminatorId) + "," + helper.fpDate(params.terminationDate) + ");",
-            conn, function(error, result){
-                if(data.handle(error,res,true)){
-                    var message = JSON.stringify(result[0])
-                    if(message === '' || message === undefined){
-                        message = '[{"message": "ok"}]'
-                    }
-                    res.status(200).end( message );
-                }
-            });
-        });
-    });
-
-/** PUT - TASK LEADER
- * 
- */
-    apiRoutes.put('/task/:taskId/leader/:leaderId',function(req,res){
-        console.log(req.decoded.personId);
-        data.reqUpload(req,'avatar', helper.fpInt(req.params.taskId), function(fileName,params){
-            data.db("CALL ChangeLeader(" + helper.fpInt(req.params.taskId) +
-                                "," + helper.fpInt(req.params.leaderId) + "," + helper.fpInt(req.decoded.personId) + ");",
-            conn,function(error,result){
+    /** GET - POSTS
+     *     Get all posts relevant to a person
+     * 
+     */
+        apiRoutes.get('/post/:id',function(req,res){
+            data.db("CALL GetPost(" + req.params.id + ");",conn,function(error,result){
                 if(data.handle(error,res,true)){
                     data.handleResponse(result,res,"");
                 }
             });
-            console.log('Entró');
         });
-    });
-/** POST - TASK MEMBER
- * 
- */
-    apiRoutes.post('/taskMember',function(req,res){
-        data.reqUpload(req,'postatt','personId', function(fileName, params){
-            data.db("CALL CreateTaskMember(" + helper.fpInt(params.taskId) + "," + helper.fpInt(params.personId) + "," + helper.fpInt(params.roleId) +
-                                "," + helper.fpDate(params.startDate) + "," + helper.fpDate(params.endDate) + "," + helper.fpInt(req.decoded.personId) + ");",
-            conn, function(error, result){
-                if(data.handle(error,res,true)){
-                    var message = JSON.stringify(result[0])
-                    if(message === '' || message === undefined){
-                        message = '[{"message": "ok"}]'
+    /** PUT - POSTS
+     *      Edit a post with an Id
+     */
+        apiRoutes.put('/post/:id',function(req,res){
+            data.reqUpload(req,'postatt',req.params.id, function(fileName, params){
+                data.db("CALL EditPost(" + helper.fpInt(req.params.id) + "," + helper.fpVarchar(params.message) + "," + helper.fpVarchar(params.fileName) + "," +
+                                    helper.fpInt(params.attachmentTypeId) + "," + helper.fpInt(params.scopeTypeId) + "," + helper.fpInt(params.scopeId) + ");",
+                conn,function(error,result){
+                    if(data.handle(error,res,true)){
+                        res.status(200).end( responseMsg("Updated") );
                     }
-                    res.status(200).end( message );
-                }
+                });
             });
         });
-    });
 
-/** DELETE - TASK MEMBER
+/** =================== TEAMS ===================================
+ *  
+ */
+    /** GET - TEAMS
+     *      Get teams a person is part of
+     */
+        apiRoutes.get('/teams/:personId',function(req,res){
+            data.db("CALL GetPersonTeam(" + req.params.personId + ");",conn,function(error,result){
+                if(data.handle(error,res,true)){
+                    data.handleResponse(result,res,"");
+                }
+            });
+        });
+/** =================== PROJECTS ================================
  * 
  */
-    apiRoutes.delete('/taskMember',function(req,res){
-        data.db("CALL DeleteTaskMember(" + helper.fpInt(req.body.taskId) + "," + helper.fpInt(req.body.personId) + "," + helper.fpInt(req.decoded.personId) + ");",
-        conn, function(error, result){
-            if(data.handle(error,res,true)){
-                var message = JSON.stringify(result[0])
-                if(message === '' || message === undefined){
-                    message = '[{"message": "ok"}]'
+    /** GET - PROJECTS BY ID
+     *      All projects relevant to a person
+     */
+        apiRoutes.get('/personProjects/:personId',function(req,res){
+            data.db("CALL GetPersonProjects(" + req.params.personId + ");",conn,function(error,result){
+                if(data.handle(error,res,true)){
+                    data.handleResponse(result,res,"");
                 }
-                res.status(200).end( message );
-            }
+            });
         });
-    });
-/** PUT - TASK MEMBER
+
+    /** POST - PROJECT
+     * 
+     */
+        apiRoutes.post('/project',function(req,res){
+            data.reqUpload(req,'projatt','id', function(fileName, params){
+                data.db("CALL CreateProject(" + helper.fpVarchar(params.name) + "," + helper.fpVarchar(params.abbr) + "," + helper.fpDate(params.startDate) +
+                                    "," + helper.fpInt(params.creatorId) + "," + helper.fpDate(params.dueDate) + "," + helper.fpVarchar(params.fileName) + ");",
+                conn, function(error, result){
+                    if(data.handle(error,res,true)){
+                        var message = JSON.stringify(result[0])
+                        if(message === '' || message === undefined){
+                            message = '[{"message": "ok"}]'
+                        }
+                        res.status(200).end( message );
+                    }
+                });
+            });
+        });     
+
+    /** PUT - PROJECT
+     * 
+     */    
+        apiRoutes.put('/project/:projectId',function(req,res){    
+            data.reqUpload(req,'projatt', helper.fpInt(req.params.projectId), function(fileName,params){
+                data.db("CALL EditProject(" + helper.fpInt(req.params.projectId) + "," + helper.fpVarchar(params.name) + "," + helper.fpVarchar(params.abbr) + "," + helper.fpDate(params.startDate) +
+                                    "," + helper.fpDate(params.dueDate) + "," + helper.fpVarchar(params.fileName) + ");",
+                conn,function(error,result){
+                    if(data.handle(error,res,true)){
+                        data.handleResponse(result,res,"");
+                    }
+                });
+            });
+        });    
+/** =================== MISC ====================================
  * 
- */    
-    apiRoutes.put('/taskMember',function(req,res){
-        data.reqUpload(req,'postatt','personId', function(fileName, params){
-            data.db("CALL EditTaskMember(" + helper.fpInt(params.taskId) + "," + helper.fpInt(params.personId) + "," + helper.fpInt(params.roleId) +
-                                        "," + helper.fpDate(params.lastSeen) + 
-                                "," + helper.fpDate(params.startDate) + "," + helper.fpDate(params.endDate) + "," + helper.fpBool(params.isPinned) + ");",
+ */
+    /** GET - StateType
+     * 
+     */
+        app.get('/stateType/:stateTypeId',function(req,res){
+            data.db("CALL GetStateType(" + req.params.stateTypeId + ");",conn,function(error,result){
+                if(data.handle(error,res,true)){
+                    data.handleResponse(result,res,"");
+                }
+            });
+        });
+
+    /** GET - Gender
+     * 
+     */
+        app.get('/gender/:genderId',function(req,res){
+            data.db("CALL GetGender(" + req.params.genderId + ");",conn,function(error,result){
+                if(data.handle(error,res,true)){
+                    data.handleResponse(result,res,"");
+                }
+            });
+        });
+
+    /** GET - Priority
+     * 
+     */
+        app.get('/priority/:priorityId',function(req,res){
+            data.db("CALL GetPriority(" + req.params.priorityId + ");",conn,function(error,result){
+                if(data.handle(error,res,true)){
+                    data.handleResponse(result,res,"");
+                }
+            });
+        });
+
+    /** GET - ScopeType
+     * 
+     */
+        app.get('/scopeType/:scopeTypeId',function(req,res){
+            data.db("CALL GetScopeType(" + req.params.scopeTypeId + ");",conn,function(error,result){
+                if(data.handle(error,res,true)){
+                    data.handleResponse(result,res,"");
+                }
+            });
+        });
+
+    /** GET - RoleType
+     * 
+     */
+        app.get('/roleType/:roleTypeId',function(req,res){
+            data.db("CALL GetRoleType(" + req.params.roleTypeId + ");",conn,function(error,result){
+                if(data.handle(error,res,true)){
+                    data.handleResponse(result,res,"");
+                }
+            });
+        });
+
+    /** GET - AttachmentType
+     * 
+     */
+        app.get('/attachmentType/:attachmentTypeId',function(req,res){
+            data.db("CALL GetAttachmentType(" + req.params.attachmentTypeId + ");",conn,function(error,result){
+                if(data.handle(error,res,true)){
+                    data.handleResponse(result,res,"");
+                }
+            });
+        });
+
+    /** GET - Messagetype
+     * 
+     */
+        app.get('/messageType/:messageTypeId',function(req,res){
+            data.db("CALL GetMessageType(" + req.params.messageTypeId + ");",conn,function(error,result){
+                if(data.handle(error,res,true)){
+                    data.handleResponse(result,res,"");
+                }
+            });
+        });
+
+/** =================== TASKS ===================================
+ * 
+ */
+    /** GET - TASKS
+     *      Get tasks relevant to a person
+     */
+        apiRoutes.get('/personTasks/:personId', function(req,res){
+            data.db("CALL GetPersonTasks(" + helper.fpInt(req.params.personId) + ")",conn,function(error,result){
+                if(data.handle(error,res,true)){
+                    data.handleResponse(result,res);
+                }
+            }); 
+        });
+
+    /** POST - TASKS
+     *     Create new Task
+     */
+        apiRoutes.post('/task',function(req,res){
+            data.reqUpload(req,'postatt','personId', function(fileName, params){
+                data.db("CALL CreateTask(" + helper.fpVarchar(params.name) + "," + helper.fpVarchar(params.description) + "," + helper.fpDate(params.startDate) +
+                                    "," + helper.fpDate(params.dueDate) + "," + helper.fpInt(params.creatorId) + "," + helper.fpInt(params.projectId)+
+                                    "," + helper.fpVarchar(params.calendarId) + "," + helper.fpInt(params.priorityId) + ");",
+                conn, function(error, result){
+                    if(data.handle(error,res,true)){
+                        var message = JSON.stringify(result[0])
+                        if(message === '' || message === undefined){
+                            message = '[{"message": "ok"}]'
+                        }
+                        res.status(200).end( message );
+                    }
+                });
+            });
+        });
+
+    /** PUT - TASKS
+     *      Edit Tasks
+     */
+        apiRoutes.put('/task/:taskId',function(req,res){
+            data.reqUpload(req,'postatt',req.params.taskId, function(fileName, params){
+                data.db("CALL EditTask(" + helper.fpInt(req.params.taskId) + "," + helper.fpVarchar(params.name) + "," + helper.fpVarchar(params.description) + "," + helper.fpDate(params.startDate) +
+                                    "," + helper.fpDate(params.dueDate) + "," + helper.fpInt(params.projectId) + "," + helper.fpInt(params.stateId) + "," + helper.fpInt(params.progress) +
+                                    "," + helper.fpVarchar(params.calendarId) + "," + helper.fpInt(params.priorityId) + ");",
+                conn, function(error, result){
+                    if(data.handle(error,res,true)){
+                        var message = JSON.stringify(result[0])
+                        if(message === '' || message === undefined){
+                            message = '[{"message": "ok"}]'
+                        }
+                        res.status(200).end( message );
+                    }
+                });
+            });
+        });
+
+    /** GET - TASK MESSAGES
+     * 
+     */
+        apiRoutes.get('/taskMessages/:taskId/:personId',function(req,res){
+
+            data.db("CALL GetTaskMessages(" + req.params.taskId + "," + req.params.personId + ",NULL)",conn,function(error,result){
+                if(data.handle(error,res,true)){
+                    data.handleResponse(result,res,"");
+                }
+            });
+
+        });
+
+    /** POST - TASK MESSAGES
+     * 
+     */
+        apiRoutes.post('/taskMessages',function(req,res){
+            data.reqUpload(req,'postatt','personId', function(fileName, params){
+                data.db("CALL CreateTaskMessage(" + helper.fpInt(params.taskId) + "," + helper.fpInt(params.personId) + "," + helper.fpVarchar(params.message) +
+                                    "," + helper.fpInt(params.messageTypeId) + "," + helper.fpVarchar(params.fileName) + "," + helper.fpInt(params.attachmentTypeId) + ");",
+                conn, function(error, result){
+                    if(data.handle(error,res,true)){
+                        var message = JSON.stringify(result[0])
+                        if(message === '' || message === undefined){
+                            message = '[{"message": "ok"}]'
+                        }
+                        res.status(200).end( message );
+                    }
+                });
+            });
+        });
+
+    /** GET - CHECKLIST ITEMS
+     * 
+     */
+        apiRoutes.get('/checkListItem/:id',function(req,res){
+
+            data.db("CALL GetCheckListItem(" + req.params.id + ")",conn,function(error,result){
+                if(data.handle(error,res,true)){
+                    data.handleResponse(result,res,"");
+                }
+            });
+
+        });
+
+    /** PUT - CHECKLIST ITEMS
+     *      Edit checklist item
+     */
+        apiRoutes.put('/checkListItem',function(req,res){
+            data.reqUpload(req,'','checkListId', function(fileName, params){
+                data.db("CALL EditCheckListItem(" + helper.fpInt(params.checkListId) + "," + helper.fpInt(params.sortNumber) + "," + helper.fpVarchar(params.item) + "," + helper.fpDate(params.dueDate) +
+                                    "," + helper.fpBool(params.isChecked) + "," + helper.fpInt(params.terminatorId) + "," + helper.fpDate(params.terminationDate) + ");",
+                conn, function(error, result){
+                    if(data.handle(error,res,true)){
+                        var message = JSON.stringify(result[0])
+                        if(message === '' || message === undefined){
+                            message = '[{"message": "ok"}]'
+                        }
+                        res.status(200).end( message );
+                    }
+                });
+            });
+        });
+
+    /** PUT - TASK LEADER
+     * 
+     */
+        apiRoutes.put('/task/:taskId/leader/:leaderId',function(req,res){
+            console.log(req.decoded.personId);
+            data.reqUpload(req,'avatar', helper.fpInt(req.params.taskId), function(fileName,params){
+                data.db("CALL ChangeLeader(" + helper.fpInt(req.params.taskId) +
+                                    "," + helper.fpInt(req.params.leaderId) + "," + helper.fpInt(req.decoded.personId) + ");",
+                conn,function(error,result){
+                    if(data.handle(error,res,true)){
+                        data.handleResponse(result,res,"");
+                    }
+                });
+                console.log('Entró');
+            });
+        });
+    /** POST - TASK MEMBER
+     * 
+     */
+        apiRoutes.post('/taskMember',function(req,res){
+            data.reqUpload(req,'postatt','personId', function(fileName, params){
+                data.db("CALL CreateTaskMember(" + helper.fpInt(params.taskId) + "," + helper.fpInt(params.personId) + "," + helper.fpInt(params.roleId) +
+                                    "," + helper.fpDate(params.startDate) + "," + helper.fpDate(params.endDate) + "," + helper.fpInt(req.decoded.personId) + ");",
+                conn, function(error, result){
+                    if(data.handle(error,res,true)){
+                        var message = JSON.stringify(result[0])
+                        if(message === '' || message === undefined){
+                            message = '[{"message": "ok"}]'
+                        }
+                        res.status(200).end( message );
+                    }
+                });
+            });
+        });
+
+    /** DELETE - TASK MEMBER
+     * 
+     */
+        apiRoutes.delete('/taskMember',function(req,res){
+            data.db("CALL DeleteTaskMember(" + helper.fpInt(req.body.taskId) + "," + helper.fpInt(req.body.personId) + "," + helper.fpInt(req.decoded.personId) + ");",
             conn, function(error, result){
                 if(data.handle(error,res,true)){
                     var message = JSON.stringify(result[0])
@@ -596,66 +611,84 @@ var apiRoutes = express.Router();
                 }
             });
         });
-    });    
+    /** PUT - TASK MEMBER
+     * 
+     */    
+        apiRoutes.put('/taskMember',function(req,res){
+            data.reqUpload(req,'postatt','personId', function(fileName, params){
+                data.db("CALL EditTaskMember(" + helper.fpInt(params.taskId) + "," + helper.fpInt(params.personId) + "," + helper.fpInt(params.roleId) +
+                                            "," + helper.fpDate(params.lastSeen) + 
+                                    "," + helper.fpDate(params.startDate) + "," + helper.fpDate(params.endDate) + "," + helper.fpBool(params.isPinned) + ");",
+                conn, function(error, result){
+                    if(data.handle(error,res,true)){
+                        var message = JSON.stringify(result[0])
+                        if(message === '' || message === undefined){
+                            message = '[{"message": "ok"}]'
+                        }
+                        res.status(200).end( message );
+                    }
+                });
+            });
+        });    
 /** =================== FEED ====================================
  * 
  */
-/** GET - FEED
- *      Get feed according to scope
- */
-    apiRoutes.get('/feed/:userId/:scopeTypeId',function(req,res){
-        data.db("CALL GetFeed(" + helper.fpInt(req.params.userId) + "," + helper.fpInt(req.params.scopeTypeId) + ",1)",conn,function(error,result){
-            if(data.handle(error,res,true)){
-                data.handleResponse(result,res);
-            }
-        }); 
-    });
+    /** GET - FEED
+     *      Get feed according to scope
+     */
+        apiRoutes.get('/feed/:userId/:scopeTypeId',function(req,res){
+            data.db("CALL GetFeed(" + helper.fpInt(req.params.userId) + "," + helper.fpInt(req.params.scopeTypeId) + ",1)",conn,function(error,result){
+                if(data.handle(error,res,true)){
+                    data.handleResponse(result,res);
+                }
+            }); 
+        });
 
 
 
 /*
 
-apiRoutes.put('/task',function(req,res){
-    data.db("CALL EditTask(" +   helper.fpInt(req.body.taskId) + "," + helper.fpInt(req.body.name) + "," + helper.fpInt(req.body.description) + "," + 
-                            helper.fpInt(req.body.startDate) + "," + helper.fpInt(req.body.dueDate) + "," + helper.fpInt(req.body.creationDate) + "," + 
-                            helper.fpInt(req.body.creatorId) + "," + helper.fpInt(req.body.projectId) + "," + helper.fpInt(req.body.stateId) + "," + 
-                            helper.fpInt(req.body.calendarId) + ")",conn,function(error,result){
-        if(data.handle(error,res,true)){
-            data.handleResponse(result,res);
-        }
-    });     
-});
-*/
-/*
-    apiRoutes.put('/team',function(req,res){
-        data.db("CALL EditTeam(" +   helper.fpInt(req.body.teamId) + "," + helper.fpInt(req.body.name) + "," + helper.fpInt(req.body.abbr) + "," + 
-                                helper.fpInt(req.body.teamGoal) + "," + helper.fpInt(req.body.parentTeamId) + "," + helper.fpInt(req.body.email) + "," + 
-                                helper.fpInt(req.body.address) + "," + helper.fpInt(req.body.postcode) + "," + helper.fpInt(req.body.cityId) + "," + 
-                                helper.fpInt(req.body.phone1) + "," + helper.fpInt(req.body.ext1) + "," + helper.fpInt(req.body.phone2) + "," + 
-                                helper.fpInt(req.body.ext2) + "," + helper.fpInt(req.body.latitude) + "," + helper.fpInt(req.body.longitude) + "," + 
-                                helper.fpInt(req.body.logo) + "," + helper.fpInt(req.body.personId) + "," + helper.fpInt(req.body.stateTypeId) + ")",conn,function(error,result){
+    apiRoutes.put('/task',function(req,res){
+        data.db("CALL EditTask(" +   helper.fpInt(req.body.taskId) + "," + helper.fpInt(req.body.name) + "," + helper.fpInt(req.body.description) + "," + 
+                                helper.fpInt(req.body.startDate) + "," + helper.fpInt(req.body.dueDate) + "," + helper.fpInt(req.body.creationDate) + "," + 
+                                helper.fpInt(req.body.creatorId) + "," + helper.fpInt(req.body.projectId) + "," + helper.fpInt(req.body.stateId) + "," + 
+                                helper.fpInt(req.body.calendarId) + ")",conn,function(error,result){
             if(data.handle(error,res,true)){
                 data.handleResponse(result,res);
             }
         });     
     });
-*/
-/**
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- */
+    */
+    /*
+        apiRoutes.put('/team',function(req,res){
+            data.db("CALL EditTeam(" +   helper.fpInt(req.body.teamId) + "," + helper.fpInt(req.body.name) + "," + helper.fpInt(req.body.abbr) + "," + 
+                                    helper.fpInt(req.body.teamGoal) + "," + helper.fpInt(req.body.parentTeamId) + "," + helper.fpInt(req.body.email) + "," + 
+                                    helper.fpInt(req.body.address) + "," + helper.fpInt(req.body.postcode) + "," + helper.fpInt(req.body.cityId) + "," + 
+                                    helper.fpInt(req.body.phone1) + "," + helper.fpInt(req.body.ext1) + "," + helper.fpInt(req.body.phone2) + "," + 
+                                    helper.fpInt(req.body.ext2) + "," + helper.fpInt(req.body.latitude) + "," + helper.fpInt(req.body.longitude) + "," + 
+                                    helper.fpInt(req.body.logo) + "," + helper.fpInt(req.body.personId) + "," + helper.fpInt(req.body.stateTypeId) + ")",conn,function(error,result){
+                if(data.handle(error,res,true)){
+                    data.handleResponse(result,res);
+                }
+            });     
+        });
+    */
+    /**
+     * 
+     * 
+     * 
+     * 
+     * 
+     * 
+     * 
+     * 
+     * 
+     * 
+     * 
+     * 
+     * 
+     * 
+     */
 
 
 

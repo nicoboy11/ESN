@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
-import { View, Image, TouchableNativeFeedback, Text, StyleSheet } from 'react-native';
+import { View, Image, Text, StyleSheet } from 'react-native';
+import { Touchable } from '../settings';
 
 class CheckListItem extends Component {
     state = { 
@@ -34,7 +35,7 @@ class CheckListItem extends Component {
                 }
             >
                 <View style={{ flex: 3 }}>
-                    <TouchableNativeFeedback
+                    <Touchable
                         onPress={this.onPress.bind(this)}
                     >
                         <View 
@@ -61,7 +62,7 @@ class CheckListItem extends Component {
                                 {this.props.item}
                             </Text>
                         </View>
-                    </TouchableNativeFeedback>
+                    </Touchable>
                 </View>
             </View>
         );

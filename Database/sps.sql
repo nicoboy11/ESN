@@ -941,7 +941,7 @@ END$$
 DELIMITER $$
 DROP PROCEDURE IF EXISTS `EditProject`$$
 CREATE PROCEDURE `EditProject` (	IN _id int, 			IN _name varchar(250), 	IN _abbr varchar(10), 	IN _startDate datetime, 
-									IN _creatorId int, 		IN _dueDate datetime, 	IN _logo varchar(255) )
+									IN _dueDate datetime, 	IN _logo varchar(255) )
 BEGIN
 
 	IF(areValidDates(_startDate,_dueDate) = FALSE) THEN
@@ -949,12 +949,11 @@ BEGIN
     END IF;
 
 	UPDATE project 
-    SET name = _name, 
-		abbr = _abbr, 
-        startDate = _startDate, 
-        creatorId = _creatorId, 
-        dueDate = _dueDate, 
-        logo = _logo,
+    SET name = coalesce(_name, name),
+		abbr = coalesce(_abbr, abbr), 
+        startDate = coalesce(_startDate,startDate),
+        dueDate = coalesce(_dueDate, dueDate),
+        logo = coalesce(_logo,logo),
         lastChanged = NOW()
 	WHERE id = _id;
 
@@ -994,7 +993,7 @@ BEGIN
 	WHERE p.creatorId = _personId;
 
 END$$
-
+select * from project
 /*--------------------Project Teams--------------------------*/
 DELIMITER $$
 DROP PROCEDURE IF EXISTS `CreateProjectTeam`$$

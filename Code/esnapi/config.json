@@ -4,13 +4,14 @@
         "port": "3306",
         "database": "esn",
         "user": "root",
-        "password": "root"
+        "password": "evensosa"
     },
     "auth":{
         "secret":"H3rtr4dScotch"
     },
     "prefixes":{
         "avatar":"avt_",
-        "postatt": "pst_"
+        "postatt": "pst_",
+        "projatt": "proj_"
     }
 }

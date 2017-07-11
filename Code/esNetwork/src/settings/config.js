@@ -21,10 +21,7 @@ Config.colors = {
     clickable: '#3498db',
 
     lightText: '#CED3D9',
-    //main: '#3D68EB',
     darkMain: '#3457C3',
-    //error: '#EF9C7A',
-    //inactive: '#828486',
     mainText: '#FFF',
     elementBackground: '#FFF',
     alternateColor: '#08C2A5',
@@ -36,7 +33,7 @@ Config.colors = {
 
 Config.network = {
     server: 'http://143.167.201.96:3001/',
-    wsServer: 'ws://143.167.71.24:9998/task'
+    wsServer: 'ws://143.167.201.96:9998/task'
 };
 
 const lang = {

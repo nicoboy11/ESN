@@ -1,5 +1,6 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableNativeFeedback } from 'react-native';
+import { View, Text, StyleSheet } from 'react-native';
+import { Touchable } from '../';
 import { Config, Helper } from '../settings';
 
 const { colors } = Config;
@@ -16,7 +17,7 @@ const TaskBasic = (props) => {
     } = styles;
 
     return (
-        <TouchableNativeFeedback key={id} onPress={() => onPress(props)}>
+        <Touchable key={id} onPress={() => onPress(props)}>
             <View style={containerStyle}>
                 <View style={infoContainerStyle}>
                     <Text style={projectTextStyle}>{subtitle}</Text>
@@ -30,7 +31,7 @@ const TaskBasic = (props) => {
                     </Text>
                 </View>
             </View>
-        </TouchableNativeFeedback>
+        </Touchable>
     );
 };
 

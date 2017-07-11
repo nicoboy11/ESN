@@ -6,6 +6,7 @@ class Touchable extends Component {
         if (Platform.OS === 'ios' || this.props.forceOpacity) {
             return (
                 <TouchableOpacity
+                    key={this.props.key}
                     onPress={() => this.props.onPress()}
                 >
                     {this.props.children}
@@ -15,6 +16,7 @@ class Touchable extends Component {
 
         return (
             <TouchableNativeFeedback
+                    key={this.props.key}
                     onPress={() => this.props.onPress()}
             >
                 {this.props.children}
