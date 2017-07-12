@@ -1,0 +1,6 @@
+esnapi/uploads/*.jpeg
+esnapi/uploads/thumbs/*.jpeg
+esnapi/uploads/thumbs/big/*.jpeg
+esnapi/uploads/thumbs/small/*.jpeg
+esnapi/uploads/thumbs/blured/*.jpeg
+esnapi/config.json
