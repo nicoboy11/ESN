@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
-import { LinkButton } from '../';
+import { LinkButton, Label } from '../';
 import { Config } from '../../settings';
 const { colors } = Config;
 
@@ -15,7 +15,7 @@ class ListItem2 extends Component {
         return (
             <View style={containerStyle}>
                 <View style={headStyle}>
-                    <Text style={titleStyle}>{this.props.title}:</Text>
+                    <Label style={titleStyle}>{this.props.title}:</Label>
                     {(this.props.editable) ? 
                     <LinkButton title='Edit' onPress={this.onPress.bind(this)} /> : 
                     <View />}
@@ -45,8 +45,7 @@ const styles = new StyleSheet.create({
     },
     titleStyle: {
         fontSize: 12,
-        color: colors.secondText,
-        fontFamily: 'Roboto'
+        color: colors.secondText
     }
 });
 

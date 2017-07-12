@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { View, StyleSheet, Text, TouchableOpacity, Image } from 'react-native';
 import { Config, Helper } from '../../settings';
-const { colors } = Config;
+const { colors, font } = Config;
 
 class TaskCard3 extends Component {
     render() {
@@ -113,14 +113,14 @@ const styles = StyleSheet.create({
         alignSelf: 'center'
     },
     percentText: {
-        fontFamily: 'Roboto',
+        fontFamily: font.normal,
         fontWeight: '600'
     },
     subTitleContainer: {
         
     },
     subTitleText: {
-        fontFamily: 'Roboto-Light',
+        fontFamily: font.light,
         fontSize: 14,
         color: colors.secondText,   
         flex: 1     
@@ -129,7 +129,7 @@ const styles = StyleSheet.create({
         
     },
     titleText: {
-        fontFamily: 'Roboto',
+        fontFamily: font.normal,
         fontSize: 18,
         color: colors.mainDark
     },

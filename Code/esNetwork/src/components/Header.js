@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { View, TouchableOpacity, Text, Image, StyleSheet } from 'react-native';
+import { View, TouchableOpacity, Text, Image, StyleSheet, Platform } from 'react-native';
 import { Actions } from 'react-native-router-flux';
 import { Config } from '../settings';
 
@@ -71,7 +71,7 @@ class Header extends Component {
 const style = StyleSheet.create({
 
     containerStyle: {
-        height: 40,
+        height: (Platform.OS === 'ios') ? 60 : 40,
         backgroundColor: Config.colors.background,
         flexDirection: 'row',
         alignContent: 'center',
@@ -84,7 +84,8 @@ const style = StyleSheet.create({
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.2,
         elevation: 2,
-        position: 'relative'
+        position: 'relative',
+        zIndex: 99
     },
     imageStyle: {
         width: 23,

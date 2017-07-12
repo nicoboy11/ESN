@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Alert } from 'react-native';
+import { Label } from '../';
 import { Config } from '../../settings';
 const { colors, texts } = Config;
 
@@ -56,7 +57,7 @@ class SplitButton extends Component {
                     <TouchableOpacity
                         onPress={() => this.onPress(element)}
                     >
-                        <Text
+                        <Label
                             style={
                                 [
                                     textStyle,
@@ -64,7 +65,9 @@ class SplitButton extends Component {
                                 ]
                                 
                             }                    
-                        >{(element.text) ? element.text : element.description}</Text>
+                        >
+                            {(element.text) ? element.text : element.description}
+                        </Label>
                     </TouchableOpacity>
                 </View>                
             )
@@ -100,8 +103,7 @@ const styles = StyleSheet.create({
     textStyle: {
         textAlign: 'center',
         paddingTop: 5,
-        paddingBottom: 5,
-        fontFamily: 'Roboto'
+        paddingBottom: 5
     },
     itemTextStyle: {
         color: colors.main

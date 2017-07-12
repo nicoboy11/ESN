@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { View, Image, Text, StyleSheet } from 'react-native';
-import { Touchable } from '../settings';
+import { Touchable } from '../';
 
 class CheckListItem extends Component {
     state = { 

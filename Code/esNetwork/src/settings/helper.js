@@ -28,6 +28,7 @@ class Helper {
 
     static logout() {
         Database.realm('Session', { }, 'delete', '');        
+        Database.realm('Person', { }, 'delete', '');   
     }
 
 	static prettyfyDate(uglyDate) {

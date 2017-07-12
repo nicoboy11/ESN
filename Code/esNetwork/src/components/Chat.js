@@ -13,7 +13,7 @@ import ImagePicker from 'react-native-image-picker';
 import { CardList } from './';
 import { Config, Database, Helper } from '../settings';
 
-const { colors, font } = Config;
+const { colors, font, network } = Config;
 //get current log in
 const data = Database.realm('Session', { }, 'select', '');
 
@@ -35,7 +35,7 @@ class Chat extends Component {
 
         const self = this;
 
-        this.ws = new WebSocket('ws://143.167.71.24:9998/task');
+        this.ws = new WebSocket(network.wsServer);
 
         this.ws.onmessage = function (e) {
             const messageObj = JSON.parse(e.data);
@@ -314,7 +314,7 @@ class Chat extends Component {
                         <Image 
                             tintColor={colors.main} 
                             style={{ width: 24, height: 24 }} 
-                            source={{ uri: 'attachment' }} 
+                            source={{ uri: 'attach' }} 
                         />
                     </TouchableOpacity>
                     <TouchableOpacity 

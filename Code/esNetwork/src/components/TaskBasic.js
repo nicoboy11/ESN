@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
-import { Touchable } from '../';
+import { Touchable } from './';
 import { Config, Helper } from '../settings';
 
 const { colors } = Config;
