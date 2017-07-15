@@ -11,6 +11,8 @@ import {
     TaskForm,
     TaskMessageForm,
     HierarchyForm,
+    ProjectForm,
+    EditProjectForm,
     Dummy
 } from './pages';
 import { Config } from './settings';
@@ -24,7 +26,7 @@ class TabIcon extends React.Component {
         return (
                 <Image 
                     source={{ uri: this.props.title }} 
-                    style={{ width: 23, height: 23 }}
+                    style={{ width: 23, height: 23, tintColor: color }}
                     tintColor={color}
                 />           
         );
@@ -32,7 +34,6 @@ class TabIcon extends React.Component {
 }
 
 class RouterComponent extends Component {
-
     render() {
         return (
             <Router 
@@ -55,22 +56,26 @@ class RouterComponent extends Component {
                     />                 
                 </Scene>   
                 <Scene initial key='tabbar' tabs={true} tabBarStyle={styles.tabBarStyle} >
-                    <Scene initial
+                    <Scene
                         key='hierarchy' 
                         component={HierarchyForm} 
                         hideNavBar
                         title='profile'
                         icon={TabIcon}
                         style={{ paddingBottom: 46 }}
-                    />                     
-                    <Scene 
-                        key='tasks' 
-                        component={TaskForm} 
-                        hideNavBar
-                        title='task'
+                    />         
+                    <Scene
+                        initial
+                        key='projects'
                         icon={TabIcon}
-                        style={{ paddingBottom: 46 }}
-                    />                         
+                        title='task'
+                        hideNavBar
+                    >          
+                        <Scene key='projectForm' component={ProjectForm} style={{ paddingBottom: 46 }} />    
+                        <Scene key='editProjectForm' component={EditProjectForm} />                         
+                        <Scene key='taskForm' component={TaskForm} hideNavBar hideTabBar />                  
+                        <Scene key='taskMessage' component={TaskMessageForm} hideNavBar hideTabBar />  
+                    </Scene>                     
                     <Scene 
                         key='mainForm' 
                         component={MainForm} 
@@ -81,7 +86,7 @@ class RouterComponent extends Component {
                     />         
                     <Scene 
                         key='chatForm' 
-                        component={MainForm} 
+                        component={ProjectForm} 
                         hideNavBar
                         title='chat'
                         icon={TabIcon}
@@ -90,8 +95,7 @@ class RouterComponent extends Component {
                 </Scene>    
                 <Scene key='dummy' component={Dummy} hideNavBar />
                 <Scene key='profile' component={ProfileForm} hideNavBar />
-                <Scene key='profileImage' component={ProfileImage} hideNavBar />                
-                <Scene key='taskMessage' component={TaskMessageForm} hideNavBar />
+                <Scene key='profileImage' component={ProfileImage} hideNavBar />                              
                 {/*<Scene key="statusModal" component={PostCardMenu} direction='vertical' 
                 hideNavBar />     */}
             </Router>

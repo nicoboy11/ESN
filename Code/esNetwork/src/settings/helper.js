@@ -8,12 +8,22 @@ class Helper {
         return year.toString() + '-' + 
                 ('00' + (month + 1).toString()).slice(-2) + '-' + 
                 ('00' + (day).toString()).slice(-2);
-    }
-    
+    }   
+
+    static getDateISOfromDate(date) {
+        return date.getFullYear().toString() + '-' + 
+                ('00' + (date.getMonth() + 1).toString()).slice(-2) + '-' + 
+                ('00' + (date.getDate()).toString()).slice(-2);
+    }   
+
     static toDate(dateString) {
-        return new Date(parseInt(dateString.substring(0, 4)),
-                        parseInt(dateString.substring(5, 7)) - 1,
-                        parseInt(dateString.substring(8, 10)));
+        if (dateString) {
+            return new Date(parseInt(dateString.substring(0, 4)),
+                            parseInt(dateString.substring(5, 7)) - 1,
+                            parseInt(dateString.substring(8, 10)));
+        }
+
+        return null;
     }
 
     static isValidEmail(email) {
@@ -33,7 +43,10 @@ class Helper {
 
 	static prettyfyDate(uglyDate) {
         if (uglyDate === undefined || uglyDate === null || uglyDate === 'null') {
-            return '';
+            return {
+                color: colors.main,
+                date: ''
+            };
         }
 
         const date = this.toDate(uglyDate);

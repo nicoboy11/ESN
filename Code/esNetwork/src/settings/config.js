@@ -8,7 +8,7 @@ Config.regex = {
 };
 
 Config.font = {
-        normal: (Platform.OS !== 'ios') ? 'Roboto' : 'Arial',
+        normal: (Platform.OS !== 'ios') ? 'Roboto' : 'Avenir',
         light: (Platform.OS !== 'ios') ? 'Roboto-Light' : 'Avenir-Light'
 };
 
@@ -19,11 +19,11 @@ Config.colors = {
     error: '#e74c3c',
     background: '#F7F9FB',
     clickable: '#3498db',
+    elementBackground: '#FFF',
 
     lightText: '#CED3D9',
     darkMain: '#3457C3',
     mainText: '#FFF',
-    elementBackground: '#FFF',
     alternateColor: '#08C2A5',
     veryLight: '#E1E4E8',
     contrastColor: '#32394A',

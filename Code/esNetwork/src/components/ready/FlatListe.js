@@ -70,7 +70,11 @@ class FlatListe extends Component {
             case 'avatar':
                 return (
                     <View
-                        style={{ marginRight: 5 }}
+                        style={
+                            (this.props.stacked) ?
+                                { width: 14 } :
+                                { marginRight: 5 }
+                        }
                     >
                         <TouchableOpacity
                             onPress={() => this.props.onPress(item.person, item.personId)}
@@ -78,7 +82,7 @@ class FlatListe extends Component {
                             <Avatar 
                                 avatar={item.avatar}
                                 color={item.theme}
-                                size='medium'
+                                size={(this.props.size) ? this.props.size : 'medium'}
                             />
                         </TouchableOpacity>
                     </View>

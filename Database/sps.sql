@@ -929,13 +929,37 @@ CREATE PROCEDURE `CreateProject` (	IN _name varchar(250), 	IN _abbr varchar(10),
 									IN _creatorId int, 		IN _dueDate datetime, 	IN _logo varchar(255) )
 BEGIN
 
-	IF(areValidDates(_startDate,_dueDate) = FALSE) THEN
-		SIGNAL sqlstate 'ERROR' SET message_text = 'The start date is greater than the end date.';
-    END IF;
+	DECLARE _projectId INT;
+	DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+    
+		GET DIAGNOSTICS CONDITION 1 @sqlstate = RETURNED_SQLSTATE, @errno = MYSQL_ERRNO, @text = MESSAGE_TEXT; 
+			SET @full_error = CONCAT("ERROR ", @errno, " (", @sqlstate, "): ", @text); 
+		ROLLBACK;
+        
+        INSERT INTO esnLog ( errorDescription, dateOfError, personId )
+        VALUES (@full_error, NOW(), _creatorId );
+        
+		SIGNAL sqlstate 'ERROR' SET message_text = @full_error;
+            
+    END;
 
-	INSERT INTO project ( name, abbr, startDate, creatorId, dueDate, logo )
-    VALUES ( _name, _abbr, _startDate, _creatorId, _dueDate, _logo );
+	START TRANSACTION;    
+    
+		IF(areValidDates(_startDate,_dueDate) = FALSE) THEN
+			SIGNAL sqlstate 'ERROR' SET message_text = 'The start date is greater than the end date.';
+		END IF;
 
+		INSERT INTO project ( name, abbr, startDate, creatorId, dueDate, logo )
+		VALUES ( _name, _abbr, _startDate, _creatorId, _dueDate, _logo );
+		
+		SET _projectId = LAST_INSERT_ID();
+		CALL CreateProjectMember (	_projectId, _creatorId, 1, _startDate, NULL	);
+        
+        CALL GetProject(_projectId);
+
+	COMMIT;
+    
 END$$
 
 DELIMITER $$
@@ -961,17 +985,28 @@ END$$
 
 DELIMITER $$
 DROP PROCEDURE IF EXISTS `GetProject`$$
-CREATE PROCEDURE `GetProject` (	IN _id int )
+CREATE PROCEDURE `GetProject` (	IN _projectId int )
 BEGIN
 
-	SELECT 	name,
-			abbr,
-			startDate,
-			creatorId,
-			dueDate,
-			logo
-	FROM project
-	WHERE id = _id;
+	SELECT 	DISTINCT 
+					p.id as projectId,
+                    p.name,
+					p.id as value,
+					p.name as text,
+					p.abbr,
+					p.startDate,
+					p.creatorId,
+					p.dueDate,
+					p.logo,
+                    getTaskCount(p.id, 1) as activeTasks,
+                    getTaskCount(p.id, NULL) as totalTasks,
+                    (getTaskCount(p.id, NULL)  - getTaskCount(p.id, 1))/getTaskCount(p.id, NULL) as progress,
+                    getProjectMembers(p.id,1) as members
+	FROM project as p
+    LEFT JOIN projectMember as pm on pm.projectId = p.id
+    LEFT JOIN task as t on t.projectId = p.id
+	LEFT JOIN taskMember as tm on tm.taskId = t.id
+	WHERE p.id = _projectId;
 
 END$$
 
@@ -981,19 +1016,27 @@ CREATE PROCEDURE `GetPersonProjects` (	IN _personId int )
 BEGIN
 
 	SELECT 	DISTINCT 
-			p.id as value,
-			p.name as text,
-			p.abbr,
-			p.startDate,
-			p.creatorId,
-			p.dueDate,
-			p.logo
+					p.id as projectId,
+                    p.name,
+					p.id as value,
+					p.name as text,
+					p.abbr,
+					p.startDate,
+					p.creatorId,
+					p.dueDate,
+					p.logo,
+                    getTaskCount(p.id, 1) as activeTasks,
+                    getTaskCount(p.id, NULL) as totalTasks,
+                    (getTaskCount(p.id, NULL)  - getTaskCount(p.id, 1))/getTaskCount(p.id, NULL) as progress,
+                    getProjectMembers(p.id,1) as members
 	FROM project as p
+    LEFT JOIN projectMember as pm on pm.projectId = p.id
     LEFT JOIN task as t on t.projectId = p.id
-	WHERE p.creatorId = _personId;
+	LEFT JOIN taskMember as tm on tm.taskId = t.id
+	WHERE pm.personId = _personId OR tm.personId = _personId;
 
 END$$
-select * from project
+
 /*--------------------Project Teams--------------------------*/
 DELIMITER $$
 DROP PROCEDURE IF EXISTS `CreateProjectTeam`$$
@@ -1148,8 +1191,8 @@ BEGIN
 			SIGNAL sqlstate 'ERROR' SET message_text = 'The start date is greater than the end date.';
 		END IF;
 
-		INSERT INTO task ( name, description, startDate, dueDate, creationDate, creatorId, projectId, calendarId, priorityId, progress )
-		VALUES ( _name, _description, _startDate, _dueDate, NOW(), _creatorId, _projectId, _calendarId,  _priorityId, 0);
+		INSERT INTO task ( name, description, startDate, dueDate, creationDate, creatorId, projectId, calendarId, priorityId, progress, stateId )
+		VALUES ( _name, _description, _startDate, _dueDate, NOW(), _creatorId, _projectId, _calendarId,  _priorityId, 0, 1);
 		
         SET _taskId = LAST_INSERT_ID();
         
@@ -1207,18 +1250,18 @@ BEGIN
             getJsonMembers(t.id,3) as collaborators,
             getJsonMembers(t.id,2) as leader,
             per.theme,
-            tm.isPinned,
+            /*tm.isPinned,*/
             'Task' as category,
             t.stateId,
             ifnull(t.progress,0) as progress
     FROM task as t
     INNER JOIN person as per on per.id = t.creatorId
-    INNER JOIN taskMember as tm on tm.taskId = t.id
+    /*INNER JOIN taskMember as tm on tm.taskId = t.id*/
     LEFT JOIN project as p on p.id = t.projectId
     LEFT JOIN projectTeam as pte on pte.projectId = p.id
     LEFT JOIN team as te on te.id = pte.teamId
-    WHERE t.id = _taskId
-    ORDER BY tm.isPinned desc;
+    WHERE t.id = _taskId;
+    /*ORDER BY tm.isPinned desc;*/
 
 END$$
 
@@ -1423,7 +1466,7 @@ END$$
 
 DELIMITER $$
 DROP PROCEDURE IF EXISTS `GetPersonTasks`$$
-CREATE PROCEDURE `GetPersonTasks` (	IN _personId int )
+CREATE PROCEDURE `GetPersonTasks` (	IN _personId int, IN _projectId int )
 BEGIN
 
     SELECT	t.id as taskId,
@@ -1459,7 +1502,7 @@ BEGIN
     LEFT JOIN team as te on te.id = pte.teamId
     LEFT JOIN vwTaskNotifications as tn on tn.taskId = t.id AND tn.personId = tm.personId
     LEFT JOIN priority as pr on pr.id = t.priorityId
-    WHERE tm.personId = _personId
+    WHERE tm.personId = _personId AND t.projectId = ifnull(_projectId, t.projectId)
     ORDER BY tm.isPinned desc;
 
 END$$   

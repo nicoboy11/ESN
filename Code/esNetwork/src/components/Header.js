@@ -36,7 +36,7 @@ class Header extends Component {
         return (
             <Image 
                 tintColor={(!color) ? colors.clickable : color} 
-                style={imageStyle} 
+                style={[imageStyle, { tintColor: (!color) ? colors.clickable : color }]} 
                 source={{ uri: icon }} 
             />
         );
@@ -78,10 +78,11 @@ const style = StyleSheet.create({
         justifyContent: 'space-between',
         alignItems: 'center',
         alignSelf: 'flex-start',
+        paddingTop: (Platform.OS === 'ios') ? 20 : 0,
     },
     shadow: {
         shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
+        shadowOffset: { width: 0, height: 0.2 },
         shadowOpacity: 0.2,
         elevation: 2,
         position: 'relative',
@@ -98,7 +99,8 @@ const style = StyleSheet.create({
         color: Config.colors.mainDark,
         textAlign: 'left',
         flex: 3,
-        fontFamily: font.normal
+        fontFamily: font.normal,
+        lineHeight: 20
     },
     buttonStyles: {
         flex: 1

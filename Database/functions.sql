@@ -10,6 +10,18 @@ BEGIN
 END$$
 
 DELIMITER $$
+DROP FUNCTION IF EXISTS getTaskCount$$
+CREATE FUNCTION `getTaskCount` (_projectId int, _stateId int) 
+RETURNS INT
+BEGIN
+
+	SET @activeTasks = (	SELECT count(*)
+											FROM task
+											WHERE projectId = _projectId AND stateId = ifnull(_stateId,stateId) );
+    RETURN @activeTasks;
+END$$
+
+DELIMITER $$
 DROP FUNCTION IF EXISTS getPersonAbbr$$
 CREATE FUNCTION `getPersonAbbr` (_personId int) 
 RETURNS VARCHAR(3)
@@ -285,6 +297,31 @@ BEGIN
     FROM taskMember as t
     INNER JOIN person as p on p.id = t.personId
     WHERE taskId = _taskId and t.roleId = _roleId;
+    
+    RETURN _members;
+
+END$$
+
+DELIMITER $$
+DROP FUNCTION IF EXISTS getProjectMembers$$
+CREATE FUNCTION getProjectMembers(_projectId int, _roleId int) RETURNS text
+BEGIN
+
+	DECLARE _members text;
+	SET SESSION group_concat_max_len = 1000000;
+    SELECT concat('[',
+					group_concat( concat(
+                    '{',
+						'"personId":',t.personId,',',
+						'"avatar":"',getAvatar(personId),'",',
+						'"abbr":"',getPersonAbbr(personId),'",',
+						'"person":"',getFullName(personId),'",',
+                        '"theme":"',ifnull(p.theme,'#555555'),'"',
+                    '}') separator ','),
+				  ']') INTO _members
+    FROM projectMember as t
+    INNER JOIN person as p on p.id = t.personId
+    WHERE projectId = _projectId and t.roleId = _roleId;
     
     RETURN _members;
 

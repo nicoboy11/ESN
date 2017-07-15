@@ -178,6 +178,7 @@ var self = module.exports = {
         },
 
        dequalify: function (fileName) {
+           console.log('opening: ' + fileName);
             require('lwip').open('./uploads/' + fileName, function(err, image) {
                 if(err) {
                     console.log('Could not generate thumb');

@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { View, Text, TextInput, StyleSheet } from 'react-native';
+import { View, Text, TextInput, StyleSheet, Alert } from 'react-native';
 import { Config, Helper } from '../../settings';
 
 const { colors, texts, regex, font } = Config;
@@ -65,6 +65,10 @@ class Input extends Component {
         }*/
     }
 
+    focus() {
+        return this.input.focus();
+    }
+
     validateInput(text) {
         let newText = text;
         switch (this.props.type) {
@@ -106,7 +110,13 @@ class Input extends Component {
         return (
             <View style={{ flex: 1 }}>
                 <TextInput 
-                    style={[inputStyle, (this.props.height) ? { height: this.props.height } : {}, !this.state.isError ? validInputStyle : invalidInputStyle]}
+                    ref={(input) => { this.input = input; }}
+                    style={[
+                        inputStyle, 
+                        (this.props.height) ? { height: this.props.height } : {}, 
+                        !this.state.isError ? validInputStyle : invalidInputStyle,
+                        this.props.style
+                    ]}
                     autoCorrect={false}                  
                     underlineColorAndroid='transparent'                       
                     placeholderTextColor={colors.lightText}
@@ -120,7 +130,7 @@ class Input extends Component {
                     onSubmitEditing={this.onSubmitEditing.bind(this)}
                     autoCapitalize={this.props.autoCapitalize}
                     returnKeyType={this.props.returnKeyType}
-                    placeholder={this.props.label}
+                    placeholder={(this.props.label ? this.props.label : this.props.placeholder)}
                     multiline={this.props.multiline}
                 />
                 <Text style={styles.errorTextStyle} >{this.renderError()}</Text>

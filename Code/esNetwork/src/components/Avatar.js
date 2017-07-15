@@ -1,8 +1,9 @@
 import React from 'react';
 import { View, Text, Image, StyleSheet } from 'react-native';
+import { Label } from './';
 import { Config } from '../settings';
 
-const { colors } = Config;
+const { colors, network } = Config;
 
 const Avatar = ({ avatar, color, name, size }) => {
     const sizes = {
@@ -21,7 +22,8 @@ const Avatar = ({ avatar, color, name, size }) => {
             justifyContent: 'center',
             alignItems: 'center',
             borderWidth: StyleSheet.hairlineWidth,
-            borderColor: colors.mainDark
+            borderColor: colors.mainDark,
+            backgroundColor: 'transparent'
         },
         containerStyle: {
             flexDirection: 'row',
@@ -32,15 +34,15 @@ const Avatar = ({ avatar, color, name, size }) => {
         },
         abbrStyle: {
             color: colors.mainText,
-            fontSize: sizes[size] / 2  
+            fontSize: (sizes[size] / 2) - 2  
         }
     });
 
     const avt = (avatar.length < 3) ?
                 (<View style={[styles.avtStyle, { backgroundColor: color }]}>
-                    <Text style={styles.abbrStyle}>{avatar}</Text>
+                    <Label style={styles.abbrStyle}>{avatar}</Label>
                 </View>) :
-                <Image style={styles.avtStyle} source={{ uri: avatar }} />;
+                <Image style={styles.avtStyle} source={{ uri: network.server + 'thumbs/small/' + avatar }} />;
 
     return (
         <View style={styles.containerStyle}>

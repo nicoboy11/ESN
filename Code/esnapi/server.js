@@ -449,8 +449,8 @@ var apiRoutes = express.Router();
     /** GET - TASKS
      *      Get tasks relevant to a person
      */
-        apiRoutes.get('/personTasks/:personId', function(req,res){
-            data.db("CALL GetPersonTasks(" + helper.fpInt(req.params.personId) + ")",conn,function(error,result){
+        apiRoutes.get('/personTasks/:personId/:projectId', function(req,res){
+            data.db("CALL GetPersonTasks(" + helper.fpInt(req.params.personId) + "," + helper.fpInt(req.params.projectId) + ")",conn,function(error,result){
                 if(data.handle(error,res,true)){
                     data.handleResponse(result,res);
                 }

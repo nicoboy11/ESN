@@ -17,7 +17,6 @@ const NewCard = ({ name, avatar, color, value, onChangeText, onSubmitEditing }) 
                 value={value}      
                 editable={true}
             /> 
-            <Avatar name={name} avatar={avatar} color={color} size='small' />
         </View>
     );
 };

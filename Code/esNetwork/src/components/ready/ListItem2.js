@@ -15,9 +15,9 @@ class ListItem2 extends Component {
         return (
             <View style={containerStyle}>
                 <View style={headStyle}>
-                    <Label style={titleStyle}>{this.props.title}:</Label>
+                    <Label style={titleStyle}>{this.props.title}</Label>
                     {(this.props.editable) ? 
-                    <LinkButton title='Edit' onPress={this.onPress.bind(this)} /> : 
+                    <LinkButton title='Edit' onPress={this.onPress.bind(this)} /> :
                     <View />}
                 </View>
                 <View style={[contentStyle, this.props.style]}>

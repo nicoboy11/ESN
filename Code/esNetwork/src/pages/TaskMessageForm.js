@@ -5,6 +5,7 @@ import {
     StyleSheet, 
     Image
 } from 'react-native';
+import { Actions } from 'react-native-router-flux';
 import { Chat, Form } from '../components';
 import { CheckListForm, EditTaskForm } from './';
 import { Helper, Config, Database } from '../settings';
@@ -52,6 +53,7 @@ class TaskMessageForm extends Component {
                 data={this.state.taskData}
                 title={this.state.taskData.name}
                 shadow={false}
+                onPressLeft={() => Actions.pop()}
             >
                 <View style={mainContainerStyle}>
                     <TouchableOpacity

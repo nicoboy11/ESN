@@ -129,6 +129,12 @@ CALL CreateTeamMember(2,14,3);
 
 CALL CreateProject('Secretaría de Seguridad Pública', 'SSP', '2017-01-01', 1, '2017-02-01', 'ssp.png');
 CALL CreateProject('Human resources stuff', 'HRS', '2017-01-01', 1, '2017-02-01', 'hrs.png');
+
+CALL CreateProject('Payroll System', 'PS', '2017-01-01', 1, '2017-02-01', 'ssp.png');
+CALL CreateProject('New Credit App', 'NCA', '2017-01-01', 1, '2017-02-01', 'hrs.png');
+CALL CreateProject('Scholarship programm website', 'SPW', '2017-01-01', 1, '2017-02-01', 'ssp.png');
+CALL CreateProject('Finance System V2.0', 'FS2', '2017-01-01', 1, '2017-02-01', 'hrs.png');
+
 CALL EditProject(1,'Secretaría de Seguridad Pública', 'SSP', '2017-02-01', 1, '2017-03-30', 'ssp.png');
 
 CALL CreateProjectTeam(1,1,'2016-01-01','2016-05-05');
@@ -136,11 +142,36 @@ CALL CreateProjectTeam(1,2,'2016-05-05','2016-08-01');
 CALL EditProjectTeam(1,2,'2016-05-05','2016-10-01');
 CALL CreateProjectTeam(2,2,'2016-05-05','2016-08-01');
 
-CALL CreateProjectMember(1,1,1,NOW(),'2018-01-01');
+CALL CreateProjectMember(1,1,1,NOW(),'2018-01-01'); /* corregir los roleType en los members (todos tienen 1)*/
 CALL CreateProjectMember(1,2,1,NOW(),'2018-01-01');
 
 CALL CreateProjectMember(2,1,1,NOW(),'2018-01-01');
 CALL CreateProjectMember(2,2,1,NOW(),'2018-01-01');
+
+CALL CreateProjectMember(3,1,1,NOW(),'2018-01-01');
+CALL CreateProjectMember(3,2,1,NOW(),'2018-01-01');
+CALL CreateProjectMember(3,3,1,NOW(),'2018-01-01');
+CALL CreateProjectMember(3,4,1,NOW(),'2018-01-01');
+CALL CreateProjectMember(3,5,1,NOW(),'2018-01-01');
+CALL CreateProjectMember(3,6,1,NOW(),'2018-01-01');
+
+
+CALL CreateProjectMember(4,2,1,NOW(),'2018-01-01');
+CALL CreateProjectMember(4,7,1,NOW(),'2018-01-01');
+CALL CreateProjectMember(4,8,1,NOW(),'2018-01-01');
+CALL CreateProjectMember(4,1,1,NOW(),'2018-01-01');
+
+CALL CreateProjectMember(5,9,1,NOW(),'2018-01-01');
+CALL CreateProjectMember(5,1,1,NOW(),'2018-01-01');
+
+CALL CreateProjectMember(6,1,1,NOW(),'2018-01-01');
+CALL CreateProjectMember(6,10,1,NOW(),'2018-01-01');
+CALL CreateProjectMember(6,11,1,NOW(),'2018-01-01');
+CALL CreateProjectMember(6,12,1,NOW(),'2018-01-01');
+CALL CreateProjectMember(6,13,1,NOW(),'2018-01-01');
+CALL CreateProjectMember(6,21,1,NOW(),'2018-01-01');
+CALL CreateProjectMember(6,15,1,NOW(),'2018-01-01');
+CALL CreateProjectMember(6,17,1,NOW(),'2018-01-01');
 
 CALL EditProjectMember(1,2,1,NOW(),'2016-01-01','2018-01-01');
 
@@ -152,6 +183,8 @@ CALL CreateTask('Training on Android', 'Preparation for the Android training', '
 CALL CreateTask('September Conference', 'Review everything wrt the conference', '2016-12-21', '2017-06-21', 1, 2, NULL,4);
 CALL CreateTask('Organizing data', 'Organize all data in folders', '2016-12-21', '2017-06-21', 1, 2, NULL,5);
 CALL CreateTask('Create new method', 'create new method', '2016-12-21', '2017-06-21', 1, 2, NULL,5);
+CALL CreateTask('Create new method 2', 'create new method 2' , '2016-12-21', '2017-06-21', 1, 1, NULL,5);
+
 
 CALL EditTask(1, 'Prepare Enterprise Social Network', 'Write requirements, design database and application', NULL, NULL, NULL, NULL, NULL, NULL,NULL);
 CALL EditTask(1, 'Prepare ESN App', 'Write requirements, design database and applicatio', '2017-01-01', '2017-09-15', 2, 1, NULL, NULL,NULL);
@@ -208,6 +241,7 @@ UPDATE person SET theme = '#00C853' WHERE id = 16;
 UPDATE person SET theme = '#304FFE' WHERE id = 17;
 UPDATE person SET theme = '#D50000' WHERE id = 18;
 UPDATE person SET theme = '#00BFA5' WHERE id = 19;
+UPDATE person SET theme = '#D50000' WHERE id = 20;
 UPDATE person SET theme = '#00C853' WHERE id = 21;
 UPDATE person SET theme = '#304FFE' WHERE id = 22;
 UPDATE person SET theme = '#00BFA5' WHERE id = 23;

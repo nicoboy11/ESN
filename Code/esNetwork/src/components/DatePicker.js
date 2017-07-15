@@ -6,8 +6,11 @@ import {
     TouchableOpacity,
     Text,
     View,
-    StyleSheet
+    StyleSheet,
+    Alert,
+    Modal
 } from 'react-native';
+import { LinkButton } from './';
 import { Config, Helper } from '../settings';
 
 const { colors } = Config;
@@ -19,7 +22,8 @@ class DatePicker extends Component {
         this.state = {
             date: null, 
             borderLine: 1,
-            editable: true
+            editable: true,
+            showPickerIOS: false
         };
     }
 
@@ -33,7 +37,7 @@ class DatePicker extends Component {
 
     loadPicker(props) {
         if (props.date !== undefined && props.date !== null) {
-            this.setState({ date: props.date.toLocaleDateString() });
+            this.setState({ date: props.date });
         }
 
         if (props.editable !== undefined) {
@@ -50,15 +54,19 @@ class DatePicker extends Component {
                 return;
             }
 
-            const { action, year, month, day } = await DatePickerAndroid.open({
-                date: (this.props.date === null) ? new Date() : this.props.date
-            });
-            if (action !== DatePickerAndroid.dismissedAction) {
-                const date = new Date(year, month, day);
-                const dateISO = Helper.getDateISO(year, month, day);
-                this.setState({ date: date.toLocaleDateString() });
-                //Back to the parent component
-                this.props.onChangeDate(dateISO);
+            if (Platform.OS === 'ios') {            
+                this.setState({ showPickerIOS: true });
+            } else {
+                const { action, year, month, day } = await DatePickerAndroid.open({
+                    date: (this.props.date === null) ? new Date() : this.props.date
+                });
+                if (action !== DatePickerAndroid.dismissedAction) {
+                    const date = new Date(year, month, day);
+                    const dateISO = Helper.getDateISO(year, month, day);
+                    this.setState({ date });
+                    //Back to the parent component
+                    this.props.onChangeDate(dateISO);
+                }
             }
         } catch ({ code, message }) {
             console.log('Could not load date picker');
@@ -76,15 +84,48 @@ class DatePicker extends Component {
     renderSelection() {
         if (this.state.date != null) {
             return (
-                <Text 
-                    style={
-                        [
-                            styles.validInputStyle, 
-                            { color: colors.mainDark, borderBottomWidth: this.state.borderLine }
-                        ]}
-                >
-                    {this.state.date}
-                </Text>);
+                <View>
+                    <Text 
+                        style={
+                            [
+                                styles.validInputStyle, 
+                                { color: colors.mainDark, borderBottomWidth: this.state.borderLine }
+                            ]}
+                    >
+                        {Helper.prettyfyDate(Helper.getDateISOfromDate(this.state.date)).date}
+                    </Text>
+                    {Platform.OS === 'ios' ? 
+                    <Modal transparent visible={this.state.showPickerIOS}>
+                        <View style={{ flex: 1, justifyContent: 'flex-end' }}>
+                            <View 
+                                style={{ flex: 3, backgroundColor: colors.mainDark, opacity: 0.4 }}
+                            />
+                            <View
+                                style={{ flex: 2, backgroundColor: colors.background, justifyContent: 'flex-end' }}
+                            >
+                                <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginLeft: 40, marginRight: 40 }}>
+                                    <LinkButton title='CANCEL' />
+                                    <LinkButton 
+                                        title='OK' 
+                                        onPress={() => {
+                                            this.props.onChangeDate(this.state.date);
+                                            this.setState({ showPickerIOS: false });
+                                        }} 
+                                    />
+                                </View>
+                                <DatePickerIOS 
+                                    date={this.state.date} 
+                                    onDateChange={(date) => this.setState({ date })}
+                                    mode='date'
+                                    minimumDate={new Date(1900, 0, 1)}
+                                />
+                            </View>
+                        </View>
+                    </Modal> : <View />                    
+                    }
+        
+                </View>                  
+            );
         }
 
         return (
@@ -101,9 +142,6 @@ class DatePicker extends Component {
     }
 
     renderPicker() {
-        if (Platform.OS === 'ios') {
-            return <DatePickerIOS />;
-        }
         const { 
             labelTextStyle,
             activeLabelStyle,
@@ -120,8 +158,8 @@ class DatePicker extends Component {
                         {this.renderLabel()}
                     </Text>                
                     {this.renderSelection()}
-                </TouchableOpacity>
-               );
+                </TouchableOpacity>     
+            );
     }
 
     render() {

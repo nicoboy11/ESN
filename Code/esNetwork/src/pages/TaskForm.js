@@ -9,21 +9,32 @@ const data = Database.realm('Session', { }, 'select', '');
 
 class TaskForm extends Component {
 
-    state = { elements: [], isLoading: false, personId: data[0].personId, newTaskText: '' };
+    state = { elements: [], isLoading: false, newTaskText: '' };
 
     componentWillMount() {
-        this.setState({ isLoading: true });
+        if (data[0] === undefined) {
+            Database.realm('Session', { }, 'delete', '');
+            Actions.authentication();
+        } else {
+            this.setState({ isLoading: true, personId: data[0].personId });
+            
+            let projectId = this.props.projectId;
 
-        /** Get elements from API */
-        Database.request(
-            'GET', 
-            `personTasks/${data[0].personId}`, 
-            {}, 
-            2,
-            this.handleResponse.bind(this), 
-            this.onSuccess.bind(this),
-            this.onError.bind(this)
-        );
+            if (projectId === undefined) {
+                projectId = 'NULL';
+            }
+
+            /** Get elements from API */
+            Database.request(
+                'GET', 
+                `personTasks/${data[0].personId}/${projectId}`, 
+                {}, 
+                2,
+                this.handleResponse.bind(this), 
+                this.onSuccess.bind(this),
+                this.onError.bind(this)
+            );
+        }
     }
 
     onError(error) {
@@ -95,7 +106,9 @@ class TaskForm extends Component {
         return (
             <Form
                 rightIcon='menu'
-                title={texts.tasks}
+                leftIcon='back'
+                onPressLeft={() => Actions.pop()}
+                title={this.props.title}
                 menuList={
                     [
                         { name: 'Search', form: 'search', id: 1 }
@@ -105,9 +118,6 @@ class TaskForm extends Component {
                 <ScrollView style={{  }}>
                     {/*Aqui va para la nueva tarea*/} 
                     <NewCard
-                        name={`${data[0].names} ${data[0].firstLastName}`} 
-                        avatar={network.server + data[0].avatar} 
-                        color={data[0].theme} 
                         value={this.state.newTaskText}
                         onChangeText={(newTaskText) => this.setState({ newTaskText })}
                         onSubmitEditing={this.createTask.bind(this)}
