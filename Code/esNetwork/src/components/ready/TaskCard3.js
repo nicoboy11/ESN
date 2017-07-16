@@ -1,15 +1,81 @@
 import React, { Component } from 'react';
-import { View, StyleSheet, Text, TouchableOpacity, Image } from 'react-native';
-import { Config, Helper } from '../../settings';
+import { View, StyleSheet, Text, TouchableOpacity, Image, Alert } from 'react-native';
+import { Config, Helper, Database } from '../../settings';
+import { Avatar, DateDue } from '../';
 const { colors, font } = Config;
 
 class TaskCard3 extends Component {
+    constructor(props) {
+        super(props);
+
+        this.state = {
+            ...props,
+            newStateId: props.data.stateId,
+            taskId: props.id
+        };
+    }
+
+    onResponse(response) {
+        this.setState({ status: response.status });
+        return response.json();
+    }  
+
+    onError(error) {
+        if (this.state.status === 403) {
+            Alert.alert('Authentication Error');
+        } else {
+            Alert.alert('Unable to save the data.', `Code: ${this.state.status}, ${error.message}`);
+            this.startDate.updating = false;
+            this.dueDate.updating = false;
+        }
+    }
+
+    onSuccess(responseData) {
+        if (this.state.status > 299) {
+            console.log('error');
+        } else {
+            const data = this.state.data;
+            data.stateId = this.state.newStateId;
+
+            this.setState({ data });
+            this.props.updateFromChildren(data);
+        }        
+    }
+
+    onChangeDate() {
+
+    }
+
+    toogleTask() {
+        let stateId = this.state.data.stateId;
+        if (stateId === 1) {
+            this.setState({ newStateId: 2 });
+            stateId = 2;
+        } else {
+            this.setState({ newStateId: 1 });
+            stateId = 1;
+        }
+
+        Database.request(
+            'PUT',
+            `task/${this.state.taskId}`, 
+            {
+                stateId
+            },
+            1,
+            this.onResponse.bind(this),
+            this.onSuccess.bind(this),
+            this.onError.bind(this)
+        );        
+    }
+
     render() {
         const {
             containerStyle,
             topContainerStyle,
             bottomContainerStyle,
             checkImage,
+            uncheckImage,
             percentStyle,
             percentText,
             subTitleContainer,
@@ -22,46 +88,71 @@ class TaskCard3 extends Component {
             chevronClosed
         } = styles;
 
+        const { data, date, subtitle, title, id, onPress } = this.state;
+
+        const creator = JSON.parse(data.creator)[0];
+
         return (
-            <View key={this.props.id} style={containerStyle}>
-                <TouchableOpacity onPress={() => this.props.onPress(this.props)}>                
+            <View key={id} style={[containerStyle, (data.stateId === 1) ? {} : { opacity: 0.4 }]}>
+                <TouchableOpacity onPress={() => onPress(this.props)}>                
                     <View style={topContainerStyle}>
-                        <View style={[percentStyle, { borderColor: Helper.prettyfyDate(this.props.date).color }]}>
-                            <Text style={percentText}>{`${this.props.data.progress}%`}</Text>
+                        <View style={[percentStyle, { borderColor: Helper.prettyfyDate(date).color }]}>
+                            <Text style={percentText}>{`${data.progress}%`}</Text>
                         </View>
                         <View style={{ flex: 1 }}>
                             <View style={[subTitleContainer, { flex: 1, marginTop: 10 }]}>
-                                <Text style={subTitleText}>{this.props.subtitle}</Text>
+                                <Text style={subTitleText}>{subtitle}</Text>
                             </View>
                             <View style={[titlecontainer, { flex: 1 }]}>
-                                <Text style={titleText}>{this.props.title}</Text>
+                                <Text style={titleText}>{title}</Text>
                             </View>
                             <View style={[subTitleContainer, { flex: 1, marginBottom: 10 }]}>
-                                <Text style={subTitleText}>Even Sosa</Text>
+                                <Avatar 
+                                    avatar={creator.avatar}
+                                    color={creator.theme}
+                                    size='mini'
+                                    name={creator.person}
+                                    nameColor={colors.secondText}
+                                />
                             </View>                            
                         </View>
                     </View>
                 </TouchableOpacity>                
                 <View style={bottomContainerStyle}>
                     <View style={[smallContainers, separator]}>
-                        <Text style={smallTitle}>{Helper.prettyfyDate(this.props.date).date}</Text>
+                        <DateDue 
+                            ref={(date) => { this.startDate = date; }}
+                            date={Helper.toDate(date)} 
+                            onChangeDate={this.onChangeDate.bind(this)}
+                            title='Due Date'
+                        />                        
                     </View>
                     <View style={[smallContainers, separator]}>
                         <Text style={smallTitle}>Resume</Text>                        
                     </View>
                     <View style={[smallContainers, separator]}>
-                        <TouchableOpacity>
-                            <Image 
-                                source={{ uri: 'checked' }}
-                                style={checkImage}
-                                tintColor={colors.main}
-                            />
+                        <TouchableOpacity
+                            onPress={this.toogleTask.bind(this)}
+                        >
+                            {
+                                (data.stateId !== 1) ?
+                                <Image 
+                                    source={{ uri: 'checked' }}
+                                    style={checkImage}
+                                    tintColor={colors.main}
+                                /> :
+                                <Image 
+                                    source={{ uri: 'unchecked' }}
+                                    style={uncheckImage}
+                                    tintColor={colors.secondText}
+                                />                                 
+                            }
                         </TouchableOpacity>
                     </View>         
                     <View style={[smallContainers, { flex: 0.5 }]}>
                         <TouchableOpacity
                             style={{ flex: 1, alignSelf: 'center' }}
-                            onPress={() => this.props.onPress(this.props)}
+                            onPress={() => onPress(this.props)}
                         >
                             <Image 
                                 source={{ uri: 'chevron' }}
@@ -100,8 +191,14 @@ const styles = StyleSheet.create({
     },
     checkImage: {
         width: 24,
-        height: 24
+        height: 24,
+        tintColor: colors.main
     },
+    uncheckImage: {
+        width: 24,
+        height: 24,
+        tintColor: colors.secondText
+    },    
     percentStyle: {
         borderWidth: 4,
         borderRadius: 25,

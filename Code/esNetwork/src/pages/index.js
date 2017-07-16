@@ -14,3 +14,4 @@ export * from './HierarchyForm';
 export * from './EditHierarchyForm';
 export * from './ProjectForm';
 export * from './EditProjectForm';
+export * from './EditProfileForm';

@@ -109,7 +109,7 @@ class DateDue extends Component {
                                     </Label>
                                 </View>
                                 <DatePickerIOS 
-                                    date={this.state.newDate} 
+                                    date={(this.state.newDate === null) ? new Date() : this.state.newDate} 
                                     onDateChange={(date) => this.setState({ newDate: date })}
                                     mode='date'
                                     minimumDate={new Date(1900, 0, 1)}

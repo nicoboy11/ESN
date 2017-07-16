@@ -5,7 +5,7 @@ import { Config } from '../settings';
 
 const { colors, network } = Config;
 
-const Avatar = ({ avatar, color, name, size }) => {
+const Avatar = ({ avatar, color, name, size, nameColor }) => {
     const sizes = {
         mini: 15,
         small: 20,
@@ -30,7 +30,8 @@ const Avatar = ({ avatar, color, name, size }) => {
             alignItems: 'center'
         },
         nameStyle: {
-            fontSize: 14
+            fontSize: (sizes[size] - (sizes[size] / 2)),
+            color: nameColor
         },
         abbrStyle: {
             color: colors.mainText,

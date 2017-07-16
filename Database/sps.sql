@@ -1196,7 +1196,8 @@ BEGIN
 		
         SET _taskId = LAST_INSERT_ID();
         
-		CALL CreateTaskMember(_taskId, _creatorId, 1, NOW(), NULL, _creatorId);   
+		INSERT INTO taskMember ( taskId, personId, roleId, startDate, endDate, lastEditorId )
+		VALUES ( _taskId, _creatorId, 1, NOW(), NULL, _creatorId );        
 		
 		CALL GetTask(_taskId);
         
@@ -1244,9 +1245,9 @@ BEGIN
             p.id as projectId,
             p.name as projectName,
             p.abbr as projectabbr,
-            te.id as teamId,
+            /*te.id as teamId,
             te.name as teamName,
-            te.abbr as teamAbbr,
+            te.abbr as teamAbbr,*/
             getJsonMembers(t.id,3) as collaborators,
             getJsonMembers(t.id,2) as leader,
             per.theme,
@@ -1258,8 +1259,8 @@ BEGIN
     INNER JOIN person as per on per.id = t.creatorId
     /*INNER JOIN taskMember as tm on tm.taskId = t.id*/
     LEFT JOIN project as p on p.id = t.projectId
-    LEFT JOIN projectTeam as pte on pte.projectId = p.id
-    LEFT JOIN team as te on te.id = pte.teamId
+    /*LEFT JOIN projectTeam as pte on pte.projectId = p.id
+    LEFT JOIN team as te on te.id = pte.teamId*/
     WHERE t.id = _taskId;
     /*ORDER BY tm.isPinned desc;*/
 
@@ -1478,9 +1479,9 @@ BEGIN
             p.id as projectId,
             p.name as projectName,
             p.abbr as projectabbr,
-            te.id as teamId,
+            /*te.id as teamId,
             te.name as teamName,
-            te.abbr as teamAbbr,
+            te.abbr as teamAbbr,*/
             getJsonMembers(t.id,3) as collaborators,
             getJsonMembers(t.id,2) as leader,
             per.theme,
@@ -1498,8 +1499,8 @@ BEGIN
     INNER JOIN person as per on per.id = t.creatorId
     INNER JOIN taskMember as tm on tm.taskId = t.id
     LEFT JOIN project as p on p.id = t.projectId
-    LEFT JOIN projectTeam as pte on pte.projectId = p.id
-    LEFT JOIN team as te on te.id = pte.teamId
+    /*LEFT JOIN projectTeam as pte on pte.projectId = p.id
+    LEFT JOIN team as te on te.id = pte.teamId*/
     LEFT JOIN vwTaskNotifications as tn on tn.taskId = t.id AND tn.personId = tm.personId
     LEFT JOIN priority as pr on pr.id = t.priorityId
     WHERE tm.personId = _personId AND t.projectId = ifnull(_projectId, t.projectId)

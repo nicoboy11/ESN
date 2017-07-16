@@ -96,6 +96,7 @@ class FlatListe extends Component {
                         id={item.taskId}
                         onPress={(props) => { this.props.onPress(props); }}
                         data={item}
+                        updateFromChildren={(update) => this.props.updateFromChildren(update)}
                      />
                 );
             default:

@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { View, StyleSheet, ScrollView, Text, Image, TouchableOpacity, Alert } from 'react-native';
 import { Actions } from 'react-native-router-flux';
 import ImagePicker from 'react-native-image-picker';
-import { Input, DatePicker, Form } from '../components';
+import { Input, DatePicker, Form, Avatar } from '../components';
 import { Config, Database, Helper } from '../settings';
 
 const { texts, colors } = Config;
@@ -23,7 +23,8 @@ class ProfileForm extends Component {
         genderId: 1,
         editable: false,
         currentOption: '',
-        avatar: null
+        avatar: null,
+        theme: colors.main
     }
 
     componentWillMount() {
@@ -65,10 +66,11 @@ class ProfileForm extends Component {
                 ext: responseData[0].ext,
                 mobile: responseData[0].mobile,
                 abbr: responseData[0].abbr,
-                avatar: { uri: Config.network.server + responseData[0].avatar },
+                avatar: responseData[0].avatar,
                 genderId: 1,
                 editable: false,
-                currentOption: 'Edit'
+                currentOption: 'edit',
+                theme: responseData[0].theme
             });
         }
     }
@@ -79,8 +81,8 @@ class ProfileForm extends Component {
 
     onPressRight() {
         switch (this.state.currentOption) {
-            case 'Edit':
-                this.setState({ editable: true, currentOption: 'Save' });
+            case 'edit':
+                Actions.editProfileForm(this.state);
                 break;
             case 'Save':
                 this.saveProfile();
@@ -93,14 +95,26 @@ class ProfileForm extends Component {
     onPressLeft() {
         if (this.state.editable) {
             this.setState({ editable: false, currentOption: 'Edit' });
+        } else {
+            Actions.pop();
         }
     }
 
     getProfile(props) {
         if (session[0].personId === props.personId) {
-            this.setState({ currentOption: 'Edit' });
+            this.setState({ currentOption: 'edit' });
         }    
 
+        const profile = Database.realm('Person', { }, 'select', `personId=${props.personId}`);
+
+        if (profile[0] !== undefined) {
+            this.localLoad(profile);
+        } else {
+            this.remoteRequest(props);
+        }
+    }
+
+    remoteRequest(props) {
         Database.request(
             'GET', 
             `person/${props.personId}`, 
@@ -110,6 +124,13 @@ class ProfileForm extends Component {
             this.onSuccess.bind(this),
             this.onError.bind(this)
         );
+    }
+
+    localLoad(profile) {
+        this.setState(
+            Database.realmToObject(profile)[0]
+        );         
+        this.setState({ currentOption: 'edit' });
     }
 
     saveProfile() {
@@ -196,7 +217,11 @@ class ProfileForm extends Component {
         if (this.state.avatar !== null) {
             return (
                 <TouchableOpacity style={avatarContainer} onPress={this.imageAction.bind(this)} >
-                    <Image style={avatarStyle} source={this.state.avatar} />
+                    <Avatar 
+                        avatar={this.state.avatar}
+                        color={this.state.theme}
+                        size='huge'
+                    />
                     {indicator}
                 </TouchableOpacity>    
             );
@@ -223,18 +248,20 @@ class ProfileForm extends Component {
             contactImageStyle,
             titleStyle
         } = styles;
-
+        
         return (
                 <Form
-                   leftIcon={(this.state.editable) ? 'Cancel' : 'back'}
+                   leftIcon={(this.state.editable) ? 'cancel' : 'back'}
                    title='Profile'
                    menuList={[]}
                    rightIcon={this.state.currentOption}
                    onPressRight={this.onPressRight.bind(this)}
                    onPressLeft={this.onPressLeft.bind(this)}
+                   background={this.state.theme}
+                   shadow={false}
                 >                       
                 <ScrollView>
-                    <View style={headerStyle}>
+                    <View style={[headerStyle, { backgroundColor: this.state.theme }]}>
                         <Text style={mainTextStyle}>
                             {
                                 this.state.names + ' ' + 
@@ -333,7 +360,6 @@ const styles = StyleSheet.create({
         marginBottom: 10
     },    
     headerStyle: {
-        backgroundColor: colors.main,
         flex: 1,
         paddingBottom: 10
 

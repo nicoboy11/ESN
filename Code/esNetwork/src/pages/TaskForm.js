@@ -65,6 +65,20 @@ class TaskForm extends Component {
         Actions.taskMessage(props.data);
     } 
 
+    updateFromChildren(update) {
+        let elements = this.state.elements;
+
+        for (let i = 0; i < elements.length; i++) {
+            if (elements[i].taskId === update.taskId) {
+                elements[i] = update;
+            }
+        }
+
+        this.setState({
+            elements
+        });
+    }
+
     handleResponse(response) {
         console.log(response.status);
         this.setState({ status: response.status });
@@ -77,7 +91,8 @@ class TaskForm extends Component {
             'task', 
             {
                 name: this.state.newTaskText,
-                creatorId: this.state.personId
+                creatorId: this.state.personId,
+                projectId: this.props.projectId
             }, 
             1,
             this.handleResponse.bind(this), 
@@ -98,6 +113,7 @@ class TaskForm extends Component {
                 data={this.state.elements}
                 initialNumToRender={3}
                 onPress={(props) => { this.openComments(props); }}
+                updateFromChildren={(update) => this.updateFromChildren(update)}
             />                       
         );        
     }

@@ -13,6 +13,7 @@ import {
     HierarchyForm,
     ProjectForm,
     EditProjectForm,
+    EditProfileForm,
     Dummy
 } from './pages';
 import { Config } from './settings';
@@ -94,7 +95,13 @@ class RouterComponent extends Component {
                     />                                  
                 </Scene>    
                 <Scene key='dummy' component={Dummy} hideNavBar />
-                <Scene key='profile' component={ProfileForm} hideNavBar />
+                <Scene
+                    key='profile'
+                    hideNavBar
+                >
+                    <Scene key='profileview' initial component={ProfileForm} hideNavBar />
+                    <Scene key='editProfileForm' component={EditProfileForm} />    
+                </Scene>
                 <Scene key='profileImage' component={ProfileImage} hideNavBar />                              
                 {/*<Scene key="statusModal" component={PostCardMenu} direction='vertical' 
                 hideNavBar />     */}

@@ -21,18 +21,10 @@ class Header extends Component {
     renderButton(icon, color) {
         const { imageStyle } = style;
 
-        /*switch (icon) {
-            case 'menu':
-                return <Image tintColor={colors.clickable} style={imageStyle} source={{ uri: 'cancel' }} />;
-            case 'edit':
-                return <Image tintColor={colors.clickable} style={imageStyle} source={{ uri: 'edit' }} />;                
-            case 'search':
-                return <Image tintColor={colors.clickable} style={imageStyle} source={require('../img/wsearch.png')} />;
-            case 'back':
-                return <Image tintColor={colors.clickable} style={imageStyle} source={require('../img/wback.png')} />;
-            default:
-                return <Text style={{ color: colors.mainText }}>{icon}</Text>;
-        }*/
+        if (icon === '' || icon === undefined) {
+            return <View />;
+        }
+
         return (
             <Image 
                 tintColor={(!color) ? colors.clickable : color} 
@@ -42,9 +34,27 @@ class Header extends Component {
         );
     }
 
+    renderLeft() {
+        const { leftIcon, leftColor } = this.props;
+
+        if (this.props.leftIcon === undefined) {
+            return <View style={{ paddingLeft: 10 }} />;
+        }
+
+        return (
+            <TouchableOpacity style={{ width: 44 }} onPress={this.onPressLeft.bind(this)} >
+                {this.renderButton(leftIcon, leftColor)}
+            </TouchableOpacity>
+        );        
+    }
+
+    renderRight() {
+
+    }    
+
     render() {
         const { containerStyle, titleStyle, shadow } = style;
-        const { rightIcon, rightColor, leftIcon, leftColor, title, isVisible } = this.props;
+        const { rightIcon, rightColor, title, isVisible, background } = this.props;
 
         if (!isVisible) {
             return null;
@@ -53,10 +63,14 @@ class Header extends Component {
         const hasShadow = (this.props.shadow === undefined) ? true : this.props.shadow;
 
         return (
-            <View style={[containerStyle, (hasShadow) ? shadow : {}]}>
-                <TouchableOpacity style={{ width: 44 }} onPress={this.onPressLeft.bind(this)} >
-                    {this.renderButton(leftIcon, leftColor)}
-                </TouchableOpacity>
+            <View 
+                style={[
+                    containerStyle, 
+                    (hasShadow) ? shadow : {},
+                    (background) ? { backgroundColor: background } : {}
+                ]}
+            >
+                {this.renderLeft()}
                 <Text allowFontScaling ellipsizeMode='tail' numberOfLines={2} style={titleStyle} >
                     {title}
                 </Text>

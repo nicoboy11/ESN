@@ -127,6 +127,7 @@ class Form extends Component {
                         title={title}
                         isVisible={isVisible}
                         shadow={this.props.shadow}
+                        background={this.props.background}
                     />                
                     <View style={{ flex: 1 }}>
                         {this.props.children}
