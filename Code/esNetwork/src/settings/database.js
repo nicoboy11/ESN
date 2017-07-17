@@ -230,49 +230,88 @@ import { Config } from './';
                 .then(onSuccess)
                 .catch(onError);  
             }
-
-        static getClass(table) {
-            switch (table) {
-                case 'Session':
-                    return Session;
-                case 'Priority':
-                    return Priority;
-                case 'Person':
-                    return Person;
-                default:
-                    return Session;
-            }
-        }
-
-        static realmToObject(data) {
-            let array = [];
-            for (let i = 0; i < data.length; i++) {
-                let object = {};
-
-                for (let property in Person.schema.properties) {
-                    object[property] = data[i][property];
+        
+            static request2(method, sp, body, headerType, callback) {
+                let data = (Object.keys(params).length === 0) ? null : JSON.stringify(params);
+                
+                if (method === 'POST' || method === 'PUT') {
+                    if (headerType === 1) {
+                        data = new FormData();
+                        const keys = Object.keys(params);
+                        
+                        for (let i = 0; i < keys.length; i++) {
+                            const key = keys[i];                    
+                            if (params[key] !== undefined) {
+                                data.append(key, params[key]);
+                            }
+                        }
+                    }
                 }
 
-                array.push(object);
+                if (method === 'GET') {
+                    data = null;
+                }
+
+                fetch(Config.network.server + sp, { 
+                    method, 
+                    headers: Database.getHeader(headerType),
+                    body
+                })
+                .then((response) => response.json())
+                .then((responseJson) => callback(false,responseJson) )
+                .catch((error) => callback(true,error));                  
             }
 
-            return array;
-        }
+        /** getClass
+         * 
+         * @param {*} table 
+         */
+            static getClass(table) {
+                switch (table) {
+                    case 'Session':
+                        return Session;
+                    case 'Priority':
+                        return Priority;
+                    case 'Person':
+                        return Person;
+                    default:
+                        return Session;
+                }
+            }
+
+        /** realmToObject
+         * 
+         * @param {*} data 
+         */
+            static realmToObject(data) {
+                let array = [];
+                for (let i = 0; i < data.length; i++) {
+                    let object = {};
+
+                    for (let property in Person.schema.properties) {
+                        object[property] = data[i][property];
+                    }
+
+                    array.push(object);
+                }
+
+                return array;
+            }
 
         /** editRealm - update a realm object
          *  
          * @param {*} object the object to edit
          * @param {*} fields the data to edit
          */
-        static editRealm(table, object, fields) {
-            let objClass = Database.getClass(table);
+            static editRealm(table, object, fields) {
+                let objClass = Database.getClass(table);
 
-            for (let property in fields) {
-                object[property]
+                for (let property in fields) {
+                    object[property]
+                }
+
+                return object;
             }
-
-            return object;
-        }
 
         /** REALM - Manage local database
          * 

@@ -363,6 +363,60 @@ var apiRoutes = express.Router();
                 });
             });
         });    
+    /** POST PROJECT MEMBER
+     * 
+     */        
+        apiRoutes.post('/projectMember',function(req,res){
+            data.reqUpload(req,'postatt','personId', function(fileName, params){
+                data.db("CALL CreateProjectMember(" + helper.fpInt(params.projectId) + "," + helper.fpInt(params.personId) + "," + helper.fpInt(params.roleId) +
+                                    "," + helper.fpDate(params.startDate) + "," + helper.fpDate(params.endDate) + ");",
+                conn, function(error, result){
+                    if(data.handle(error,res,true)){
+                        var message = JSON.stringify(result[0])
+                        if(message === '' || message === undefined){
+                            message = '[{"message": "ok"}]'
+                        }
+                        res.status(200).end( message );
+                    }
+                });
+            });
+        });    
+
+    /** PUT PROJECT MEMBER
+     * 
+     */        
+        apiRoutes.put('/projectMember',function(req,res){
+            data.reqUpload(req,'postatt','personId', function(fileName, params){
+                data.db("CALL EditProjectMember(" + helper.fpInt(params.projectId) + "," + helper.fpInt(params.personId) + "," + helper.fpInt(params.roleId) +
+                                            "," + helper.fpDate(params.lastSeen) + 
+                                    "," + helper.fpDate(params.startDate) + "," + helper.fpDate(params.endDate) + ");",
+                conn, function(error, result){
+                    if(data.handle(error,res,true)){
+                        var message = JSON.stringify(result[0])
+                        if(message === '' || message === undefined){
+                            message = '[{"message": "ok"}]'
+                        }
+                        res.status(200).end( message );
+                    }
+                });
+            });
+        });       
+
+    /** DELETE PROJECT MEMBER
+     * 
+     */         
+        apiRoutes.delete('/projectMember',function(req,res){
+            data.db("CALL DeleteProjectMember(" + helper.fpInt(req.body.projectId) + "," + helper.fpInt(req.body.personId) + ");",
+                conn, function(error, result){
+                    if(data.handle(error,res,true)){
+                        var message = JSON.stringify(result[0])
+                        if(message === '' || message === undefined){
+                            message = '[{"message": "ok"}]'
+                        }
+                        res.status(200).end( message );
+                    }
+                });
+        });    
 /** =================== MISC ====================================
  * 
  */

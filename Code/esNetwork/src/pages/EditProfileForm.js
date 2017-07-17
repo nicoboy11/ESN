@@ -25,7 +25,14 @@ class EditProfileForm extends Component {
     }    
 
     onSaveName() {
-
+        let data = {};
+        Database.request('PUT',`person/${this.state.personId}`,data,1,function(err,response) {
+            if(err) {
+                Alert.alert('Error', error.message);
+            } else {
+                //do whatever with response
+            }
+        });
     }
 
     onSaveLastName() {

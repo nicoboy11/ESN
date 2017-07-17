@@ -1124,7 +1124,7 @@ BEGIN
 
 	UPDATE projectMember 
     SET roleId = coalesce(_roleId,roleId),
-		lastSeen = coalesce(_lastSeen,lastSeen),
+		lastSeen = coalesce(_lastSeen,NOW()),
 		startDate = coalesce(_startDate,startDate), 
         endDate = coalesce(_endDate,endDate)
 	WHERE 	projectId = _projectId AND
