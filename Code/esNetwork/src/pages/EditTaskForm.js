@@ -44,8 +44,17 @@ class EditTaskForm extends Component {
     }
 
     componentWillMount() {
-        this.setState({ leader: JSON.parse(this.state.leader)[0] });
-        this.setState({ collaborators: JSON.parse(this.state.collaborators) });
+        if (this.state.leader !== null) {
+            this.setState({ leader: JSON.parse(this.state.leader)[0] });
+        } else {
+            this.setState({ leader: [] });
+        }
+        
+        if (this.state.collaborators) {
+            this.setState({ collaborators: JSON.parse(this.state.collaborators) });
+        } else {
+            this.setState({ collaborators: [] });
+        }
     }
 
     onLeaderSelected(text, value) {
@@ -278,7 +287,7 @@ class EditTaskForm extends Component {
                     <ListItem2 title='START DATE:'>
                         <DateDue 
                             ref={(startDate) => { this.startDate = startDate; }}
-                            date={this.state.startDate} 
+                            date={Helper.toDate(this.state.startDate)} 
                             selectedDate={this.onChangeDateStart.bind(this)}
                         />
                     </ListItem2>    
@@ -286,7 +295,7 @@ class EditTaskForm extends Component {
                     <ListItem2 title='DUE DATE:'>
                         <DateDue 
                             ref={(dueDate) => { this.dueDate = dueDate; }}
-                            date={this.state.dueDate} 
+                            date={Helper.toDate(this.state.dueDate)} 
                             selectedDate={this.onChangeDateDue.bind(this)}
                         />
                     </ListItem2>

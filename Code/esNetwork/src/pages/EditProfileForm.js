@@ -5,7 +5,6 @@ import { Form, ListItem2, Label, DateDue, FlatListe, Input } from '../components
 import { EditTextForm, SelectPersonForm } from './';
 import { Config, Helper, Database } from '../settings';
 
-const session = Database.realm('Session', { }, 'select', '');
 const { colors } = Config;
 
 class EditProfileForm extends Component {
@@ -24,55 +23,70 @@ class EditProfileForm extends Component {
         };
     }    
 
-    onSaveName() {
-        let data = {};
-        Database.request('PUT',`person/${this.state.personId}`,data,1,function(err,response) {
-            if(err) {
-                Alert.alert('Error', error.message);
+    onSaveName(text) {
+        this.savePerson({ names: text });
+    }
+
+    onSaveLastName(text) {
+        this.savePerson({ firstLastName: text });
+    }
+
+    onSaveSecondLastName(text) {
+        this.savePerson({ secondLastName: text });
+    }
+
+    onSaveEmail(text) {
+        this.savePerson({ email: text });
+    }
+    
+    onSavePhone(text) {
+        this.savePerson({ phone: text });
+    }
+
+    onSaveExt(text) {
+        this.savePerson({ ext: text });
+    }
+
+    onSaveMobile(text) {
+        this.savePerson({ mobile: text });
+    }
+
+    onChangeDOB(date) {
+        Database.realm('Person', { dateOfBirth: date }, 'edit', `personId=${this.state.personId}`);        
+
+        Database.request2('PUT', `person/${this.state.personId}`, { dateOfBirth: Helper.getDateISOfromDate(date) }, 1, (err, response) => {
+            if (err) {
+                Alert.alert('Error', err.message);
             } else {
-                //do whatever with response
+                this.setState({ dateOfBirth: date });
+                Actions.pop({ refresh: { updated: this.updateParent() } });
+            }
+        });        
+    }    
+
+    savePerson(data) {
+        Database.realm('Person', data, 'edit', `personId=${this.state.personId}`);        
+
+        Database.request2('PUT', `person/${this.state.personId}`, data, 1, (err, response) => {
+            if (err) {
+                Alert.alert('Error', err.message);
+            } else {
+                this.setState(data);
+                Actions.pop({ refresh: { updated: this.updateParent() } });
             }
         });
     }
 
-    onSaveLastName() {
-
-    }
-
-    onSaveSecondLastName() {
-
-    }
-
-    onSaveEmail() {
-
-    }
-    
-    onSavePhone() {
-
-    }
-
-    onSaveExt() {
-
-    }
-
-    onSaveMobile() {
-
-    }
-
-    onChangeDOB() {
-
-    }    
-
-    savePerson() {
-
-    }
-
     updateParent() {
-        return {};
+        const newState = {
+            names: this.state.names,
+            personId: this.state.personId 
+        };        
+        return newState;
     }
 
     render() {
-        const { personId, names, lastName, secondLastName, dateOfBirth, email, phone, mobile, ext } = this.state;
+        const { names, firstLastName, secondLastName, dateOfBirth, email, phone, mobile, ext } = this.state;
         return (
             <Form 
                 title={names}
@@ -108,7 +122,7 @@ class EditProfileForm extends Component {
                         editable
                         onPress={() => this.setState({ isLastNameEditorVisible: true })}
                     >
-                            <Label style={{ color: colors.darkGray }} >{lastName}</Label>
+                            <Label style={{ color: colors.darkGray }} >{firstLastName}</Label>
                     </ListItem2>
                     <Modal
                         animationType='slide'
@@ -117,7 +131,7 @@ class EditProfileForm extends Component {
                     >
                         <EditTextForm 
                             title='Last Name'
-                            text={lastName}
+                            text={firstLastName}
                             onClose={() => this.setState({ isLastNameEditorVisible: false })}
                             onSave={this.onSaveLastName.bind(this)}
                         />

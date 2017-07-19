@@ -232,17 +232,17 @@ import { Config } from './';
             }
         
             static request2(method, sp, body, headerType, callback) {
-                let data = (Object.keys(params).length === 0) ? null : JSON.stringify(params);
+                let data = (Object.keys(body).length === 0) ? null : JSON.stringify(body);
                 
                 if (method === 'POST' || method === 'PUT') {
                     if (headerType === 1) {
                         data = new FormData();
-                        const keys = Object.keys(params);
+                        const keys = Object.keys(body);
                         
                         for (let i = 0; i < keys.length; i++) {
                             const key = keys[i];                    
-                            if (params[key] !== undefined) {
-                                data.append(key, params[key]);
+                            if (body[key] !== undefined) {
+                                data.append(key, body[key]);
                             }
                         }
                     }
@@ -255,7 +255,7 @@ import { Config } from './';
                 fetch(Config.network.server + sp, { 
                     method, 
                     headers: Database.getHeader(headerType),
-                    body
+                    body: data
                 })
                 .then((response) => response.json())
                 .then((responseJson) => callback(false,responseJson) )
@@ -332,7 +332,7 @@ import { Config } from './';
                 } else {
                     data = realm.objects(table);
                 }
-
+                console.log(data.length);
                 switch (action) {
                     case 'create':
                         realm.write(() => {

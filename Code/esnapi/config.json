@@ -1,10 +1,10 @@
 {
     "db":{
-        "host": "localhost",
+        "host": "awsdbinstance.clmvokdhruah.us-west-2.rds.amazonaws.com",
         "port": "3306",
         "database": "esn",
-        "user": "root",
-        "password": "evensosa"
+        "user": "even",
+        "password": "AlacranWachicoleroSensual3"
     },
     "auth":{
         "secret":"H3rtr4dScotch"

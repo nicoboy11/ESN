@@ -70,7 +70,8 @@ class ProfileForm extends Component {
                 genderId: 1,
                 editable: false,
                 currentOption: 'edit',
-                theme: responseData[0].theme
+                theme: responseData[0].theme,
+                personId: responseData[0].personId
             });
         }
     }

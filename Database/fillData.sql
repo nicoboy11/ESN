@@ -135,20 +135,17 @@ CALL CreateProject('New Credit App', 'NCA', '2017-01-01', 1, '2017-02-01', 'hrs.
 CALL CreateProject('Scholarship programm website', 'SPW', '2017-01-01', 1, '2017-02-01', 'ssp.png');
 CALL CreateProject('Finance System V2.0', 'FS2', '2017-01-01', 1, '2017-02-01', 'hrs.png');
 
-CALL EditProject(1,'Secretaría de Seguridad Pública', 'SSP', '2017-02-01', 1, '2017-03-30', 'ssp.png');
+CALL EditProject(1,'Secretaría de Seguridad Pública', 'SSP', '2017-02-01', '2017-03-30', 'ssp.png');
 
 CALL CreateProjectTeam(1,1,'2016-01-01','2016-05-05');
 CALL CreateProjectTeam(1,2,'2016-05-05','2016-08-01');
 CALL EditProjectTeam(1,2,'2016-05-05','2016-10-01');
 CALL CreateProjectTeam(2,2,'2016-05-05','2016-08-01');
-
-CALL CreateProjectMember(1,1,1,NOW(),'2018-01-01'); /* corregir los roleType en los members (todos tienen 1)*/
+ /* corregir los roleType en los members (todos tienen 1)*/
 CALL CreateProjectMember(1,2,1,NOW(),'2018-01-01');
 
-CALL CreateProjectMember(2,1,1,NOW(),'2018-01-01');
 CALL CreateProjectMember(2,2,1,NOW(),'2018-01-01');
 
-CALL CreateProjectMember(3,1,1,NOW(),'2018-01-01');
 CALL CreateProjectMember(3,2,1,NOW(),'2018-01-01');
 CALL CreateProjectMember(3,3,1,NOW(),'2018-01-01');
 CALL CreateProjectMember(3,4,1,NOW(),'2018-01-01');
@@ -159,12 +156,9 @@ CALL CreateProjectMember(3,6,1,NOW(),'2018-01-01');
 CALL CreateProjectMember(4,2,1,NOW(),'2018-01-01');
 CALL CreateProjectMember(4,7,1,NOW(),'2018-01-01');
 CALL CreateProjectMember(4,8,1,NOW(),'2018-01-01');
-CALL CreateProjectMember(4,1,1,NOW(),'2018-01-01');
 
 CALL CreateProjectMember(5,9,1,NOW(),'2018-01-01');
-CALL CreateProjectMember(5,1,1,NOW(),'2018-01-01');
 
-CALL CreateProjectMember(6,1,1,NOW(),'2018-01-01');
 CALL CreateProjectMember(6,10,1,NOW(),'2018-01-01');
 CALL CreateProjectMember(6,11,1,NOW(),'2018-01-01');
 CALL CreateProjectMember(6,12,1,NOW(),'2018-01-01');

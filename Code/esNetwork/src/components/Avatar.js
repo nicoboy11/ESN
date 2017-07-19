@@ -6,6 +6,11 @@ import { Config } from '../settings';
 const { colors, network } = Config;
 
 const Avatar = ({ avatar, color, name, size, nameColor }) => {
+
+    if (avatar === undefined) {
+        return <View />;
+    }
+
     const sizes = {
         mini: 15,
         small: 20,

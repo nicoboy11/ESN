@@ -32,8 +32,8 @@ Config.colors = {
 };
 
 Config.network = {
-    server: 'http://143.167.201.96:3001/',
-    wsServer: 'ws://143.167.201.96:9998/task'
+    server: 'http://ec2-34-211-203-109.us-west-2.compute.amazonaws.com:3001/',
+    wsServer: 'ws://ec2-34-211-203-109.us-west-2.compute.amazonaws.com:9998/task'
 };
 
 const lang = {
