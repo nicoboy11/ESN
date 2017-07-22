@@ -321,7 +321,7 @@ BEGIN
 				  ']') INTO _members
     FROM projectMember as t
     INNER JOIN person as p on p.id = t.personId
-    WHERE projectId = _projectId and t.roleId = _roleId;
+    WHERE projectId = _projectId and t.roleId = ifnull(_roleId, t.roleId);
     
     RETURN _members;
 

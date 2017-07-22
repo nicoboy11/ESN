@@ -7,10 +7,12 @@ import {
     StyleSheet, 
     Text, 
     FlatList, 
-    Alert
+    Alert,
+    Platform,
+    ActivityIndicator
 } from 'react-native';
 import ImagePicker from 'react-native-image-picker';
-import { CardList } from './';
+import { CardList, KeyboardSpacer } from './';
 import { Config, Database, Helper } from '../settings';
 
 const { colors, font, network } = Config;
@@ -25,7 +27,10 @@ class Chat extends Component {
         this.state = { elements: [], 
                         input: '',
                         personId: data[0].personId,
-                        showLog: true
+                        showLog: true,
+                        visibleElements: [],
+                        isLoading: true,
+                        isRendering: false
                     };
     }              
 
@@ -54,7 +59,11 @@ class Chat extends Component {
                                 personId: messageObj.personId
                             };
 
-                self.setState({ elements: [...self.state.elements, newMessage], typing: '' });
+                self.setState({ 
+                    visibleElements: [...self.state.visibleElements, newMessage], 
+                    elements: [...self.state.elements, newMessage], 
+                    typing: '' 
+                });
                 setTimeout(() => self.chatList.scrollToEnd(), 2000);   
             }
         };
@@ -69,7 +78,13 @@ class Chat extends Component {
     }
 
     componentDidUpdate() {
-
+        //this.chatList.scrollToEnd();
+        if (this.state.isRendering) {
+            setTimeout(() => { 
+                this.chatList.scrollToEnd(); 
+                this.setState({ isRendering: false });
+            }, 500);  
+        }    
     }
 
     componentWillUnmount() {
@@ -89,12 +104,14 @@ class Chat extends Component {
             console.log('error');
         } else {
             this.setState({
-                elements: responseData
+                elements: responseData,
+                visibleElements: responseData.slice(-8)
             });
         }
 
-        const self = this;
-        setTimeout(() => self.chatList.scrollToEnd(), 2000);        
+        if (this.state.isLoading) {
+            this.setState({ isLoading: false, isRendering: true });  
+        }   
     }
 
     onSuccessPost(responseData) {
@@ -187,8 +204,19 @@ class Chat extends Component {
                     messageTypeId: 1,
                     attachment,
                     attachmentTypeId: 2,
-                    messageDate: 'Sending...'
+                    messageDate: null,
+                    sending: 'Sending...'
                 };              
+
+        this.setState({ 
+            visibleElements: [...this.state.visibleElements, newMessage], 
+            elements: [...this.state.elements, newMessage], 
+            input: '' 
+        });
+
+        setTimeout(() => { 
+            this.chatList.scrollToEnd(); 
+        }, 500);                        
 
         Database.request(
             'POST', 
@@ -206,9 +234,6 @@ class Chat extends Component {
             this.onSuccessPost.bind(this),
             this.onError.bind(this)
         );
-        
-        this.setState({ elements: [...this.state.elements, newMessage], input: '' });
-        this.chatList.scrollToEnd();
     }
 
     renderMessages({ item }) {
@@ -245,7 +270,7 @@ class Chat extends Component {
                         <View style={[bubbleRightStyle, (item.key === 'loading') ? { opacity: 0.5 } : {}]}>
                             <Image 
                                 style={(item.attachment) ? bubbleImgStyle : {}} 
-                                source={{ uri: Config.network.server + item.attachment }} 
+                                source={{ uri: Config.network.server + 'thumbs/blured/' + item.attachment }} 
                             />
                             <Text style={{ color: colors.mainText }}>{item.message}</Text>
                             <Text style={dateBubble}>{Helper.prettyfyDate(item.messageDate).date}</Text>
@@ -260,14 +285,29 @@ class Chat extends Component {
                         <Text style={[personBubble, { color: item.theme }]}>{item.person}</Text>
                         <Image 
                             style={(item.attachment) ? bubbleImgStyle : {}} 
-                            source={{ uri: Config.network.server + item.attachment }} 
+                            source={{ uri: Config.network.server + 'thumbs/blured/' + item.attachment }} 
                         />                        
                         <Text>{item.message}</Text>
-                        <Text style={dateBubble}>{Helper.prettyfyDate(item.messageDate).date}</Text>
+                        <Text style={dateBubble}>{(item.sending) ? item.sending : Helper.prettyfyDate(item.messageDate).date}</Text>
                     </View>
                     <View style={spacer} />                        
                 </View>
         );             
+    }
+
+    renderList() {
+        if (this.state.isLoading) {
+            return <ActivityIndicator size='large' />;
+        }
+
+        return (
+            <FlatList 
+                keyExtractor={item => item.taskMessageId}
+                ref={(ref) => { this.chatList = ref; }}
+                data={this.state.visibleElements} 
+                renderItem={this.renderMessages.bind(this)}
+            />            
+        );
     }
 
     render() {
@@ -281,27 +321,26 @@ class Chat extends Component {
 
         return (
             <View style={containerStyle}>
-                <View style={chatStyle} >
-                    <FlatList 
-                        keyExtractor={item => item.taskMessageId}
-                        ref={(ref) => { this.chatList = ref; }}
-                        data={this.state.elements} 
-                        renderItem={this.renderMessages.bind(this)}
-                    />
+                <View style={[chatStyle, (this.state.isRendering) ? { opacity: 0 } : { opacity: 1 }]} >
+                    {this.renderList()}
                 </View>
-                <View>
-                    <Text>
-                        {this.state.seen}
-                    </Text>
-                </View>                
-                <View>
-                    <Text>
-                        {this.state.typing}
-                    </Text>
-                </View>
+                {(this.state.seen) ? 
+                    <View>
+                        <Text>
+                            {this.state.seen}
+                        </Text>
+                    </View> : <View />}
+                {(this.state.typing) ?
+                    <View>
+                        <Text>
+                            {this.state.typing}
+                        </Text>
+                    </View> : <View />      
+                }
                 <View style={typingContainerStyle}>
                     <TextInput 
                         placeholder='Type your message' 
+                        placeholderTextColor={colors.secondText}
                         style={typingStyle} 
                         value={this.state.input}
                         onChangeText={this.onTextChanged.bind(this)}
@@ -312,8 +351,8 @@ class Chat extends Component {
                         onPress={this.imageAction.bind(this)}
                     >
                         <Image 
-                            tintColor={colors.main} 
-                            style={{ width: 24, height: 24 }} 
+                            tintColor={colors.clickable} 
+                            style={{ width: 24, height: 24, tintColor: colors.clickable }} 
                             source={{ uri: 'attach' }} 
                         />
                     </TouchableOpacity>
@@ -321,9 +360,11 @@ class Chat extends Component {
                         style={imageStyle}
                         onPress={this.sendMessage.bind(this)}
                     >
-                        <Text style={{ color: colors.main }}>Send</Text>
+                        <Text style={{ color: colors.clickable }}>Send</Text>
                     </TouchableOpacity>                    
                 </View>
+                {(Platform.OS === 'ios') ? <KeyboardSpacer /> : <View /> }
+                
             </View>
         );
     }
@@ -332,11 +373,13 @@ class Chat extends Component {
 const styles = new StyleSheet.create({
     containerStyle: {
         flex: 1,
-        backgroundColor: colors.veryLight
+        backgroundColor: colors.veryLight,
+        justifyContent: 'flex-end'
     },
     chatStyle: {
-        flex: 1,
-        justifyContent: 'flex-end'
+        //flex: 1,
+        justifyContent: 'flex-end',
+        paddingTop: 60
     },
     typingContainerStyle: {
         flexDirection: 'row',
@@ -406,7 +449,8 @@ const styles = new StyleSheet.create({
         flex: 1,
         width: 150,
         height: 150,
-        resizeMode: 'contain',
+        marginTop: 10,
+        resizeMode: 'stretch',
         borderRadius: 10,
         alignSelf: 'center'
     }

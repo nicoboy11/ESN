@@ -65,6 +65,25 @@ import { Config } from './';
         }
     };    
 
+    class Project {}
+    Project.schema = {
+        name: 'Project',
+        properties: {
+            projectId: 'int',
+            name: 'string',
+            abbr: 'string',
+            startDate: 'date',
+            creatorId: 'int',
+            dueDate: 'date',
+            logo: 'string',
+            lastChanged: 'date',
+            activeTasks: 'int',
+            totalTasks: 'int',
+            progress: 'int',
+            members: { type: 'list', objectType: 'Person' }
+        }
+    };
+
     class ScopeType {}
     ScopeType.schema = {
         name: 'ScopeType',
@@ -274,21 +293,24 @@ import { Config } from './';
                         return Priority;
                     case 'Person':
                         return Person;
+                    case 'Project':
+                        return Project;                        
                     default:
                         return Session;
                 }
-            }
+            }         
 
         /** realmToObject
          * 
          * @param {*} data 
          */
-            static realmToObject(data) {
-                let array = [];
+            static realmToObject(data, table) {
+                let array = [];     
+                
                 for (let i = 0; i < data.length; i++) {
                     let object = {};
 
-                    for (let property in Person.schema.properties) {
+                    for (let property in Database.getClass(table).schema.properties) {
                         object[property] = data[i][property];
                     }
 
@@ -302,7 +324,7 @@ import { Config } from './';
          *  
          * @param {*} object the object to edit
          * @param {*} fields the data to edit
-         */
+         
             static editRealm(table, object, fields) {
                 let objClass = Database.getClass(table);
 
@@ -312,6 +334,7 @@ import { Config } from './';
 
                 return object;
             }
+        */
 
         /** REALM - Manage local database
          * 
@@ -322,7 +345,7 @@ import { Config } from './';
          */
             static realm(table, fields, action, filter) {
                 const realm = new Realm({ 
-                    schema: [Session, Person]   
+                    schema: [Session, Person, Project]   
                 });
 
                 let data;

@@ -128,6 +128,8 @@ class Form extends Component {
                         isVisible={isVisible}
                         shadow={this.props.shadow}
                         background={this.props.background}
+                        titleStyle={this.props.titleStyle}
+                        iconsStyle={this.props.iconsStyle}
                     />                
                     <View style={{ flex: 1 }}>
                         {this.props.children}

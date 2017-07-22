@@ -21,13 +21,24 @@ class ESModal extends Component {
     componentWillReceiveProps(nextProps) {
         if (nextProps.visible) {
             let request = '';
+            let items = [];
+            let elements = [];  
 
             switch (nextProps.table) {
                 case 'teams':
                     request = `teams/${data[0].personId}`;
                     break;
                 case 'projects':
-                    request = `projects/${data[0].personId}`;
+                    request = Database.realm('Project', {}, 'select', '');
+                    items = Database.realmToObject(request, 'Project');
+                    
+                    for (let item of items) {
+                        elements.push({ 
+                            value: item.projectId,
+                            text: item.name
+                         });
+                    }
+
                     break;    
                 case 'stateType':
                     request = 'stateType/null';
@@ -36,16 +47,7 @@ class ESModal extends Component {
                     break;
             }
 
-
-            Database.request(
-                'GET', 
-                request, 
-                {}, 
-                2,
-                this.handleResponse.bind(this), 
-                this.onSuccess.bind(this),
-                this.onError.bind(this)
-            );            
+            this.setState({ elements, visible: true });      
         } else {
             this.setState({ visible: nextProps.visible });            
         }

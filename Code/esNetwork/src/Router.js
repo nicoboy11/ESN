@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { StyleSheet, Modal, Text, View, Image } from 'react-native';
+import { StyleSheet, AppState, Image, Alert } from 'react-native';
 import { Scene, Router, ActionConst, Actions, TabBar } from 'react-native-router-flux';
 import { Menu } from './components';
 import { 
@@ -16,7 +16,7 @@ import {
     EditProfileForm,
     Dummy
 } from './pages';
-import { Config } from './settings';
+import { Config, Helper } from './settings';
 
 const { colors } = Config;
 
@@ -35,6 +35,28 @@ class TabIcon extends React.Component {
 }
 
 class RouterComponent extends Component {
+
+    state = { appState: AppState.currentState };
+
+    componentDidMount() {
+
+        //Check if there are any changes in the server
+        //then load accordingly
+
+        //AppState.addEventListener('change', this.handleAppState);
+    }
+
+    componentWillUnmount() {
+        AppState.removeEventListener('change', this.handleAppState);
+    }    
+
+    handleAppState(nextAppState) {
+        if (this.state.appState.match('/inactive|background/') && nextAppState === 'Active') {
+            Alert.alert('Welcome back');
+        }
+        this.setState({ appState: nextAppState });
+    }
+
     render() {
         return (
             <Router 
@@ -44,13 +66,14 @@ class RouterComponent extends Component {
             > 
                 <Scene  key='authentication' type={ActionConst.RESET}>
                     <Scene 
+                        hideNavBar
                         key='login' 
                         navigationBarStyle={{ opacity: 0 }} 
                         component={LoginForm} 
                         type={ActionConst.RESET}
                     />
                     <Scene 
-                        hideNaveBar={false} 
+                        hideNaveBar
                         key='register' 
                         component={RegisterForm} 
                         title='Register'

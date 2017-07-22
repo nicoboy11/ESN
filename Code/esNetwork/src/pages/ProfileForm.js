@@ -129,7 +129,7 @@ class ProfileForm extends Component {
 
     localLoad(profile) {
         this.setState(
-            Database.realmToObject(profile)[0]
+            Database.realmToObject(profile, 'Person')[0]
         );         
         this.setState({ currentOption: 'edit' });
     }

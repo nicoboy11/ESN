@@ -3,7 +3,8 @@ import {
     View, 
     TouchableOpacity, 
     StyleSheet, 
-    Image
+    Image,
+    KeyboardAvoidingView
 } from 'react-native';
 import { Actions } from 'react-native-router-flux';
 import { Chat, Form } from '../components';
@@ -33,7 +34,9 @@ class TaskMessageForm extends Component {
 
     renderForm() {
         if (this.state.isChatVisible) {
-            return <Chat taskId={this.props.taskId} />;
+            return (
+                    <Chat taskId={this.props.taskId} />
+            );
         } else if (this.state.isCheckVisible) {
             return <CheckListForm />;
         } else if (this.state.isEditVisible) {
@@ -68,7 +71,7 @@ class TaskMessageForm extends Component {
                         <Image 
                             source={{ uri: 'chat' }} 
                             tintColor={(this.state.isChatVisible) ? colors.main : colors.secondText}
-                            style={{ width: 23, height: 23 }}                        
+                            style={{ width: 23, height: 23, tintColor: (this.state.isChatVisible) ? colors.main : colors.secondText }}                        
                         />
                     </TouchableOpacity>
                     <TouchableOpacity
@@ -83,7 +86,7 @@ class TaskMessageForm extends Component {
                         <Image
                             source={{ uri: 'checkList' }} 
                             tintColor={(this.state.isCheckVisible) ? colors.main : colors.secondText}
-                            style={{ width: 23, height: 23 }}
+                            style={{ width: 23, height: 23, tintColor: (this.state.isCheckVisible) ? colors.main : colors.secondText }}
                         />
                     </TouchableOpacity>        
                     <TouchableOpacity
@@ -98,11 +101,13 @@ class TaskMessageForm extends Component {
                         <Image
                             source={{ uri: 'edit' }} 
                             tintColor={(this.state.isEditVisible) ? colors.main : colors.secondText}
-                            style={{ width: 23, height: 23 }}
+                            style={{ width: 23, height: 23, tintColor: (this.state.isEditVisible) ? colors.main : colors.secondText }}
                         />
                     </TouchableOpacity>                                                                                                                   
                 </View>
-                {this.renderForm()}
+                <View style={{ flex: 1 }}>
+                    {this.renderForm()}
+                </View>
             </Form>
         );
     }
@@ -115,7 +120,8 @@ const styles = new StyleSheet.create({
         flexDirection: 'row',
         justifyContent: 'space-around',
         borderBottomWidth: StyleSheet.hairlineWidth,
-        borderBottomColor: colors.mainDark
+        borderBottomColor: colors.mainDark,
+        zIndex: 99
     }
 });
 

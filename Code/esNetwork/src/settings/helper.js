@@ -77,7 +77,85 @@ class Helper {
 	
 	static getDifference(date1, date2) {
 		return date1 - date2;
-	}    
+    }    
+    
+    static loadRealms(sessionId) {
+        Database.request2('GET', `network/${sessionId}`, {}, 2, (err, response) => {
+            if (err) {
+                console.log('could not load people');
+            } else {
+                let people = [];
+
+                for (let row of response) {
+                    people.push({
+                        personId: row.personId,
+                        names: row.names,
+                        firstLastName: row.firstLastName,
+                        secondLastName: row.secondLastName,
+                        person: row.person,
+                        dateOfBirth: Helper.toDate(row.dateOfBirth),
+                        email: row.email,
+                        mobile: row.mobile,
+                        genderId: row.genderId,
+                        gender: row.gender,                    
+                        phone: row.phone,
+                        ext: row.ext,
+                        startDate: Helper.toDate(row.startDate),
+                        endDate: Helper.toDate(row.endDate),
+                        higherPersonId: row.higherPersonId,
+                        higherPerson: row.higherPerson,
+                        parentLevelKey: row.parentLevelKey,
+                        lastLogin: Helper.toDate(row.lastLogin),
+                        avatar: row.avatar,
+                        description: row.description,
+                        job: row.job,
+                        roleId: row.roleId,
+                        abbr: row.abbr,  
+                        levelKey: row.levelKey,
+                        theme: row.theme,
+                        isParent: (row.isParent === 1),
+                        isSync: true
+                    });         
+                }
+                
+                Database.realm('Person', people, 'create', '');                
+            }
+        });  
+        
+        Database.request2('GET', `personProjects/${sessionId}`, {}, 2, (err, response) => {
+            if (err) {
+                console.log(response.message);
+            } else {
+                let projects = [];
+
+                for (let row of response) {
+                    const membersJSON = JSON.parse(row.members);
+                    let membersRealm = [];
+                    
+                    for (let member of membersJSON) {
+                        membersRealm.push(Database.realmToObject(Database.realm('Person', { }, 'select', `personId=${member.personId}`), 'Person')[0]);
+                    }
+
+                    projects.push({
+                        projectId: row.projectId,
+                        name: row.name,
+                        abbr: row.abbr,
+                        startDate: Helper.toDate(row.startDate),
+                        creatorId: row.creatorId,
+                        dueDate: Helper.toDate(row.dueDate),
+                        logo: row.logo,
+                        lastChanged: new Date(),
+                        activeTasks: row.activeTasks,
+                        totalTasks: row.totalTasks,
+                        progress: row.progress,
+                        members: membersRealm           
+                    });         
+                }
+                
+                Database.realm('Project', projects, 'create', '');                
+            }
+        });              
+    }
 }
 
 export { Helper };

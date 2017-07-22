@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { View, Image, Alert, Keyboard } from 'react-native';
 import { Actions } from 'react-native-router-flux';
-import { Input, LinkButton, Button } from '../components';
+import { Input, LinkButton, Button, KeyboardSpacer } from '../components';
 import { Config, Database, Helper } from '../settings';
 
 const { texts } = Config;
@@ -56,6 +56,8 @@ class LoginForm extends Component {
             }];
 
             Database.realm('Session', data, 'create', '');
+
+            Helper.loadRealms(responseData[0].personId);
             /** Go to main screen */
             Actions.tabbar({ personId: responseData[0].personId });
         }
@@ -126,7 +128,8 @@ class LoginForm extends Component {
                                 title={texts.signup} 
                                 onPress={() => Actions.register()} 
                             />
-                        </View>                              
+                        </View>   
+                        <KeyboardSpacer />                           
                     </View>            
             </View>
         );

@@ -127,7 +127,7 @@ CALL CreateTeamMember(2,12,3);
 CALL CreateTeamMember(2,13,3);
 CALL CreateTeamMember(2,14,3);
 
-CALL CreateProject('Secretaría de Seguridad Pública', 'SSP', '2017-01-01', 1, '2017-02-01', 'ssp.png');
+CALL CreateProject('Dissertation project', 'SSP', '2017-01-01', 1, '2017-02-01', '');
 CALL CreateProject('Human resources stuff', 'HRS', '2017-01-01', 1, '2017-02-01', 'hrs.png');
 
 CALL CreateProject('Payroll System', 'PS', '2017-01-01', 1, '2017-02-01', 'ssp.png');

@@ -13,7 +13,7 @@ class CardList extends Component {
 
     componentDidMount() {
        if (this.props.selectedItem !== null) {
-           this.refs.listView.scrollTo({ y: 100, animated: true });
+           this.refs.listView.scrollTo({ animated: true });
        }
     }
     componentWillReceiveProps(nextProps) {

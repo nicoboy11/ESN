@@ -57,6 +57,8 @@ const lang = {
                         mobile: 'Mobile',
                         //Profile
                         contactInfo: 'Contact Information',
+                        personalInfo: 'Personal Information',
+                        securityInfo: 'Security',    
                         //PageTitles
                         accountSettings: 'Account Settings',
                         feed: 'Feed',
@@ -121,7 +123,9 @@ const lang = {
                         ext: 'Extensión',
                         mobile: 'Celular',
                         //Profile
-                        contactInfo: 'Información de Contacto',                        
+                        contactInfo: 'Información de Contacto',                
+                        personalInfo: 'Información Personal',        
+                        securityInfo: 'Seguridad',        
                         //PageTitles
                         accountSettings: 'Configuración de la cuenta',
                         feed: 'Actualizaciones',

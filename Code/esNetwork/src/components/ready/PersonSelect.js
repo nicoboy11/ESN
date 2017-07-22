@@ -35,7 +35,7 @@ class PersonSelect extends Component {
                 this.onError.bind(this)
             );  
         } else {
-            this.loadPeople(Database.realmToObject(network), Database.realmToObject(company));
+            this.loadPeople(Database.realmToObject(network, 'Person'), Database.realmToObject(company, 'Person'));
         }
     }
 

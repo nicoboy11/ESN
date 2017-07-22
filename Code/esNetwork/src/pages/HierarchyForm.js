@@ -22,7 +22,7 @@ class HierarchyForm extends Component {
             } else if (peopleNotSync.length > 0) {
                 this.commitChanges();             
             } else {
-                this.setState({ network: Database.realmToObject(people) });
+                this.setState({ network: Database.realmToObject(people, 'Person') });
                 this.loadPeople(people);
             }            
         }     
@@ -86,7 +86,7 @@ class HierarchyForm extends Component {
     onEditedHierarchy(edited) {
         if (edited) {
             people = Database.realm('Person', { }, 'select', '').sorted('levelKey');
-            this.setState({ network: Database.realmToObject(people) });
+            this.setState({ network: Database.realmToObject(people, 'Person') });
             this.loadPeople(people);
             this.commitChanges();
         }
@@ -148,7 +148,7 @@ class HierarchyForm extends Component {
                 this.remoteRequest();
             } else {
                 Alert.alert('Unable to sync', response.message);
-                this.setState({ network: Database.realmToObject(people) });
+                this.setState({ network: Database.realmToObject(people, 'Person') });
                 this.loadPeople(people);                        
             }
         });            
@@ -158,7 +158,7 @@ class HierarchyForm extends Component {
         //Initially only show immediate employees
         const sessionLevel = session[0].levelKey.split('-').length - 1;
         //let visibleData = JSON.parse(JSON.stringify(data));
-        let visibleData = Database.realmToObject(data);
+        let visibleData = Database.realmToObject(data, 'Person');
 
         visibleData = visibleData.filter((item) => {
             const personLevel = item.levelKey.split('-').length - 1;

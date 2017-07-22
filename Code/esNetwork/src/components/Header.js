@@ -53,8 +53,8 @@ class Header extends Component {
     }    
 
     render() {
-        const { containerStyle, titleStyle, shadow } = style;
-        const { rightIcon, rightColor, title, isVisible, background } = this.props;
+        const { containerStyle, localTitleStyle, shadow } = style;
+        const { rightIcon, rightColor, title, isVisible, background, titleStyle } = this.props;
 
         if (!isVisible) {
             return null;
@@ -71,7 +71,7 @@ class Header extends Component {
                 ]}
             >
                 {this.renderLeft()}
-                <Text allowFontScaling ellipsizeMode='tail' numberOfLines={2} style={titleStyle} >
+                <Text allowFontScaling ellipsizeMode='tail' numberOfLines={2} style={[localTitleStyle, titleStyle]} >
                     {title}
                 </Text>
                 <TouchableOpacity style={{ width: 44 }} onPress={this.onPressRight.bind(this)} >
@@ -93,6 +93,7 @@ const style = StyleSheet.create({
         alignItems: 'center',
         alignSelf: 'flex-start',
         paddingTop: (Platform.OS === 'ios') ? 20 : 0,
+        zIndex: 99
     },
     shadow: {
         shadowColor: '#000',
@@ -108,7 +109,7 @@ const style = StyleSheet.create({
         marginLeft: 10,
         marginRight: 10
     },
-    titleStyle: {
+    localTitleStyle: {
         fontSize: 18,
         color: Config.colors.mainDark,
         textAlign: 'left',

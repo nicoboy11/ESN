@@ -40,7 +40,7 @@ class EditHierarchyForm extends Component {
     getEmployer({ data }) {     
         const employerRealm = Database.realm('Person', { }, 'select', `personId=${data.higherPersonId}`);
         let employer = {};
-        employer = Database.realmToObject(employerRealm)[0];
+        employer = Database.realmToObject(employerRealm, 'Person')[0];
         this.setState({ employer });
     }
 

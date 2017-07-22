@@ -2,6 +2,7 @@ export * from './common/Input';
 export * from './common/Button';
 export * from './common/Touchable';
 export * from './common/Label';
+export * from './common/KeyboardSpacer';
 
 export * from './LinkButton';
 export * from './PostCard';

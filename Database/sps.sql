@@ -277,6 +277,7 @@ BEGIN
 	
 	DECLARE _existsMessage varchar(255);
     DECLARE _abbr varchar(3); 
+    DECLARE _theme varchar(3);
     
     SET _existsMessage = validatePersonExists(_email,_names,_firstLastName,_secondLastName,_dateOfBirth);
     
@@ -285,7 +286,16 @@ BEGIN
     END IF;
     
     SET _abbr = getAbbr(_names,_firstLastName);
+    SET _theme = '#00BFA5';
     
+    /*
+    UPDATE person SET theme = '#00BFA5' WHERE id = 1;
+UPDATE person SET theme = '#00C853' WHERE id = 2;
+UPDATE person SET theme = '#304FFE' WHERE id = 3;
+UPDATE person SET theme = '#D50000' WHERE id = 4;
+UPDATE person SET theme = '#FF6D00' WHERE id = 5;
+UPDATE person SET theme = '#AA00FF' WHERE id = 6;
+    */
 
     INSERT INTO person (names,firstLastName,secondLastName,dateOfBirth,email,mobile,phone,ext,password,genderId,higherPersonId,avatar,token,abbr,roleId,startDate)
     VALUES(_names,_firstLastName,_secondLastName,_dateOfBirth,_email,_mobile,_phone,_ext,_password,_genderId,_higherPersonId,_avatar,_token,_abbr,_roleId,NOW());
@@ -1027,8 +1037,8 @@ BEGIN
 					p.logo,
                     getTaskCount(p.id, 1) as activeTasks,
                     getTaskCount(p.id, NULL) as totalTasks,
-                    (getTaskCount(p.id, NULL)  - getTaskCount(p.id, 1))/getTaskCount(p.id, NULL) as progress,
-                    getProjectMembers(p.id,1) as members
+                    ifnull((getTaskCount(p.id, NULL)  - getTaskCount(p.id, 1))/getTaskCount(p.id, NULL),0) as progress,
+                    getProjectMembers(p.id,null) as members
 	FROM project as p
     LEFT JOIN projectMember as pm on pm.projectId = p.id
     LEFT JOIN task as t on t.projectId = p.id
@@ -1110,6 +1120,14 @@ BEGIN
 	INSERT INTO projectMember ( projectId, personId, roleId, startDate, endDate )
     VALUES ( _projectId, _personId, _roleId, _startDate, _endDate );
 
+    SELECT	t.personId,
+					getAvatar(t.personId) as avatar,
+                    getPersonAbbr(t.personId) as abbr,
+                    getFullName(t.personId) as person,
+                    p.theme
+    FROM projectMember as t
+    INNER JOIN person as p on p.id = t.personId
+    WHERE projectId = _projectId and t.roleId = ifnull(_roleId, t.roleId) and personId = _personId;
 END$$
 
 DELIMITER $$
@@ -1129,6 +1147,8 @@ BEGIN
         endDate = coalesce(_endDate,endDate)
 	WHERE 	projectId = _projectId AND
 			personId = _personId;
+            
+	CALL GetProjectMember(_projectId, _personId);
 
 END$$
 
@@ -1158,7 +1178,7 @@ BEGIN
 			endDate
 	FROM projectMember
 	WHERE 	projectId = coalesce(_projectId,projectId) AND
-			userId = coalesce(_personId, personId);
+			personId = coalesce(_personId, personId);
 
 END$$
 

@@ -1,10 +1,10 @@
 import React, { Component } from 'react';
-import { ScrollView, StyleSheet, Keyboard, Alert } from 'react-native';
+import { ScrollView, StyleSheet, Keyboard, Alert, View } from 'react-native';
 import { Actions } from 'react-native-router-flux';
-import { Input, DatePicker, Button } from '../components';
+import { Input, DatePicker, Button, KeyboardSpacer, Form } from '../components';
 import { Config, Database } from '../settings';
 
-const { texts } = Config;
+const { texts, colors } = Config;
 
 class RegisterForm extends Component {
     state = { 
@@ -15,12 +15,55 @@ class RegisterForm extends Component {
         secondLastName: '',
         email: '',
         password: '',
+        password2: '',
         genderId: 1,
-        mobile: ''
+        mobile: '',
+        phone: '',
+        ext: '',
+        rightIcon: 'forward',
+        currentSection: 1,
+        title: texts.register
     }
 
     onChangeDate(dateISO) {
         this.setState({ dateOfBirth: dateISO });
+    }
+
+    onPressLeft() {
+        switch (this.state.currentSection) {
+            case 1:
+                Actions.pop();
+                return;
+            case 2:
+                this.setState({ currentSection: 1, title: texts.register });
+                return;
+            case 3:
+                this.setState({ currentSection: 2, title: texts.personalInfo });
+                return;
+            case 4:
+                this.setState({ currentSection: 3, title: texts.contactInfo, rightIcon: 'forward' });
+                return;
+            default:
+                return;
+        }
+    }
+
+    onPressRight() {
+        switch (this.state.currentSection) {
+            case 1:
+                this.setState({ currentSection: 2, title: texts.personalInfo });
+                return;
+            case 2:
+                this.setState({ currentSection: 3, title: texts.contactInfo });
+                return;
+            case 3:
+                this.setState({ currentSection: 4, title: texts.securityInfo, rightIcon: '' });
+                return;
+            case 4:
+                return;
+            default:
+                return;
+        }
     }
 
     onRegisterPress() {
@@ -87,66 +130,151 @@ class RegisterForm extends Component {
         this.setState({ loading: 0 });
     }
 
-    render() {
+    renderSections() {
         const { mainViewStyle } = styles;
+        switch (this.state.currentSection) {
+            case 1:
+                return (
+                    <ScrollView 
+                        style={[mainViewStyle, { opacity: this.state.section1 }]}
+                    >
+                        <Input 
+                            ref={(ref) => { this.inptName = ref; }}
+                            label={texts.names} 
+                            type='text' 
+                            returnKeyType='next' 
+                            onChangeText={(names) => this.setState({ names })}
+                            value={this.state.names}
+                            autoCapitalize='sentences'
+                            onSubmitEditing={() => this.inptLastName.focus()}  
+                        />
+                        <Input 
+                            ref={(ref) => { this.inptLastName = ref; }}
+                            label={texts.firstLastName} 
+                            type='text' 
+                            returnKeyType='next' 
+                            onChangeText={(firstLastName) => this.setState({ firstLastName })}
+                            value={this.state.firstLastName}
+                            autoCapitalize='sentences'
+                            onSubmitEditing={() => this.inptSecLastName.focus()}  
+                        />
+                        <Input 
+                            ref={(ref) => { this.inptSecLastName = ref; }}
+                            label={texts.secondLastName} 
+                            type='text' 
+                            returnKeyType='next' 
+                            onChangeText={(secondLastName) => this.setState({ secondLastName })}
+                            value={this.state.secondLastName}
+                            autoCapitalize='sentences'
+                            onSubmitEditing={() => this.onPressRight()}  
+                        />
+                        <KeyboardSpacer /> 
+                    </ScrollView>
+                );
+            case 2:
+                return (
+                    <ScrollView 
+                        style={[mainViewStyle, { opacity: this.state.section2 }]}
+                    >
+                        <DatePicker 
+                            label={texts.dateOfBirth} 
+                            onChangeDate={this.onChangeDate.bind(this)}
+                            editable
+                        />
+                        <KeyboardSpacer /> 
+                    </ScrollView>
+                );
+            case 3:
+                return (
+                    <ScrollView 
+                        style={[mainViewStyle, { opacity: this.state.section3 }]}
+                    >
+                        <Input 
+                            label={texts.email} 
+                            type='email' 
+                            returnKeyType='next' 
+                            onChangeText={(email) => this.setState({ email })}
+                            value={this.state.email}          
+                            onSubmitEditing={() => this.inptPhone.focus()}          
+                        />
+                        <Input 
+                            ref={(ref) => { this.inptPhone = ref; }}
+                            label={texts.phone} 
+                            type='number' 
+                            returnKeyType='next' 
+                            onChangeText={(phone) => this.setState({ phone })}
+                            value={this.state.phone}          
+                            onSubmitEditing={() => this.inptExt.focus()}             
+                        />    
+                        <Input 
+                            ref={(ref) => { this.inptExt = ref; }}
+                            label={texts.ext} 
+                            type='number' 
+                            returnKeyType='next' 
+                            onChangeText={(ext) => this.setState({ ext })}
+                            value={this.state.ext}       
+                            onSubmitEditing={() => this.inptMobile.focus()}                
+                        />                                            
+                        <Input 
+                            ref={(ref) => { this.inptMobile = ref; }}
+                            label={texts.mobile} 
+                            type='number' 
+                            returnKeyType='next' 
+                            onChangeText={(mobile) => this.setState({ mobile })}
+                            value={this.state.mobile}        
+                            onSubmitEditing={() => this.onPressRight()}               
+                        />         
+                        <KeyboardSpacer />           
+                    </ScrollView> 
+                );
+            case 4:
+                return (
+                    <ScrollView 
+                        style={[mainViewStyle, { opacity: this.state.section4 }]}
+                    >
+                        <Input 
+                            label={texts.password} 
+                            type='password' 
+                            returnKeyType='next' 
+                            onChangeText={(password) => this.setState({ password })}
+                            value={this.state.password}                    
+                        />
+                        <Input 
+                            label={texts.password} 
+                            type='password' 
+                            returnKeyType='next' 
+                            onChangeText={(password2) => this.setState({ password2 })}
+                            value={this.state.password2}                    
+                        />                    
+                        <Button 
+                            title={texts.signup} 
+                            animating={this.state.loading}
+                            onPress={this.onRegisterPress.bind(this)} 
+                        />   
+                        <KeyboardSpacer /> 
+                    </ScrollView>                        
+                );
+            default:
+                return <View />;
+        }
+    }
+
+    render() {
         return (
-            <ScrollView style={mainViewStyle}>
-                <Input 
-                    label={texts.names} 
-                    type='text' 
-                    returnKeyType='next' 
-                    onChangeText={(names) => this.setState({ names })}
-                    value={this.state.names}
-                    autoCapitalize='sentences'
-                />
-                <Input 
-                    label={texts.firstLastName} 
-                    type='text' 
-                    returnKeyType='next' 
-                    onChangeText={(firstLastName) => this.setState({ firstLastName })}
-                    value={this.state.firstLastName}
-                    autoCapitalize='sentences'
-                />
-                <Input 
-                    label={texts.secondLastName} 
-                    type='text' 
-                    returnKeyType='next' 
-                    onChangeText={(secondLastName) => this.setState({ secondLastName })}
-                    value={this.state.secondLastName}
-                    autoCapitalize='sentences'
-                />
-                <Input 
-                    label={texts.email} 
-                    type='email' 
-                    returnKeyType='next' 
-                    onChangeText={(email) => this.setState({ email })}
-                    value={this.state.email}                    
-                />
-                <Input 
-                    label={texts.mobile} 
-                    type='number' 
-                    returnKeyType='next' 
-                    onChangeText={(mobile) => this.setState({ mobile })}
-                    value={this.state.mobile}                    
-                />                
-                <Input 
-                    label={texts.password} 
-                    type='password' 
-                    returnKeyType='next' 
-                    onChangeText={(password) => this.setState({ password })}
-                    value={this.state.password}                    
-                />
-                <DatePicker 
-                    label={texts.dateOfBirth} 
-                    onChangeDate={this.onChangeDate.bind(this)}
-                    editable
-                />
-                <Button 
-                    title={texts.signup} 
-                    animating={this.state.loading}
-                    onPress={this.onRegisterPress.bind(this)} 
-                />   
-            </ScrollView>
+            <Form
+                title={this.state.title}
+                leftIcon='back'
+                rightIcon={this.state.rightIcon}
+                onPressLeft={this.onPressLeft.bind(this)}
+                onPressRight={this.onPressRight.bind(this)}
+                background={colors.main}
+                titleStyle={{ color: colors.elementBackground }}
+                rightColor={colors.elementBackground}
+                leftColor={colors.elementBackground}
+            >
+                {this.renderSections()}
+            </Form>
+            
         );
     }
 }

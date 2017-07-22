@@ -86,17 +86,17 @@ class EditTaskForm extends Component {
     }
 
     onChangeDateStart(date) {
-        this.setState({ newStartDate: date });
-        this.saveTask({ startDate: date });  
+        this.setState({ newStartDate: Helper.getDateISOfromDate(date) });
+        this.saveTask({ startDate: Helper.getDateISOfromDate(date) });  
     }
 
     onChangeDateDue(date) {
-        this.setState({ newDueDate: date });
-        this.saveTask({ dueDate: date });        
+        this.setState({ newDueDate: Helper.getDateISOfromDate(date) });
+        this.saveTask({ dueDate: Helper.getDateISOfromDate(date) });        
     }
 
     onPrioritySelection(priorityId) {
-        this.state({ priorityId });
+        this.setState({ priorityId });
         this.saveTask({ priorityId });
     }
 
@@ -237,7 +237,15 @@ class EditTaskForm extends Component {
     }
 
     projectSelected(text, value) {
-        this.setState({ project: { text, value }, isProjectModalVisible: false });
+        this.setState({ project: { text, value }, isProjectModalVisible: false, processingProgress: true });
+        Database.request2('PUT', `task/${this.state.taskId}`, { projectId: value }, 1, 
+            (err, response) => {
+                if (err) {
+                    Alert.alert(response.message);
+                } else {
+                    this.setState({ processingProgress: false });
+                }
+            });      
     }
 
     render() {
@@ -288,7 +296,7 @@ class EditTaskForm extends Component {
                         <DateDue 
                             ref={(startDate) => { this.startDate = startDate; }}
                             date={Helper.toDate(this.state.startDate)} 
-                            selectedDate={this.onChangeDateStart.bind(this)}
+                            onChangeDate={this.onChangeDateStart.bind(this)}
                         />
                     </ListItem2>    
                 {/* Due Date */}
@@ -296,7 +304,7 @@ class EditTaskForm extends Component {
                         <DateDue 
                             ref={(dueDate) => { this.dueDate = dueDate; }}
                             date={Helper.toDate(this.state.dueDate)} 
-                            selectedDate={this.onChangeDateDue.bind(this)}
+                            onChangeDate={this.onChangeDateDue.bind(this)}
                         />
                     </ListItem2>
                 {/* Progress */}    
@@ -381,6 +389,7 @@ class EditTaskForm extends Component {
                         <LinkButton 
                             title={this.state.project.text}
                             onPress={() => this.setState({ isProjectModalVisible: true })}
+                            style={{ opacity: (this.state.processingProject) ? 0.5 : 1 }}
                         />
                         <ESModal 
                             title={texts.projectSelect} 
@@ -388,6 +397,7 @@ class EditTaskForm extends Component {
                             onSelection={this.projectSelected.bind(this)}
                             elements={[]}
                             table='projects'
+                            selectedItem={this.state.projectId}
                         />                        
                     </View>    
                     }

@@ -26,15 +26,11 @@ var clients = [];
         ws.on('message', function incoming(message){
             try {
                 console.log("incoming message: " + message);
+                //A message with the element newConnectionxxx will create a new client
                 if(message.includes('{"newConnectionxxx":0,')) {
                     var json = JSON.parse(message);
                     
                     var obj = { "client":ws, "room":json.taskId, "personId":json.personId };
-
-                    /*if the person already connected remove it*/
-                    clients.pop(clients.filter(function(client){
-                        return client.personId === json.personId;
-                    }));
 
                     clients.push(obj);
                     console.log("online clients: " + clients.length)
@@ -45,8 +41,6 @@ var clients = [];
                     conn, function(error, result){
                         console.log(JSON.stringify(result[0]));
                     });
-
-
                 }
                 else if(message.includes('{"disconnectingClient":')){
                     var jsonMsg = JSON.parse(message);

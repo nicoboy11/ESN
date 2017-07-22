@@ -71,8 +71,23 @@ class EditProjectForm extends Component {
         }
     }
 
-    onMemberSelected() {
-
+    onMemberSelected(text, value) {
+        const params = { 
+            projectId: this.state.projectId,
+            personId: value,
+            roleId: 3
+        };
+        Database.request2('POST', 'projectMember', params, 1, (err, response) => {
+            if (err) { 
+                Alert.alert('Error', response.message);
+            } else {
+                this.setState({ 
+                    members: [...this.state.members, response[0]], 
+                    isMemberEditorVisible: false 
+                });
+                this.updateParent();
+            }
+        });
     }
 
     onResponse(response) {
@@ -149,20 +164,27 @@ class EditProjectForm extends Component {
         );
     }
 
-    removeCollaborator(personId) {
+    removeMember(personId) {
         this.setState({ member2Del: personId });
-        Database.request(
-            'DELETE',
-            'projectMember', 
-            { 
-                projectId: this.state.projectId,
-                personId
-            },
-            2,
-            this.onResponse.bind(this),
-            this.onSuccessDelete.bind(this),
-            this.onError.bind(this)
-        );           
+        Database.request2('DELETE', 'projectMember', { projectId: this.state.projectId, personId }, 2, 
+            (err, response) => {
+                if (err) {
+                    Alert.alert('Error', response.message);
+                } else {
+                    // Get new array without the removed element
+                    const result = this.state.members.filter(
+                        (person) => person.personId !== this.state.member2Del
+                    );        
+
+                    if (this.state.status > 299) {
+                        console.log('error');
+                    } else {
+                        this.setState({ members: result, isMemberEditorVisible: false });
+                    }                     
+                    
+                    this.updateParent();
+                }
+            });           
     }
 
     updateParent() {
