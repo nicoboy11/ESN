@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { View, StyleSheet, ScrollView, Text, Image, TouchableOpacity, Alert } from 'react-native';
 import { Actions } from 'react-native-router-flux';
 import ImagePicker from 'react-native-image-picker';
-import { Input, DatePicker, Form, Avatar } from '../components';
+import { Input, DatePicker, Form, Avatar, MyPicker } from '../components';
 import { Config, Database, Helper } from '../settings';
 
 const { texts, colors } = Config;
@@ -23,6 +23,7 @@ class ProfileForm extends Component {
         genderId: 1,
         editable: false,
         currentOption: '',
+        currentLeft: undefined,
         avatar: null,
         theme: colors.main
     }
@@ -67,8 +68,8 @@ class ProfileForm extends Component {
                 mobile: responseData[0].mobile,
                 abbr: responseData[0].abbr,
                 avatar: responseData[0].avatar,
-                genderId: 1,
-                editable: false,
+                genderId: responseData[0].genderId,
+                editable: (responseData[0].personId === session[0].personId),
                 currentOption: 'edit',
                 theme: responseData[0].theme,
                 personId: responseData[0].personId
@@ -83,9 +84,9 @@ class ProfileForm extends Component {
     onPressRight() {
         switch (this.state.currentOption) {
             case 'edit':
-                Actions.editProfileForm(this.state);
+                Actions.myEditProfileForm(this.state);
                 break;
-            case 'Save':
+            case 'save':
                 this.saveProfile();
                 break;
             default:
@@ -94,31 +95,38 @@ class ProfileForm extends Component {
     }
 
     onPressLeft() {
-        if (this.state.editable) {
-            this.setState({ editable: false, currentOption: 'Edit' });
+        if (this.state.currentLeft === 'close') {
+            this.setState({ editable: false, currentOption: 'edit' });
         } else {
             Actions.pop();
         }
     }
 
     getProfile(props) {
-        if (session[0].personId === props.personId) {
-            this.setState({ currentOption: 'edit' });
-        }    
+        let personId = 0;
+        if (props.personId !== undefined) {
+            if (session[0].personId === props.personId) {
+                this.setState({ currentOption: 'edit', currentLeft: 'back', editable: true });
+            }  
+            personId = props.personId;
+        } else {
+            personId = session[0].personId;
+        }
+  
 
-        const profile = Database.realm('Person', { }, 'select', `personId=${props.personId}`);
+        const profile = Database.realm('Person', { }, 'select', `personId=${personId}`);
 
         if (profile[0] !== undefined) {
             this.localLoad(profile);
         } else {
-            this.remoteRequest(props);
+            this.remoteRequest(personId);
         }
     }
 
-    remoteRequest(props) {
+    remoteRequest(personId) {
         Database.request(
             'GET', 
-            `person/${props.personId}`, 
+            `person/${personId}`, 
             {}, 
             2,
             this.onResponse.bind(this), 
@@ -131,7 +139,7 @@ class ProfileForm extends Component {
         this.setState(
             Database.realmToObject(profile, 'Person')[0]
         );         
-        this.setState({ currentOption: 'edit' });
+        this.setState({ currentOption: 'edit', editable: true });
     }
 
     saveProfile() {
@@ -163,9 +171,7 @@ class ProfileForm extends Component {
         if (this.state.editable) {
             const options = {
                 title: 'Select your profile photo',
-                customButtons: [
-                    { name: 'fb', title: 'Photos from facebook' },
-                ],
+                customButtons: [],
                 storageOptions: {
                     skipBackup: true,
                     path: 'images'
@@ -208,7 +214,7 @@ class ProfileForm extends Component {
                     style={indicatorStyle} 
                 >
                     <Image 
-                        source={require('../img/wcamera.png')} 
+                        source={{ uri: 'camera' }} 
                         style={contactImageStyle}
                     />
                 </View>
@@ -252,16 +258,21 @@ class ProfileForm extends Component {
         
         return (
                 <Form
-                   leftIcon={(this.state.editable) ? 'cancel' : 'back'}
-                   title='Profile'
+                   leftIcon={this.state.currentLeft}
+                   title=''
                    menuList={[]}
                    rightIcon={this.state.currentOption}
                    onPressRight={this.onPressRight.bind(this)}
                    onPressLeft={this.onPressLeft.bind(this)}
                    background={this.state.theme}
                    shadow={false}
+                   rightColor={colors.elementBackground}
+                   leftColor={colors.elementBackground}
+                   titleStyle={{ color: colors.elementBackground }}
                 >                       
-                <ScrollView>
+                <ScrollView
+                    style={{ backgroundColor: this.state.theme }}
+                >
                     <View style={[headerStyle, { backgroundColor: this.state.theme }]}>
                         <Text style={mainTextStyle}>
                             {
@@ -282,7 +293,21 @@ class ProfileForm extends Component {
                     </View>
                     <View />
                     <View style={mainViewStyle}>
-                        <Text style={titleStyle}>{texts.contactInfo}</Text>
+                        <Text style={titleStyle}>{texts.personalInfo}</Text>
+                        <DatePicker 
+                            label={texts.dateOfBirth} 
+                            onChangeDate={this.onChangeDate.bind(this)}
+                            date={this.state.dateOfBirth}
+                            editable={this.state.editable}
+                        />
+                        <MyPicker 
+                            label='Gender'
+                            onChangeSelection={(genderId) => this.setState({ genderId })}
+                            elements={[{ text: 'Male', value: 1 }, { text: 'Famale', value: 2 }]}
+                            selectedValue={this.state.genderId}
+                            editable={false}
+                        />                
+                        <Text style={titleStyle}>{texts.contactInfo}</Text>                                                           
                         <Input 
                             label={texts.email} 
                             type='email' 
@@ -291,20 +316,6 @@ class ProfileForm extends Component {
                             value={this.state.email}
                             editable={this.state.editable}
                         />
-                        <DatePicker 
-                            label={texts.dateOfBirth} 
-                            onChangeDate={this.onChangeDate.bind(this)}
-                            date={this.state.dateOfBirth}
-                            editable={this.state.editable}
-                        />
-                        <Input 
-                            label={texts.mobile} 
-                            type='number' 
-                            returnKeyType='next' 
-                            onChangeText={(mobile) => this.setState({ mobile })}
-                            value={this.state.mobile}       
-                            editable={this.state.editable}
-                        />                      
                         <Input 
                             label={texts.phone} 
                             type='number' 
@@ -320,7 +331,15 @@ class ProfileForm extends Component {
                             onChangeText={(ext) => this.setState({ ext })}
                             value={this.state.ext}      
                             editable={this.state.editable}
-                        />  
+                        />                          
+                        <Input 
+                            label={texts.mobile} 
+                            type='number' 
+                            returnKeyType='next' 
+                            onChangeText={(mobile) => this.setState({ mobile })}
+                            value={this.state.mobile}       
+                            editable={this.state.editable}
+                        />                      
                     </View>
 
                     {/*<Input 
@@ -339,7 +358,8 @@ class ProfileForm extends Component {
 const styles = StyleSheet.create({
     mainViewStyle: {
         paddingLeft: 30,
-        paddingRight: 30
+        paddingRight: 30,
+        backgroundColor: colors.elementBackground
     },
     mainTextStyle: {
         color: colors.mainText,
@@ -383,7 +403,7 @@ const styles = StyleSheet.create({
         height: 30,
         position: 'absolute',
         borderRadius: 15,
-        backgroundColor: 'gray',
+        backgroundColor: colors.clickable,
         right: 5,
         bottom: 5,
         padding: 5
@@ -405,7 +425,8 @@ const styles = StyleSheet.create({
     },
     contactImageStyle: {
         width: 20,
-        height: 20
+        height: 20,
+        tintColor: colors.elementBackground
     },
     titleStyle: {
         marginTop: 20,

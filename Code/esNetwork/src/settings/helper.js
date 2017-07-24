@@ -39,6 +39,7 @@ class Helper {
     static logout() {
         Database.realm('Session', { }, 'delete', '');        
         Database.realm('Person', { }, 'delete', '');   
+        Database.realm('Project', { }, 'delete', '');  
     }
 
 	static prettyfyDate(uglyDate) {
@@ -80,9 +81,9 @@ class Helper {
     }    
     
     static loadRealms(sessionId) {
-        Database.request2('GET', `network/${sessionId}`, {}, 2, (err, response) => {
+        Database.request2('GET', 'network', {}, 2, (err, response) => {
             if (err) {
-                console.log('could not load people');
+                console.log(response.message);
             } else {
                 let people = [];
 
@@ -159,23 +160,3 @@ class Helper {
 }
 
 export { Helper };
-
-/*
-module.exports = function helpers() {
-    this.getDateISO = function (year, month, day) {
-        return year.toString() + '-' + 
-                ('00' + (month + 1).toString()).slice(-2) + '-' + 
-                ('00' + day.toString()).slice(-2);
-    };
-
-    this.isValidEmail = function (email) {
-        const re = regex.email;
-        return !re.test(email);
-    };
-
-    this.isValidText = function (text) {
-        const re = regex.textOnly;
-        return !re.test(text);
-    };
-
-};*/

@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { View, Text, Alert, ActivityIndicator, Modal } from 'react-native';
 import { Actions } from 'react-native-router-flux';
-import { Form, FlatListe } from '../components';
+import { Form, FlatListe, Label } from '../components';
 import { EditHierarchyForm } from './';
 import { Config, Database, Helper } from '../settings';
 const { colors } = Config;
@@ -23,9 +23,15 @@ class HierarchyForm extends Component {
                 this.commitChanges();             
             } else {
                 this.setState({ network: Database.realmToObject(people, 'Person') });
-                this.loadPeople(people);
+                this.loadPeople();
             }            
         }     
+    }
+
+    componentWillReceiveProps(newProps) {
+        if (newProps.edited) {
+            this.onEditedHierarchy(true);
+        }
     }
 
     onResponse(response) {
@@ -74,7 +80,7 @@ class HierarchyForm extends Component {
             
             Database.realm('Person', people, 'create', '');
             this.setState({ network: people });
-            this.loadPeople(people);
+            this.loadPeople();
         }
     }
 
@@ -87,7 +93,7 @@ class HierarchyForm extends Component {
         if (edited) {
             people = Database.realm('Person', { }, 'select', '').sorted('levelKey');
             this.setState({ network: Database.realmToObject(people, 'Person') });
-            this.loadPeople(people);
+            this.loadPeople();
             this.commitChanges();
         }
         
@@ -132,7 +138,7 @@ class HierarchyForm extends Component {
     remoteRequest() {
         Database.request(
             'GET', 
-            `network/${session[0].personId}`, 
+            'network', 
             {}, 
             2,
             this.onResponse.bind(this), 
@@ -146,15 +152,23 @@ class HierarchyForm extends Component {
             if (success) {
                 Database.realm('Person', { }, 'delete', '');
                 this.remoteRequest();
+                Alert.alert('Saved!', '');
             } else {
                 Alert.alert('Unable to sync', response.message);
                 this.setState({ network: Database.realmToObject(people, 'Person') });
-                this.loadPeople(people);                        
+                this.loadPeople();                        
             }
         });            
     }
 
-    loadPeople(data) {
+    loadPeople() {
+        const data = Database.realm(
+            'Person', 
+            { }, 
+            'select', 
+            `higherPersonId=${session[0].personId} OR personId=${session[0].personId}`
+        ).sorted('levelKey');
+
         //Initially only show immediate employees
         const sessionLevel = session[0].levelKey.split('-').length - 1;
         //let visibleData = JSON.parse(JSON.stringify(data));
@@ -176,30 +190,34 @@ class HierarchyForm extends Component {
             return <ActivityIndicator size='large' />;
         }
 
-        return (
-            <View>
-                <FlatListe 
-                    keyEx='personId'
-                    itemType='people'
-                    data={this.state.visibleNetwork}
-                    onPress={this.onPress.bind(this)}
-                    onIconPress={this.onIconPress.bind(this)}
-                    icon='edit'
-                    separator
-                    chevron
-                />
-                <Modal
-                    animationType='slide'
-                    onRequestClose={() => console.log('closing')}
-                    visible={this.state.isEditPersonOpen}                
-                >
-                    <EditHierarchyForm 
-                        onClose={this.onEditedHierarchy.bind(this)}
-                        data={this.state.selectedPerson}
+        if (this.state.visibleNetwork.length !== 0) {
+            return (
+                <View>
+                    <FlatListe 
+                        keyEx='personId'
+                        itemType='people'
+                        data={this.state.visibleNetwork}
+                        onPress={this.onPress.bind(this)}
+                        onIconPress={this.onIconPress.bind(this)}
+                        icon='edit'
+                        separator
+                        chevron
                     />
-                </Modal>                  
-            </View>             
-        );
+                    <Modal
+                        animationType='slide'
+                        onRequestClose={() => console.log('closing')}
+                        visible={this.state.isEditPersonOpen}                
+                    >
+                        <EditHierarchyForm 
+                            onClose={this.onEditedHierarchy.bind(this)}
+                            data={this.state.selectedPerson}
+                        />
+                    </Modal>                  
+                </View>             
+            );
+        }
+
+        return <Label style={{ textAlign: 'center', fontSize: 28, paddingTop: 60, color: colors.secondText }}>No people to manage</Label>;
     }   
 
     render() {
@@ -207,6 +225,7 @@ class HierarchyForm extends Component {
             <Form
                 title='Manage people'
                 rightIcon='plus'
+                onPressRight={() => Actions.newHierarchyForm()}
             >
                 {this.renderList()}
             </Form>

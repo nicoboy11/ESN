@@ -42,19 +42,19 @@ class EditProjectForm extends Component {
 
     onChangeDateStart(date) {
         if (this.state.projectId !== 0) { //If the project is not new...        
-            this.setState({ newStartDate: Helper.getDateISOfromDate(date) });
-            this.saveProject({ startDate: Helper.getDateISOfromDate(date) });
+            this.setState({ newStartDate: date });
+            this.saveProject({ startDate: date });
         } else {
-            this.setState({ startDate: Helper.getDateISOfromDate(date) });
+            this.setState({ startDate: date });
         }
     }
 
     onChangeDueDate(date) {
         if (this.state.projectId !== 0) { //If the project is not new...        
-            this.setState({ newDueDate: Helper.getDateISOfromDate(date) });
-            this.saveProject({ dueDate: Helper.getDateISOfromDate(date) });
+            this.setState({ newDueDate: date });
+            this.saveProject({ dueDate: date });
         } else {
-            this.setState({ dueDate: Helper.getDateISOfromDate(date) });
+            this.setState({ dueDate: date });
         }
     }
 
@@ -234,10 +234,11 @@ class EditProjectForm extends Component {
                         visible={this.state.isNameEditorVisible}
                     >
                         <EditTextForm 
-                            title='Name of task'
+                            title={name}
                             text={name}
                             onClose={() => this.setState({ isNameEditorVisible: false })}
                             onSave={this.onSaveName.bind(this)}
+                            multiline
                         />
                     </Modal>   
                 {/* Start Date */}                       

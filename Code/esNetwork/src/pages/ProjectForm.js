@@ -10,7 +10,8 @@ import {
     ActivityIndicator, 
     Image, 
     TouchableHighlight,
-    TouchableOpacity 
+    TouchableOpacity,
+    Vibration
 } from 'react-native';
 import { Actions } from 'react-native-router-flux';
 import { Form, Label, FlatListe, LinkButton } from '../components';
@@ -28,15 +29,27 @@ class ProjectForm extends Component {
             Actions.authentication();
         } else {
             const personId = data[0].personId;        
-            Database.request(
-                'GET', 
-                `personProjects/${personId}`, 
-                {}, 
-                2,
-                this.handleResponse.bind(this), 
-                this.onSuccess.bind(this),
-                this.onError.bind(this)
-            ); 
+            Database.request2('GET', `personProjects/${personId}`, {}, 2, (err, response) => {
+                if (err) {
+                    Alert.alert('Error', err.message);
+                    this.refresh();
+                } else {
+                    if (response.status > 299) {
+                        Database.realm('Session', { }, 'delete', '');
+                        Actions.authentication();
+                    } else {
+                        // Add a element with 0 to act as the new Project card
+                        const newProj = {
+                            projectId: 0, 
+                            text: '', 
+                            name: '',
+                            startDate: Helper.getDateISOfromDate(new Date())
+                        };
+
+                        this.setState({ projects: [newProj, ...response], isLoading: false });
+                    }
+                }
+            }); 
         }       
     }
 
@@ -73,25 +86,11 @@ class ProjectForm extends Component {
     }
 
     onError(error) {
-        Alert.alert('Error', error.message);
-        this.refresh();
+
     }
     
     onSuccess(responseData) {
-        if (this.state.status > 299) {
-            Database.realm('Session', { }, 'delete', '');
-            Actions.authentication();
-        } else {
-            // Add a element with 0 to act as the new Project card
-            const newProj = {
-                projectId: 0, 
-                text: '', 
-                name: '',
-                startDate: Helper.getDateISOfromDate(new Date())
-            };
 
-            this.setState({ projects: [newProj, ...responseData], isLoading: false });
-        }
     }
 
     handleResponse(response) {
@@ -104,7 +103,7 @@ class ProjectForm extends Component {
         if (this.state.selectedProjects === null) {
             Actions.taskForm({ projectId: item.projectId, title: item.text });
         } else {
-            if(item.projectId === this.state.selectedProjects.projectId) {
+            if (item.projectId === this.state.selectedProjects.projectId) {
                 this.unSelect();
             } else {
                 this.selectProject(item);
@@ -140,7 +139,7 @@ class ProjectForm extends Component {
                 projects[i].selected = false;
             }
         }
-
+        Vibration.vibrate([0, 50], false);
         this.setState({ selectedProjects: item, showEditButton: 'edit', showCancelButton: 'cancel', title: '', projects });
     }
 
@@ -174,7 +173,9 @@ class ProjectForm extends Component {
             circleStyle,
             countStyle,
             statStyle,
-            avatarStyles
+            avatarStyles,
+            newProjectStyle,
+            newImageStyle
         } = styles;
 
         if (item.projectId === 0) {
@@ -184,28 +185,10 @@ class ProjectForm extends Component {
                 >                
                     <View 
                         key={item.projectId} 
-                        style={[
-                            projectStyle, 
-                            { 
-                                alignItems: 'center', 
-                                justifyContent: 'center', 
-                                borderStyle: 'dashed',
-                                backgroundColor: colors.background,
-                                flex: 1,
-                                paddingLeft: 20,
-                                paddingRight: 20
-                            }
-                        ]}
+                        style={[projectStyle, newProjectStyle]}
                     >
                                 <Image 
-                                    style={{ 
-                                        width: 30, 
-                                        height: 30, 
-                                        borderWidth: 1, 
-                                        borderColor: colors.main, 
-                                        borderRadius: 15,
-                                        tintColor: colors.main
-                                    }} 
+                                    style={newImageStyle} 
                                     source={{ uri: 'plus' }} 
                                 />
                                 <Label>New Project</Label>                        
@@ -362,6 +345,23 @@ const styles = new StyleSheet.create({
     avatarStyles: {
         marginLeft: 10,
         marginBottom: 10
+    },
+    newProjectStyle: {
+        alignItems: 'center', 
+        justifyContent: 'center', 
+        borderStyle: 'dashed',
+        backgroundColor: colors.background,
+        flex: 1,
+        paddingLeft: 20,
+        paddingRight: 20
+    },
+    newImageStyle: {
+        width: 30, 
+        height: 30, 
+        borderWidth: 1, 
+        borderColor: colors.main, 
+        borderRadius: 15,
+        tintColor: colors.main        
     }
 });
 

@@ -23,10 +23,14 @@ class TaskMessageForm extends Component {
                 progress: this.props.progress,
                 newSliderValue: this.props.progress,
                 isChatVisible: true,
-                isEditVisible: false,
+                isCheckVisible: false,
                 isLeaderVisible: false,
                 taskData: this.props
             }
+
+    componentWillReceiveProps(newProps) {
+        this.setState(newProps);
+    }
 
     onUpdateChild(updatedTask) {
         this.setState({ taskData: updatedTask });
@@ -35,15 +39,13 @@ class TaskMessageForm extends Component {
     renderForm() {
         if (this.state.isChatVisible) {
             return (
-                    <Chat taskId={this.props.taskId} />
+                <Chat taskId={this.props.taskId} />
             );
-        } else if (this.state.isCheckVisible) {
-            return <CheckListForm />;
-        } else if (this.state.isEditVisible) {
-            return <EditTaskForm onUpdateChild={this.onUpdateChild.bind(this)} taskData={this.props} />;
-        }
+        } 
 
-        return <View />;
+        return (
+            <CheckListForm checkListId={this.props.checkListId} />
+        );        
     }
 
     render() {
@@ -53,18 +55,19 @@ class TaskMessageForm extends Component {
         return (
             <Form
                 leftIcon='back'
+                rightIcon='edit'
                 data={this.state.taskData}
                 title={this.state.taskData.name}
                 shadow={false}
-                onPressLeft={() => Actions.pop()}
+                onPressLeft={() => Actions.pop({ refresh: { updated: this.state.taskData } })}
+                onPressRight={() => Actions.editTaskForm({ taskData: this.props })}
             >
                 <View style={mainContainerStyle}>
                     <TouchableOpacity
                         onPress={() => this.setState(
                             { 
                                 isChatVisible: true,
-                                isCheckVisible: false,
-                                isEditVisible: false
+                                isCheckVisible: false
                             }
                         )}
                     >
@@ -78,8 +81,7 @@ class TaskMessageForm extends Component {
                         onPress={() => this.setState(
                             { 
                                 isChatVisible: false,
-                                isCheckVisible: true,
-                                isEditVisible: false
+                                isCheckVisible: true
                             }
                         )}
                     >
@@ -88,22 +90,7 @@ class TaskMessageForm extends Component {
                             tintColor={(this.state.isCheckVisible) ? colors.main : colors.secondText}
                             style={{ width: 23, height: 23, tintColor: (this.state.isCheckVisible) ? colors.main : colors.secondText }}
                         />
-                    </TouchableOpacity>        
-                    <TouchableOpacity
-                        onPress={() => this.setState(
-                            { 
-                                isChatVisible: false,
-                                isCheckVisible: false,
-                                isEditVisible: true
-                            }
-                        )}
-                    >
-                        <Image
-                            source={{ uri: 'edit' }} 
-                            tintColor={(this.state.isEditVisible) ? colors.main : colors.secondText}
-                            style={{ width: 23, height: 23, tintColor: (this.state.isEditVisible) ? colors.main : colors.secondText }}
-                        />
-                    </TouchableOpacity>                                                                                                                   
+                    </TouchableOpacity>                                                                                                                       
                 </View>
                 <View style={{ flex: 1 }}>
                     {this.renderForm()}

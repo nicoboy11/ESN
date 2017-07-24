@@ -15,6 +15,14 @@ class TaskCard3 extends Component {
         };
     }
 
+    componentWillReceiveProps(newProps) {
+        this.setState({
+            ...newProps,
+            newStateId: newProps.data.stateId,
+            taskId: newProps.id
+        });
+    }
+
     onResponse(response) {
         this.setState({ status: response.status });
         return response.json();
@@ -25,8 +33,6 @@ class TaskCard3 extends Component {
             Alert.alert('Authentication Error');
         } else {
             Alert.alert('Unable to save the data.', `Code: ${this.state.status}, ${error.message}`);
-            this.startDate.updating = false;
-            this.dueDate.updating = false;
         }
     }
 
@@ -42,8 +48,21 @@ class TaskCard3 extends Component {
         }        
     }
 
-    onChangeDate() {
+    onChangeDate(dueDate) {
+        const params = { dueDate: Helper.getDateISOfromDate(dueDate) };
+        this.setState({ date: Helper.getDateISOfromDate(dueDate) });                
 
+        Database.request2('PUT', `task/${this.state.taskId}`, params, 1, (err, response) => {
+            if (err) {
+                Alert.alert('Error', response.message);
+            } else {
+                const data = this.state.data;
+                data.dueDate = this.state.dueDate;
+
+                this.setState({ data });
+                this.props.updateFromChildren(data);
+            }
+        });   
     }
 
     toogleTask() {
@@ -121,7 +140,7 @@ class TaskCard3 extends Component {
                 <View style={bottomContainerStyle}>
                     <View style={[smallContainers, separator]}>
                         <DateDue 
-                            ref={(date) => { this.startDate = date; }}
+                            ref={(date) => { this.dueDate = date; }}
                             date={Helper.toDate(date)} 
                             onChangeDate={this.onChangeDate.bind(this)}
                             title='Due Date'

@@ -5,11 +5,12 @@ import { Config } from '../settings';
 
 const { colors } = Config;
 
-const NewCard = ({ name, avatar, color, value, onChangeText, onSubmitEditing }) => {
+const NewCard = ({ placeholder, name, avatar, color, value, onChangeText, onSubmitEditing }) => {
     return (
         <View style={styles.containerStyle}>
             <Input 
-                label='Type a new task' 
+                placeholder={placeholder}
+                label=''
                 type='text' 
                 returnKeyType='done' 
                 onChangeText={onChangeText}

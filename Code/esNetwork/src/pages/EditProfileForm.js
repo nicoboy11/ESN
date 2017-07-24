@@ -1,7 +1,8 @@
 import React, { Component } from 'react';
-import { ScrollView, Modal, Alert } from 'react-native';
+import { ScrollView, Modal, Alert, ActivityIndicator } from 'react-native';
 import { Actions } from 'react-native-router-flux';
-import { Form, ListItem2, Label, DateDue, FlatListe, Input } from '../components';
+import ImagePicker from 'react-native-image-picker';
+import { Form, ListItem2, Label, DateDue, Avatar } from '../components';
 import { EditTextForm, SelectPersonForm } from './';
 import { Config, Helper, Database } from '../settings';
 
@@ -52,27 +53,51 @@ class EditProfileForm extends Component {
     }
 
     onChangeDOB(date) {
-        Database.realm('Person', { dateOfBirth: date }, 'edit', `personId=${this.state.personId}`);        
+        Database.realm('Person', { dateOfBirth: Helper.toDate(date) }, 'edit', `personId=${this.state.personId}`);        
 
-        Database.request2('PUT', `person/${this.state.personId}`, { dateOfBirth: Helper.getDateISOfromDate(date) }, 1, (err, response) => {
+        Database.request2('PUT', `person/${this.state.personId}`, { dateOfBirth: date }, 1, (err, response) => {
             if (err) {
-                Alert.alert('Error', err.message);
+                Alert.alert('Error', response.message);
             } else {
-                this.setState({ dateOfBirth: date });
-                Actions.pop({ refresh: { updated: this.updateParent() } });
+                this.setState({ dateOfBirth: Helper.toDate(date) });
             }
         });        
     }    
 
     savePerson(data) {
-        Database.realm('Person', data, 'edit', `personId=${this.state.personId}`);        
-
+        this.setState({ uploading: true });
         Database.request2('PUT', `person/${this.state.personId}`, data, 1, (err, response) => {
             if (err) {
                 Alert.alert('Error', err.message);
             } else {
-                this.setState(data);
-                Actions.pop({ refresh: { updated: this.updateParent() } });
+                const newData = {
+                    dateOfBirth: Helper.toDate(response[0].dateOfBirth),
+                    names: response[0].names,
+                    firstLastName: response[0].firstLastName,
+                    secondLastName: response[0].secondLastName,
+                    email: response[0].email,
+                    phone: response[0].phone,
+                    ext: response[0].ext,
+                    mobile: response[0].mobile,
+                    abbr: response[0].abbr,
+                    avatar: response[0].avatar,
+                    genderId: response[0].genderId              
+                };
+
+                this.setState(newData);
+                
+                this.setState({ 
+                    isMobileEditorVisible: false,
+                    isExtensionEditorVisible: false,
+                    isPhoneEditorVisible: false,
+                    isEmailEditorVisible: false,
+                    isSecondLastNameEditorVisible: false,
+                    isLastNameEditorVisible: false,
+                    isNameEditorVisible: false,
+                    uploading: false
+                });             
+
+                Database.realm('Person', newData, 'edit', `personId=${this.state.personId}`); 
             }
         });
     }
@@ -85,17 +110,71 @@ class EditProfileForm extends Component {
         return newState;
     }
 
+    selectProfilePicture() {
+        const options = {
+            title: 'Select your profile photo',
+            customButtons: [],
+            storageOptions: {
+                skipBackup: true,
+                path: 'images'
+            }
+        };
+
+        ImagePicker.showImagePicker(options, (response) => {
+            if (response.didCancel) {
+                console.log('canceled');
+            } else if (response.error) {
+                console.log('error');
+            } else if (response.customButton) {
+                console.log('customButton', response.customButton);
+            } else {
+                const source = { uri: response.uri };
+                this.setState({
+                    avatar: source,
+                    avatarFileName: response.fileName,
+                    avatarFileType: response.type
+                });
+
+                let avatar;
+
+                if (response.fileName !== undefined) {
+                    avatar = {
+                                uri: source.uri,
+                                name: response.fileName,
+                                type: response.type
+                            };
+                }      
+                        
+                this.savePerson({ avatar });
+            }
+        });        
+    }
+
     render() {
-        const { names, firstLastName, secondLastName, dateOfBirth, email, phone, mobile, ext } = this.state;
+        const { avatar, theme, names, firstLastName, secondLastName, dateOfBirth, email, phone, mobile, ext } = this.state;
         return (
             <Form 
                 title={names}
                 leftIcon='back'
                 onPressLeft={() => Actions.pop({ refresh: { updated: this.updateParent() } })}
-                rightIcon={'ok'}
-                onPressRight={() => this.saveNewProject()}
             >
                 <ScrollView>
+                {/* Name editor */}
+                    <ListItem2 
+                        title='PROFILE PICTURE:' 
+                        editable
+                        onPress={this.selectProfilePicture.bind(this)}
+                    >
+                        {(this.state.uploading) ? 
+                            <ActivityIndicator /> : 
+                            <Avatar 
+                                avatar={avatar}
+                                color={theme}
+                                size='big'
+                            /> 
+                        }
+                                                   
+                    </ListItem2>                    
                 {/* Name editor */}
                     <ListItem2 
                         title='NAME(s):' 
@@ -114,6 +193,7 @@ class EditProfileForm extends Component {
                             text={names}
                             onClose={() => this.setState({ isNameEditorVisible: false })}
                             onSave={this.onSaveName.bind(this)}
+                            type='text'
                         />
                     </Modal> 
                 {/* lastName editor */}
@@ -134,6 +214,7 @@ class EditProfileForm extends Component {
                             text={firstLastName}
                             onClose={() => this.setState({ isLastNameEditorVisible: false })}
                             onSave={this.onSaveLastName.bind(this)}
+                            type='text'
                         />
                     </Modal> 
                 {/* secondLastName editor */}
@@ -154,6 +235,7 @@ class EditProfileForm extends Component {
                             text={secondLastName}
                             onClose={() => this.setState({ isSecondLastNameEditorVisible: false })}
                             onSave={this.onSaveSecondLastName.bind(this)}
+                            type='text'
                         />
                     </Modal>    
                 {/* Date of Birth */}                       
@@ -183,6 +265,7 @@ class EditProfileForm extends Component {
                             text={email}
                             onClose={() => this.setState({ isEmailEditorVisible: false })}
                             onSave={this.onSaveEmail.bind(this)}
+                            type='email'
                         />
                     </Modal>                        
                 {/* phone editor */}
@@ -203,6 +286,7 @@ class EditProfileForm extends Component {
                             text={phone}
                             onClose={() => this.setState({ isPhoneEditorVisible: false })}
                             onSave={this.onSavePhone.bind(this)}
+                            type='number'
                         />
                     </Modal>      
                 {/* Extension editor */}
@@ -223,6 +307,7 @@ class EditProfileForm extends Component {
                             text={ext}
                             onClose={() => this.setState({ isExtensionEditorVisible: false })}
                             onSave={this.onSaveExt.bind(this)}
+                            type='number'
                         />
                     </Modal>     
                 {/* Mobile editor */}
@@ -243,6 +328,7 @@ class EditProfileForm extends Component {
                             text={mobile}
                             onClose={() => this.setState({ isMobileEditorVisible: false })}
                             onSave={this.onSaveMobile.bind(this)}
+                            type='number'
                         />
                     </Modal>                                                                                                                      
                 </ScrollView>    

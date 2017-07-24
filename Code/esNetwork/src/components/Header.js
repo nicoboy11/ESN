@@ -1,11 +1,17 @@
 import React, { Component } from 'react';
-import { View, TouchableOpacity, Text, Image, StyleSheet, Platform } from 'react-native';
+import { View, TouchableOpacity, Text, Image, StyleSheet, Platform, Alert } from 'react-native';
 import { Actions } from 'react-native-router-flux';
 import { Config } from '../settings';
 
 const { colors, font } = Config;
 
 class Header extends Component {
+    state = { localStyle: {} };
+
+    componentWillMount() {
+        this.setState({ localStyle: styles.localTitleStyle });
+    }
+
     onPressLeft() {
         if (this.props.leftIcon === 'back' && this.props.onPressLeft === undefined) {
             Actions.pop({ refresh: { dataFromChild: this.props.data } });
@@ -18,8 +24,14 @@ class Header extends Component {
         this.props.onPressRight();
     }
 
+    handleTitleLayout(event) {
+        if (event.nativeEvent.layout.height > 28) {
+            this.setState({ localStyle: styles.localTitleStyleSmall });
+        }
+    }
+
     renderButton(icon, color) {
-        const { imageStyle } = style;
+        const { imageStyle } = styles;
 
         if (icon === '' || icon === undefined) {
             return <View />;
@@ -53,7 +65,7 @@ class Header extends Component {
     }    
 
     render() {
-        const { containerStyle, localTitleStyle, shadow } = style;
+        const { containerStyle, localTitleStyle, shadow } = styles;
         const { rightIcon, rightColor, title, isVisible, background, titleStyle } = this.props;
 
         if (!isVisible) {
@@ -71,7 +83,14 @@ class Header extends Component {
                 ]}
             >
                 {this.renderLeft()}
-                <Text allowFontScaling ellipsizeMode='tail' numberOfLines={2} style={[localTitleStyle, titleStyle]} >
+                <Text 
+                    ref={(ref) => { this.txt = ref; }}
+                    allowFontScaling 
+                    ellipsizeMode='tail' 
+                    numberOfLines={2} 
+                    style={[this.state.localStyle, titleStyle]}
+                    onLayout={this.handleTitleLayout.bind(this)}
+                >
                     {title}
                 </Text>
                 <TouchableOpacity style={{ width: 44 }} onPress={this.onPressRight.bind(this)} >
@@ -82,7 +101,7 @@ class Header extends Component {
     }
 }
 
-const style = StyleSheet.create({
+const styles = StyleSheet.create({
 
     containerStyle: {
         height: (Platform.OS === 'ios') ? 60 : 40,
@@ -114,9 +133,15 @@ const style = StyleSheet.create({
         color: Config.colors.mainDark,
         textAlign: 'left',
         flex: 3,
-        fontFamily: font.normal,
-        lineHeight: 20
+        fontFamily: font.normal
     },
+    localTitleStyleSmall: {
+        fontSize: 14,
+        color: Config.colors.mainDark,
+        textAlign: 'left',
+        flex: 3,
+        fontFamily: font.normal
+    },    
     buttonStyles: {
         flex: 1
     }

@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
-import { ScrollView, StyleSheet, Keyboard, Alert, View } from 'react-native';
+import { ScrollView, StyleSheet, Keyboard, Alert, View, Picker } from 'react-native';
 import { Actions } from 'react-native-router-flux';
-import { Input, DatePicker, Button, KeyboardSpacer, Form } from '../components';
+import { Input, DatePicker, Button, KeyboardSpacer, Form, MyPicker } from '../components';
 import { Config, Database } from '../settings';
 
 const { texts, colors } = Config;
@@ -23,6 +23,10 @@ class RegisterForm extends Component {
         rightIcon: 'forward',
         currentSection: 1,
         title: texts.register
+    }
+
+    componentDidMount() {
+        this.inptName.focus();
     }
 
     onChangeDate(dateISO) {
@@ -75,16 +79,24 @@ class RegisterForm extends Component {
                 email, 
                 genderId,
                 password,
-                mobile } = this.state;
+                mobile,
+                phone,
+                ext,
+                password2
+        } = this.state;
 
         this.setState({ loading: 1 });  
         Keyboard.dismiss();
 
         if (password === '') {
-            Alert.alert('Incomplete form', 'A password must be provided');
+            Alert.alert(texts.incompleteForm, texts.passwordProvided);
+        }
+
+        if (password !== password2) {
+            Alert.alert(texts.passwordMissmatch, texts.passwordMissmatchMsg);
         }
          
-        Database.request(
+        Database.request2(
             'POST', 
             'person', 
             { dateOfBirth, 
@@ -95,12 +107,26 @@ class RegisterForm extends Component {
               email, 
               password,
               genderId,
-              mobile
-            }, 
-            false,
-            this.handleResponse.bind(this), 
-            this.onLoginResponse.bind(this), 
-            this.onError.bind(this));
+              mobile,
+              phone,
+              ext,
+              roleId: 3
+            }, 0, (err, response) => {
+            if (err) { 
+                console.log(err.message);
+                this.refresh();
+            } else {
+                console.log('Response');
+                if (this.state > 399) {
+                    Alert.alert(texts.loginFailed, response.message);
+                } else {
+                    Alert.alert(texts.success, texts.accountCreated);
+                    Actions.pop();
+                }
+
+                this.refresh();                
+            }
+        });
     }    
 
     onLoginResponse(responseData) {
@@ -181,6 +207,12 @@ class RegisterForm extends Component {
                             onChangeDate={this.onChangeDate.bind(this)}
                             editable
                         />
+                        <MyPicker 
+                            label='Gender'
+                            onChangeSelection={(genderId) => this.setState({ genderId })}
+                            elements={[{ text: 'Male', value: 1 }, { text: 'Famale', value: 2 }]}
+                            editable
+                        />                       
                         <KeyboardSpacer /> 
                     </ScrollView>
                 );
@@ -232,6 +264,7 @@ class RegisterForm extends Component {
                     <ScrollView 
                         style={[mainViewStyle, { opacity: this.state.section4 }]}
                     >
+                        <View /><View /><View /><View />
                         <Input 
                             label={texts.password} 
                             type='password' 
@@ -239,6 +272,7 @@ class RegisterForm extends Component {
                             onChangeText={(password) => this.setState({ password })}
                             value={this.state.password}                    
                         />
+                        <View />
                         <Input 
                             label={texts.password} 
                             type='password' 
@@ -282,8 +316,8 @@ class RegisterForm extends Component {
 const styles = StyleSheet.create({
     mainViewStyle: {
         paddingLeft: 20,
-        paddingRight: 20,    
-        paddingTop: 60    
+        paddingRight: 20,
+        paddingTop: 10
     }
 });
 

@@ -277,7 +277,7 @@ BEGIN
 	
 	DECLARE _existsMessage varchar(255);
     DECLARE _abbr varchar(3); 
-    DECLARE _theme varchar(3);
+    DECLARE _theme varchar(10);
     
     SET _existsMessage = validatePersonExists(_email,_names,_firstLastName,_secondLastName,_dateOfBirth);
     
@@ -288,17 +288,21 @@ BEGIN
     SET _abbr = getAbbr(_names,_firstLastName);
     SET _theme = '#00BFA5';
     
+    IF(_genderId = 2) THEN
+		SET _theme = '#00C853';
+    END IF;
+
     /*
     UPDATE person SET theme = '#00BFA5' WHERE id = 1;
-UPDATE person SET theme = '#00C853' WHERE id = 2;
-UPDATE person SET theme = '#304FFE' WHERE id = 3;
-UPDATE person SET theme = '#D50000' WHERE id = 4;
-UPDATE person SET theme = '#FF6D00' WHERE id = 5;
-UPDATE person SET theme = '#AA00FF' WHERE id = 6;
+	UPDATE person SET theme = '#00C853' WHERE id = 2;
+	UPDATE person SET theme = '#304FFE' WHERE id = 3;
+	UPDATE person SET theme = '#D50000' WHERE id = 4;
+	UPDATE person SET theme = '#FF6D00' WHERE id = 5;
+	UPDATE person SET theme = '#AA00FF' WHERE id = 6;
     */
 
-    INSERT INTO person (names,firstLastName,secondLastName,dateOfBirth,email,mobile,phone,ext,password,genderId,higherPersonId,avatar,token,abbr,roleId,startDate)
-    VALUES(_names,_firstLastName,_secondLastName,_dateOfBirth,_email,_mobile,_phone,_ext,_password,_genderId,_higherPersonId,_avatar,_token,_abbr,_roleId,NOW());
+    INSERT INTO person (names,firstLastName,secondLastName,dateOfBirth,email,mobile,phone,ext,password,genderId,higherPersonId,avatar,token,abbr,roleId,startDate, theme)
+    VALUES(_names,_firstLastName,_secondLastName,_dateOfBirth,_email,_mobile,_phone,_ext,_password,_genderId,_higherPersonId,_avatar,_token,_abbr,_roleId,NOW(), _theme);
     
     SELECT LAST_INSERT_ID() as id;
     
@@ -588,7 +592,43 @@ BEGIN
 
 END$$
 
-CALL GetNetwork(1);
+DELIMITER $$
+DROP procedure IF EXISTS `GetPeople`$$
+CREATE PROCEDURE `GetPeople` ()
+BEGIN
+   
+    SELECT	p.id as personId,
+			p.names,	
+			p.firstLastName,
+			p.secondLastName,
+            getFullName(p.id) as person,
+			formatDate(p.dateOfBirth) as dateOfBirth,
+			p.email,
+            p.mobile,
+            p.genderId,
+            g.description as gender,
+			ifnull(p.phone,'') as phone,
+			ifnull(p.ext,'') as ext,
+			formatDate(p.startDate) as startDate,
+			ifnull(formatDate(p.endDate), '2100-01-01') as endDate,
+			ifnull(p.higherPersonId,0) as higherPersonId,
+            getFullName(p.higherPersonId) as higherPerson,
+            ifnull(getLevelKey(p.higherPersonId),'') as parentLevelKey,
+			ifnull(formatDate(p.lastLogin), '2000-01-01') as lastLogin,
+			getAvatar(p.id) as avatar,
+			ifnull(p.description, '') as description,
+			ifnull(p.job, '') as job,
+			p.roleId,
+			p.abbr,
+            getLevelKey(p.id) as levelKey,
+            ifnull(p.theme,'') as theme,
+            isParent(p.id) as isParent
+    FROM person as p
+    INNER JOIN gender as g on g.id = p.genderId
+    ORDER BY levelKey,person;  
+
+END$$
+
 /*===================================================================================================*/
 /*===================================================================================================*/
 /*=========================================POSTS ============================================*/
@@ -964,7 +1004,9 @@ BEGIN
 		VALUES ( _name, _abbr, _startDate, _creatorId, _dueDate, _logo );
 		
 		SET _projectId = LAST_INSERT_ID();
-		CALL CreateProjectMember (	_projectId, _creatorId, 1, _startDate, NULL	);
+
+		INSERT INTO projectMember ( projectId, personId, roleId, startDate, endDate )
+		VALUES ( _projectId, _creatorId, 1, _startDate,  NULL);        
         
         CALL GetProject(_projectId);
 
@@ -1191,6 +1233,7 @@ CREATE PROCEDURE `CreateTask` (	IN _name varchar(255), 	IN _description text, 		
                                 IN _projectId int,		IN _calendarId varchar(255), IN _priorityId int)
 BEGIN
 	DECLARE _taskId int;
+    DECLARE _checkListId int;
 	DECLARE EXIT HANDLER FOR SQLEXCEPTION
     BEGIN
     
@@ -1218,7 +1261,9 @@ BEGIN
         
 		INSERT INTO taskMember ( taskId, personId, roleId, startDate, endDate, lastEditorId )
 		VALUES ( _taskId, _creatorId, 1, NOW(), NULL, _creatorId );        
-		
+        
+        CALL CreateCheckList(_taskId, 'basic', NULL, _creatorId, _checkListId );
+        
 		CALL GetTask(_taskId);
         
     COMMIT;        
@@ -1274,6 +1319,7 @@ BEGIN
             /*tm.isPinned,*/
             'Task' as category,
             t.stateId,
+            chk.id as checkListId,            
             ifnull(t.progress,0) as progress
     FROM task as t
     INNER JOIN person as per on per.id = t.creatorId
@@ -1281,6 +1327,7 @@ BEGIN
     LEFT JOIN project as p on p.id = t.projectId
     /*LEFT JOIN projectTeam as pte on pte.projectId = p.id
     LEFT JOIN team as te on te.id = pte.teamId*/
+    LEFT JOIN checkList as chk on chk.taskId = t.id
     WHERE t.id = _taskId;
     /*ORDER BY tm.isPinned desc;*/
 
@@ -1495,7 +1542,7 @@ BEGIN
             t.description,
             formatDate(t.startDate) as startDate,
             formatDate(t.dueDate) as dueDate,
-            getJsonMembers(t.creatorId,1) as creator,
+            getJsonMembers(t.id,1) as creator,
             p.id as projectId,
             p.name as projectName,
             p.abbr as projectabbr,
@@ -1503,7 +1550,7 @@ BEGIN
             te.name as teamName,
             te.abbr as teamAbbr,*/
             getJsonMembers(t.id,3) as collaborators,
-            getJsonMembers(t.id,2) as leader,
+            ifnull(getJsonMembers(t.id,2), getJsonMembers(t.id,1)) as leader, /* if leader is null bring creator instead*/
             per.theme,
             tm.isPinned,
             'Task' as category,
@@ -1511,6 +1558,7 @@ BEGIN
             ifnull(t.progress,0) as progress,
             t.priorityId,
             pr.description as priority,
+            chk.id as checkListId,
             taskNotif, 
             chatNotif, 
             checkNotif,
@@ -1523,6 +1571,7 @@ BEGIN
     LEFT JOIN team as te on te.id = pte.teamId*/
     LEFT JOIN vwTaskNotifications as tn on tn.taskId = t.id AND tn.personId = tm.personId
     LEFT JOIN priority as pr on pr.id = t.priorityId
+    LEFT JOIN checkList as chk on chk.taskId = t.id
     WHERE tm.personId = _personId AND t.projectId = ifnull(_projectId, t.projectId)
     ORDER BY tm.isPinned desc;
 
@@ -1582,13 +1631,13 @@ END$$
 /*---------Task Checklist----------*/
 DELIMITER $$
 DROP PROCEDURE IF EXISTS `CreateCheckList`$$
-CREATE PROCEDURE `CreateCheckList` ( IN _taskId int, IN _title varchar(255), _dueDate date, _personId int )
+CREATE PROCEDURE `CreateCheckList` ( IN _taskId int, IN _title varchar(255), _dueDate date, _personId int, OUT _checkListId int )
 BEGIN
 
 	INSERT INTO checkList ( taskId, title, creationDate, dueDate, personId )
     VALUES ( _taskId, _title, NOW(), _dueDate, _personId );
 
-	SELECT LAST_INSERT_ID() as id;
+	SELECT LAST_INSERT_ID() INTO _checkListId;
 
 END$$ 
 
@@ -1641,6 +1690,8 @@ BEGIN
 
 	INSERT INTO checkListItem (checkListId, item, dueDate, creatorId, isChecked, sortNumber, lastChanged)
     VALUES(_checkListId, _item, _dueDate, _creatorId, false, _sortNumber, NOW() );
+    
+    CALL GetCheckListItem(_checkListId);
 
 END$$
 
@@ -1675,7 +1726,7 @@ BEGIN
             sortNumber
     FROM checkListItem
     WHERE checkListId = _checkListId
-    ORDER BY sortNumber;
+    ORDER BY isChecked, sortNumber;
 
 END$$ 
 

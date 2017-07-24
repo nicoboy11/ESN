@@ -37,6 +37,23 @@ class TaskForm extends Component {
         }
     }
 
+    componentWillReceiveProps(newProps) {
+        let elements = this.state.elements;
+
+        for (let i = 0; i < elements.length; i++) {
+            if (elements[i].taskId === newProps.updated.taskId) {
+                elements[i].name = newProps.updated.name;
+                elements[i].dueDate = newProps.updated.dueDate;
+                elements[i].progress = newProps.updated.progress;
+                elements[i].priorityId = newProps.updated.priorityId;
+            }
+        }
+
+        this.setState({
+            elements
+        }); 
+    }
+
     onError(error) {
         Alert.alert('Error', error.message);
         if (this.state.status === 403) {
@@ -137,6 +154,7 @@ class TaskForm extends Component {
                         value={this.state.newTaskText}
                         onChangeText={(newTaskText) => this.setState({ newTaskText })}
                         onSubmitEditing={this.createTask.bind(this)}
+                        placeholder='Type a new task'
                     />                    
                     {this.renderList()}
                 </ScrollView>                

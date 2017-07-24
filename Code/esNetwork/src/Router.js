@@ -14,6 +14,8 @@ import {
     ProjectForm,
     EditProjectForm,
     EditProfileForm,
+    EditTaskForm,
+    NewHierarchyForm,
     Dummy
 } from './pages';
 import { Config, Helper } from './settings';
@@ -80,14 +82,19 @@ class RouterComponent extends Component {
                     />                 
                 </Scene>   
                 <Scene initial key='tabbar' tabs={true} tabBarStyle={styles.tabBarStyle} >
-                    <Scene
-                        key='hierarchy' 
-                        component={HierarchyForm} 
+                    <Scene 
+                        key='hierarchy'
                         hideNavBar
                         title='profile'
                         icon={TabIcon}
                         style={{ paddingBottom: 46 }}
-                    />         
+                    >    
+                        <Scene
+                            key='hierarchyForm' 
+                            component={HierarchyForm} 
+                        />
+                        <Scene key='newHierarchyForm' component={NewHierarchyForm} />
+                    </Scene>         
                     <Scene
                         initial
                         key='projects'
@@ -96,9 +103,10 @@ class RouterComponent extends Component {
                         hideNavBar
                     >          
                         <Scene key='projectForm' component={ProjectForm} style={{ paddingBottom: 46 }} />    
-                        <Scene key='editProjectForm' component={EditProjectForm} />                         
+                        <Scene key='editProjectForm' component={EditProjectForm} hideTabBar />                         
                         <Scene key='taskForm' component={TaskForm} hideNavBar hideTabBar />                  
                         <Scene key='taskMessage' component={TaskMessageForm} hideNavBar hideTabBar />  
+                        <Scene key='editTaskForm' component={EditTaskForm} hideNavBar hideTabBar />  
                     </Scene>                     
                     <Scene 
                         key='mainForm' 
@@ -107,15 +115,23 @@ class RouterComponent extends Component {
                         title='feed'
                         icon={TabIcon}
                         style={{ paddingBottom: 46 }}
-                    />         
-                    <Scene 
-                        key='chatForm' 
-                        component={ProjectForm} 
-                        hideNavBar
-                        title='chat'
+                    />       
+                    <Scene
+                        key='myprofile'
                         icon={TabIcon}
-                        style={{ paddingBottom: 46 }}
-                    />                                  
+                        title='profile'
+                        hideNavBar
+                    >
+                        <Scene 
+                            key='myProfileForm' 
+                            component={ProfileForm} 
+                            hideNavBar
+                            title='profile'
+                            icon={TabIcon}
+                            style={{ paddingBottom: 46 }}
+                        />                      
+                        <Scene key='myEditProfileForm' component={EditProfileForm} hideTabBar />     
+                    </Scene>                                 
                 </Scene>    
                 <Scene key='dummy' component={Dummy} hideNavBar />
                 <Scene
@@ -123,7 +139,7 @@ class RouterComponent extends Component {
                     hideNavBar
                 >
                     <Scene key='profileview' initial component={ProfileForm} hideNavBar />
-                    <Scene key='editProfileForm' component={EditProfileForm} />    
+                    <Scene key='editProfileForm' component={EditProfileForm} hideTabBar />    
                 </Scene>
                 <Scene key='profileImage' component={ProfileImage} hideNavBar />                              
                 {/*<Scene key="statusModal" component={PostCardMenu} direction='vertical' 

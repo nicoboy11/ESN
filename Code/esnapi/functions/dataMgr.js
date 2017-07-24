@@ -128,16 +128,26 @@ var self = module.exports = {
             .on('end',function(){
                 if(fileName === ''){
                     fileName = undefined;
+                    callback(fileName, params);
                 } else {//If file exists - create a thumb copy
                     if(type=='avatar') {
-                        self.resize(fileName, 'small');
-                        self.resize(fileName, 'big');
+                        console.log('started small thumb');
+                        self.resize(fileName, 'small', function(success) {
+                            console.log('finished small thumb');
+                        });
+                        console.log('started big thumb');
+                        self.resize(fileName, 'big', function(success){
+                            console.log('finished big thumb');
+                            callback(fileName, params);
+                        });
                     } else {
-                        self.dequalify(fileName);
+                        self.dequalify(fileName,function(success) {
+                            callback(fileName, params);
+                        });
                     }
                 }
 
-                callback(fileName, params);
+                
             })
             .on('error', function(err){
                 console.log('upload Error:' + err.message);
@@ -145,7 +155,7 @@ var self = module.exports = {
             })
         },
 
-        resize: function (fileName, size) {
+        resize: function (fileName, size, callback) {
             require('lwip').open('./uploads/' + fileName, function(err, image) {
                 if(err) {
                     console.log('Could not generate thumb');
@@ -168,16 +178,16 @@ var self = module.exports = {
                         .cover(maxWidth,maxWidth)
                         .writeFile('./uploads/thumbs/' + size + '/' + fileName, function(err) {
                             if(err) {
-                                console.log('Could not save thumb');
+                                callback(false);
                             } else {
-                                console.log('Thumb saved');
+                                callback(true);
                             }
                         });                             
                 }
             });           
         },
 
-       dequalify: function (fileName) {
+       dequalify: function (fileName, callback) {
            console.log('opening: ' + fileName);
             require('lwip').open('./uploads/' + fileName, function(err, image) {
                 if(err) {
@@ -188,9 +198,9 @@ var self = module.exports = {
                         .blur(5)
                         .writeFile('./uploads/thumbs/blured/' + fileName, function(err) {
                             if(err) {
-                                console.log('Could not save blur');
+                                callback(false);
                             } else {
-                                console.log('Blur saved');
+                                callback(true);
                             }
                         });                             
                 }

@@ -99,7 +99,8 @@ class Form extends Component {
             rightIcon,
             leftColor,
             rightColor,
-            title
+            title,
+            formBackground
         } = this.props;
 
         const isVisible = this.props.isVisible || true;
@@ -111,7 +112,7 @@ class Form extends Component {
 
         return (
             <View 
-                style={wrapperStyle} 
+                style={[wrapperStyle, formBackground]} 
                 onLayout={() => this.setState({ 
                     screen: Dimensions.get('screen') 
                 })}

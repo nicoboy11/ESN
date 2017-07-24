@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { View, Image, Alert, Keyboard } from 'react-native';
+import { View, Image, Alert, Keyboard, Platform } from 'react-native';
 import { Actions } from 'react-native-router-flux';
 import { Input, LinkButton, Button, KeyboardSpacer } from '../components';
 import { Config, Database, Helper } from '../settings';
@@ -27,7 +27,7 @@ class LoginForm extends Component {
 
         if (status > 399 || status === undefined) {
             if (status === 422) {
-                Alert.alert(texts.loginFailed, 'The server is not available.');                
+                Alert.alert(texts.loginFailed, responseData.message);                
             } else {
                 Alert.alert(texts.loginFailed, responseData.message);
             }
@@ -107,13 +107,16 @@ class LoginForm extends Component {
                                 type='email' 
                                 onChangeText={(text) => this.setState({ email: text })}
                                 value={this.state.email}
+                                onSubmitEditing={() => this.inptPassword.focus()}
                             />
                             <Input 
+                                ref={(ref) => { this.inptPassword = ref; }}
                                 label={texts.password} 
                                 returnKeyType='next' 
                                 type='password' 
                                 onChangeText={(text) => this.setState({ password: text })}
                                 value={this.state.password}
+                                onSubmitEditing={this.onLoginPress.bind(this)}
                             />
                             <Button 
                                 title={texts.login} 
@@ -129,7 +132,8 @@ class LoginForm extends Component {
                                 onPress={() => Actions.register()} 
                             />
                         </View>   
-                        <KeyboardSpacer />                           
+                        {(Platform.OS === 'ios') ? <KeyboardSpacer /> : <View />}
+                                                   
                     </View>            
             </View>
         );

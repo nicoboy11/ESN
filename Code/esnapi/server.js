@@ -148,7 +148,7 @@ var apiRoutes = express.Router();
      * 
      */
         apiRoutes.get('/person/:id',function(req,res){
-            data.db("CALL GetPerson(" + req.params.id + ")",conn,function(error,result){
+            data.db("CALL GetPerson(" + req.params.id + ");",conn,function(error,result){
                 if(data.handle(error,res,true)){
                     data.handleResponse(result,res,"");
                 }
@@ -159,12 +159,23 @@ var apiRoutes = express.Router();
      *      Get all the people in your network meaning all your employees
      */
         apiRoutes.get('/network/:id',function(req,res){
-            data.db("CALL GetNetwork(" + req.params.id + ")",conn,function(error,result){
+            data.db("CALL GetNetwork(" + req.params.id + ");",conn,function(error,result){
                 if(data.handle(error,res,true)){
                     data.handleResponse(result,res,"");
                 }
             });
         });
+
+    /** GET - PEOPLE
+     *      Get all the people in your company
+     */
+        apiRoutes.get('/network',function(req,res){
+            data.db("CALL GetPeople();",conn,function(error,result){
+                if(data.handle(error,res,true)){
+                    data.handleResponse(result,res,"");
+                }
+            });
+        });        
 
     /** PUT - PERSON BY ID
      *      Edit any person data ID in parameter and the rest in BODY
@@ -608,6 +619,24 @@ var apiRoutes = express.Router();
                 });
             });
         });
+
+    /** POST - CHECKLIST ITEMS
+     *      Edit checklist item
+     */
+        apiRoutes.post('/checkListItem',function(req,res){
+            data.reqUpload(req,'','checkListId', function(fileName, params){
+                data.db("CALL CreateCheckListItem(" + helper.fpInt(params.checkListId) + "," + helper.fpVarchar(params.item) + "," + helper.fpInt(params.creatorId) + ");",
+                conn, function(error, result){
+                    if(data.handle(error,res,true)){
+                        var message = JSON.stringify(result[0])
+                        if(message === '' || message === undefined){
+                            message = '[{"message": "ok"}]'
+                        }
+                        res.status(200).end( message );
+                    }
+                });
+            });
+        });        
 
     /** PUT - TASK LEADER
      * 

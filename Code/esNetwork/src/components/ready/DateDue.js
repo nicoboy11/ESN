@@ -24,6 +24,10 @@ class DateDue extends Component {
         this.loadPicker(newProps);
     }
 
+    finishedUpdating() {
+        this.setState({ updating: false });
+    }
+
     loadPicker(props) {
         if (props.date !== undefined && props.date !== null) {
             this.setState({ date: props.date, newDate: props.date, updating: (props.updating ? props.updating : false) });
@@ -46,15 +50,15 @@ class DateDue extends Component {
             const { action, year, month, day } = await DatePickerAndroid.open({
                 date: (this.state.date === null || this.state.date === undefined) ? 
                         new Date() :
-                        Helper.toDate(this.state.date)
+                        this.state.date
             });
 
             if (action !== DatePickerAndroid.dismissedAction) {
+                const date = new Date(year, month, day);
                 const dateISO = Helper.getDateISO(year, month, day);
-                this.setState({ date: dateISO, updating: true });
-                if (this.props.selectedDate !== undefined) {
-                    this.props.selectedDate(dateISO);
-                }
+                this.setState({ date });
+                //Back to the parent component
+                this.props.onChangeDate(dateISO);
             }
         } catch ({ code, message }) {
             console.log('Could not load date picker');

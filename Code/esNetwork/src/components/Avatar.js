@@ -5,7 +5,7 @@ import { Config } from '../settings';
 
 const { colors, network } = Config;
 
-const Avatar = ({ avatar, color, name, size, nameColor }) => {
+const Avatar = ({ avatar, color, name, size, nameColor, flexDirection = 'row', textStyle }) => {
 
     if (avatar === undefined) {
         return <View />;
@@ -16,6 +16,7 @@ const Avatar = ({ avatar, color, name, size, nameColor }) => {
         small: 20,
         medium: 30,
         big: 40,
+        veryBig: 60,
         huge: 120
     };
 
@@ -31,7 +32,7 @@ const Avatar = ({ avatar, color, name, size, nameColor }) => {
             backgroundColor: 'transparent'
         },
         containerStyle: {
-            flexDirection: 'row',
+            flexDirection,
             alignItems: 'center'
         },
         nameStyle: {
@@ -53,7 +54,7 @@ const Avatar = ({ avatar, color, name, size, nameColor }) => {
     return (
         <View style={styles.containerStyle}>
             {avt}
-            <Text style={styles.nameStyle} >{name}</Text>
+            <Label style={[styles.nameStyle, textStyle]} >{name}</Label>
         </View>
     );
 };

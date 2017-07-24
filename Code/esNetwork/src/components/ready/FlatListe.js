@@ -39,7 +39,7 @@ class FlatListe extends Component {
             case 'checkList':
                 return (
                     <CheckListItem 
-                        processing={this.props.chkListProcessing} 
+                        updating={this.props.chkListProcessing} 
                         item={item.item} 
                         isChecked={item.isChecked} 
                         onPress={this.props.onPress} 
@@ -77,7 +77,11 @@ class FlatListe extends Component {
                         }
                     >
                         <TouchableOpacity
-                            onPress={() => this.props.onPress(item.person, item.personId)}
+                            onPress={() => {
+                                if (this.props.onPress) {
+                                    this.props.onPress(item.person, item.personId);
+                                }
+                            }}
                         >  
                             <Avatar 
                                 avatar={item.avatar}

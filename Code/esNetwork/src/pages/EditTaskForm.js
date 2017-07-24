@@ -1,17 +1,16 @@
 import React, { Component } from 'react';
 import { ScrollView, View, Slider, Modal, Text, StyleSheet, Alert } from 'react-native';
+import { Actions } from 'react-native-router-flux';
 import { 
-    Input, 
-    DatePicker, 
     ESModal, 
     SplitButton, 
-    PersonSelect2, 
     ListItem2, 
     DateDue, 
     Avatar, 
     LinkButton,
     FlatListe,
-    Label
+    Label,
+    Form
 } from '../components';
 import { EditTextForm, SelectPersonForm } from './';
 import { Config, Helper, Database } from '../settings';
@@ -86,13 +85,13 @@ class EditTaskForm extends Component {
     }
 
     onChangeDateStart(date) {
-        this.setState({ newStartDate: Helper.getDateISOfromDate(date) });
-        this.saveTask({ startDate: Helper.getDateISOfromDate(date) });  
+        this.setState({ newStartDate: date });
+        this.saveTask({ startDate: date });  
     }
 
     onChangeDateDue(date) {
-        this.setState({ newDueDate: Helper.getDateISOfromDate(date) });
-        this.saveTask({ dueDate: Helper.getDateISOfromDate(date) });        
+        this.setState({ newDueDate: date });
+        this.saveTask({ dueDate: date });        
     }
 
     onPrioritySelection(priorityId) {
@@ -190,7 +189,6 @@ class EditTaskForm extends Component {
 
             this.startDate.updating = false;
             this.dueDate.updating = false;
-            this.updateParent();
         }
     }    
 
@@ -198,14 +196,16 @@ class EditTaskForm extends Component {
         const newState = {
                 name: this.state.name, 
                 description: this.state.description, 
-                startDate: this.state.newStartDate,
-                dueDate: this.state.newDueDate,
+                startDate: this.state.startDate,
+                dueDate: this.state.dueDate,
                 collaborators: this.state.collaborators,
                 leader: this.state.leader,
                 progress: this.state.progress,
-                priorityId: this.state.priorityId
+                priorityId: this.state.priorityId,
+                taskId: this.state.taskId
         };
-        this.props.onUpdateChild(newState);
+
+        Actions.pop({ refresh: { taskData: newState } });
     }
 
     saveTask(data) {
@@ -248,161 +248,173 @@ class EditTaskForm extends Component {
             });      
     }
 
+    backToMain() {
+        this.updateParent();
+    }
+
     render() {
         return (
-            <ScrollView>
-                {/* Name editor */}
-                    <ListItem2 
-                        title='NAME' 
-                        editable 
-                        onPress={() => this.setState({ isNameEditorVisible: true })}
-                    >
-                        <Label style={{ color: colors.darkGray }} >{this.state.name}</Label>
-                    </ListItem2>
-                    <Modal
-                        animationType='slide'
-                        onRequestClose={() => console.log('closing')}
-                        visible={this.state.isNameEditorVisible}
-                    >
-                        <EditTextForm 
-                            title='Name of task'
-                            text={this.state.name}
-                            onClose={() => this.setState({ isNameEditorVisible: false })}
-                            onSave={this.onSaveName.bind(this)}
-                        />
-                    </Modal>   
-                {/* Description editor */}                        
-                    <ListItem2 
-                        title='DESCRIPTION' 
-                        editable
-                        onPress={() => this.setState({ isDescriptionEditorVisible: true })}
-                    >
-                        <Label style={{ color: colors.darkGray }} >{this.state.description}</Label>
-                    </ListItem2>  
-                    <Modal
-                        animationType='slide'
-                        onRequestClose={() => console.log('closing')}
-                        visible={this.state.isDescriptionEditorVisible}
-                    >
-                        <EditTextForm 
-                            title='Description of task'
-                            text={this.state.description}
-                            onClose={() => this.setState({ isDescriptionEditorVisible: false })}
-                            onSave={this.onSaveDescription.bind(this)}
-                        />
-                    </Modal>    
-                {/* Start Date */}                       
-                    <ListItem2 title='START DATE:'>
-                        <DateDue 
-                            ref={(startDate) => { this.startDate = startDate; }}
-                            date={Helper.toDate(this.state.startDate)} 
-                            onChangeDate={this.onChangeDateStart.bind(this)}
-                        />
-                    </ListItem2>    
-                {/* Due Date */}
-                    <ListItem2 title='DUE DATE:'>
-                        <DateDue 
-                            ref={(dueDate) => { this.dueDate = dueDate; }}
-                            date={Helper.toDate(this.state.dueDate)} 
-                            onChangeDate={this.onChangeDateDue.bind(this)}
-                        />
-                    </ListItem2>
-                {/* Progress */}    
-                    <ListItem2 title='PROGRESS:' style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-                        <View style={{ flex: 4 }}>  
-                            <Slider 
-                                minimumValue={0}
-                                maximumValue={100}
-                                step={1}
-                                thumbTintColor={colors.main}
-                                minimumTrackTintColor={colors.main}
-                                value={this.state.progress}
-                                onValueChange={(value) => this.setState({ progress: value })}
-                                onSlidingComplete={this.onSaveProgress.bind(this)}
-                                disabled={this.state.processingProgress}
+            <Form
+                title={this.state.name}
+                leftIcon='back'
+                onPressLeft={this.backToMain.bind(this)}
+            >
+                <ScrollView>
+                    {/* Name editor */}
+                        <ListItem2 
+                            title='NAME' 
+                            editable 
+                            onPress={() => this.setState({ isNameEditorVisible: true })}
+                        >
+                            <Label style={{ color: colors.darkGray }} >{this.state.name}</Label>
+                        </ListItem2>
+                        <Modal
+                            animationType='slide'
+                            onRequestClose={() => console.log('closing')}
+                            visible={this.state.isNameEditorVisible}
+                        >
+                            <EditTextForm 
+                                title='Name of task'
+                                text={this.state.name}
+                                onClose={() => this.setState({ isNameEditorVisible: false })}
+                                onSave={this.onSaveName.bind(this)}
+                                multiline
                             />
-                        </View>
-                        <View style={{ flex: 1 }}>
-                            <Label>{this.state.progress}%</Label>
-                        </View>
-                    </ListItem2>    
-                {/* Priority */}    
-                    <ListItem2 title='PRIORITY:'>
-                        <SplitButton 
-                            onSelection={this.onPrioritySelection.bind(this)}
-                            elements={this.state.priority}
-                            selectedItem={this.state.priorityId}
-                        />
-                    </ListItem2>
-                {/* Leader */}         
-                    <ListItem2 
-                        title='LEADER:' 
-                        editable
-                        onPress={() => this.setState({ isLeaderEditorVisible: true })}
-                    >
-                        {<Avatar 
-                            avatar={this.state.leader.avatar}
-                            color={this.state.leader.theme}
-                            name={this.state.leader.person}
-                            size='medium'
-                        />}
-                    </ListItem2>         
-                    <Modal
-                        animationType='slide'
-                        onRequestClose={() => console.log('closing')}
-                        visible={this.state.isLeaderEditorVisible}                
-                    >
-                        <SelectPersonForm 
-                            title='Select a leader' 
-                            onSelection={this.onLeaderSelected.bind(this)}
-                            onClose={() => this.setState({ isLeaderEditorVisible: false })}
-                        />
-                    </Modal>
-                {/* Collaborators */}    
-                    <ListItem2 
-                        title='COLLABORATORS:' 
-                        editable
-                        onPress={() => this.setState({ isCollaboratorEditorVisible: true })}
-                    >
-                        <FlatListe 
-                            keyEx='personId'
-                            data={this.state.collaborators}
-                            itemType='avatar'
-                            horizontal
-                            onPress={this.onPress2Delete.bind(this)}
-                        />
-                    </ListItem2>
-                    <Modal
-                        animationType='slide'
-                        onRequestClose={() => console.log('closing')}
-                        visible={this.state.isCollaboratorEditorVisible}                
-                    >
-                        <SelectPersonForm 
-                            title='Select a collaborator' 
-                            onSelection={this.onCollaboratorSelected.bind(this)}
-                            onClose={() => this.setState({ isCollaboratorEditorVisible: false })}
-                        />
-                    </Modal>                
-                <ListItem2 title='PROJECT:'>
-                    {
-                    <View>
-                        <LinkButton 
-                            title={this.state.project.text}
-                            onPress={() => this.setState({ isProjectModalVisible: true })}
-                            style={{ opacity: (this.state.processingProject) ? 0.5 : 1 }}
-                        />
-                        <ESModal 
-                            title={texts.projectSelect} 
-                            visible={this.state.isProjectModalVisible} 
-                            onSelection={this.projectSelected.bind(this)}
-                            elements={[]}
-                            table='projects'
-                            selectedItem={this.state.projectId}
-                        />                        
-                    </View>    
-                    }
-                </ListItem2>                                                                                                
-            </ScrollView>
+                        </Modal>   
+                    {/* Description editor */}                        
+                        <ListItem2 
+                            title='DESCRIPTION' 
+                            editable
+                            onPress={() => this.setState({ isDescriptionEditorVisible: true })}
+                        >
+                            <Label style={{ color: colors.darkGray }} >{this.state.description}</Label>
+                        </ListItem2>  
+                        <Modal
+                            animationType='slide'
+                            onRequestClose={() => console.log('closing')}
+                            visible={this.state.isDescriptionEditorVisible}
+                        >
+                            <EditTextForm 
+                                title='Description of task'
+                                text={this.state.description}
+                                onClose={() => this.setState({ isDescriptionEditorVisible: false })}
+                                onSave={this.onSaveDescription.bind(this)}
+                                multiline
+                            />
+                        </Modal>    
+                    {/* Start Date */}                       
+                        <ListItem2 title='START DATE:'>
+                            <DateDue 
+                                ref={(startDate) => { this.startDate = startDate; }}
+                                date={Helper.toDate(this.state.startDate)} 
+                                onChangeDate={this.onChangeDateStart.bind(this)}
+                            />
+                        </ListItem2>    
+                    {/* Due Date */}
+                        <ListItem2 title='DUE DATE:'>
+                            <DateDue 
+                                ref={(dueDate) => { this.dueDate = dueDate; }}
+                                date={Helper.toDate(this.state.dueDate)} 
+                                onChangeDate={this.onChangeDateDue.bind(this)}
+                            />
+                        </ListItem2>
+                    {/* Progress */}    
+                        <ListItem2 title='PROGRESS:' style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+                            <View style={{ flex: 4 }}>  
+                                <Slider 
+                                    minimumValue={0}
+                                    maximumValue={100}
+                                    step={1}
+                                    thumbTintColor={colors.main}
+                                    minimumTrackTintColor={colors.main}
+                                    value={this.state.progress}
+                                    onValueChange={(value) => this.setState({ progress: value })}
+                                    onSlidingComplete={this.onSaveProgress.bind(this)}
+                                    disabled={this.state.processingProgress}
+                                />
+                            </View>
+                            <View style={{ flex: 1 }}>
+                                <Label>{this.state.progress}%</Label>
+                            </View>
+                        </ListItem2>    
+                    {/* Priority */}    
+                        <ListItem2 title='PRIORITY:'>
+                            <SplitButton 
+                                onSelection={this.onPrioritySelection.bind(this)}
+                                elements={this.state.priority}
+                                selectedItem={this.state.priorityId}
+                            />
+                        </ListItem2>
+                    {/* Leader */}         
+                        <ListItem2 
+                            title='LEADER:' 
+                            editable
+                            onPress={() => this.setState({ isLeaderEditorVisible: true })}
+                        >
+                            {<Avatar 
+                                avatar={this.state.leader.avatar}
+                                color={this.state.leader.theme}
+                                name={this.state.leader.person}
+                                size='medium'
+                            />}
+                        </ListItem2>         
+                        <Modal
+                            animationType='slide'
+                            onRequestClose={() => console.log('closing')}
+                            visible={this.state.isLeaderEditorVisible}                
+                        >
+                            <SelectPersonForm 
+                                title='Select a leader' 
+                                onSelection={this.onLeaderSelected.bind(this)}
+                                onClose={() => this.setState({ isLeaderEditorVisible: false })}
+                            />
+                        </Modal>
+                    {/* Collaborators */}    
+                        <ListItem2 
+                            title='COLLABORATORS:' 
+                            editable
+                            onPress={() => this.setState({ isCollaboratorEditorVisible: true })}
+                        >
+                            <FlatListe 
+                                keyEx='personId'
+                                data={this.state.collaborators}
+                                itemType='avatar'
+                                horizontal
+                                onPress={this.onPress2Delete.bind(this)}
+                            />
+                        </ListItem2>
+                        <Modal
+                            animationType='slide'
+                            onRequestClose={() => console.log('closing')}
+                            visible={this.state.isCollaboratorEditorVisible}                
+                        >
+                            <SelectPersonForm 
+                                title='Select a collaborator' 
+                                onSelection={this.onCollaboratorSelected.bind(this)}
+                                onClose={() => this.setState({ isCollaboratorEditorVisible: false })}
+                            />
+                        </Modal>                
+                    <ListItem2 title='PROJECT:'>
+                        {
+                        <View>
+                            <LinkButton 
+                                title={this.state.project.text}
+                                onPress={() => this.setState({ isProjectModalVisible: true })}
+                                style={{ opacity: (this.state.processingProject) ? 0.5 : 1 }}
+                            />
+                            <ESModal 
+                                title={texts.projectSelect} 
+                                visible={this.state.isProjectModalVisible} 
+                                onSelection={this.projectSelected.bind(this)}
+                                elements={[]}
+                                table='projects'
+                                selectedItem={this.state.projectId}
+                            />                        
+                        </View>    
+                        }
+                    </ListItem2>                                                                                                
+                </ScrollView>
+            </Form>
         );
     }
 }

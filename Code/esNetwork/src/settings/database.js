@@ -276,8 +276,13 @@ import { Config } from './';
                     headers: Database.getHeader(headerType),
                     body: data
                 })
-                .then((response) => response.json())
-                .then((responseJson) => callback(false,responseJson) )
+                .then((response) => {
+                    const status = response.status;
+                    let jsonResponse = response.json();
+                    jsonResponse.status = status;
+                    return jsonResponse;
+                })
+                .then((responseJson) => callback(false,responseJson))
                 .catch((error) => callback(true,error));                  
             }
 

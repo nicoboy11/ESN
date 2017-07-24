@@ -89,6 +89,10 @@ class Input extends Component {
         return newText;
     }
 
+    isValidInput() {
+        return !this.state.isError;
+    }
+
     renderLabel() {
         if (this.state.value !== '' || !this.state.editable) {
             return this.props.label;
