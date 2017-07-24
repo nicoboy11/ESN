@@ -112,7 +112,10 @@ const lang = {
                         taskName: 'Name',
                         taskDesc: 'Descripcion',
                         taskStart: 'Start date',
-                        taskDue: 'Due date'
+                        taskDue: 'Due date',
+                        //TimeSheet
+                        addCheck: 'Check in/out',
+                        timesheet: 'Timesheet'
                 },
                 es: {   //Login page
                         email: 'Email',
@@ -189,7 +192,10 @@ const lang = {
                         taskName: 'Nombre',
                         taskDesc: 'Descripción',
                         taskStart: 'Fecha de Inicio',
-                        taskDue: 'Fecha límite'
+                        taskDue: 'Fecha límite',
+                        //TimeSheet
+                        addCheck: 'Marcar entrada/salida',
+                        timesheet: 'Asistencia'                        
                 }
 
              };

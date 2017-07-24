@@ -128,7 +128,7 @@ class TaskForm extends Component {
                 keyEx='taskId'
                 itemType='task'
                 data={this.state.elements}
-                initialNumToRender={3}
+                initialNumToRender={4}
                 onPress={(props) => { this.openComments(props); }}
                 updateFromChildren={(update) => this.updateFromChildren(update)}
             />                       

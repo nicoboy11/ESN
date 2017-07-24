@@ -720,6 +720,38 @@ var apiRoutes = express.Router();
                 }
             }); 
         });
+/** =================== Check in/out ====================================
+ * 
+ */
+    /** POST - LocationCheck
+     * 
+     */
+        apiRoutes.post('/locationCheck',function(req,res){
+            data.reqUpload(req,'','', function(fileName, params){
+                data.db("CALL CreateLocationCheck(" + helper.fpInt(params.personId) + "," + helper.fpDate(params.checkDate) + "," + helper.fpBool(params.isCheckin) + 
+                                "," + helper.fpInt(params.companyId) + "," + helper.fpInt(params.officeId) + ");",
+                conn, function(error, result){
+                    if(data.handle(error,res,true)){
+                        var message = JSON.stringify(result[0])
+                        if(message === '' || message === undefined){
+                            message = '[{"message": "ok"}]'
+                        }
+                        res.status(200).end( message );
+                    }
+                });
+            });
+        });   
+
+    /** GET - LocationCheck
+     * 
+     */
+        apiRoutes.get('/locationCheck/:personId',function(req,res){
+            data.db("CALL GetLocationCheck(" + req.params.personId + ");",conn,function(error,result){
+                if(data.handle(error,res,true)){
+                    data.handleResponse(result,res,"");
+                }
+            });
+        });
 
 
 

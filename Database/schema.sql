@@ -361,6 +361,63 @@ CREATE TABLE checkListItem(
 );
 
 
+/* checkins + checkouts*/
+DROP TABLE IF EXISTS company;
+CREATE TABLE company(
+	id int PRIMARY KEY AUTO_INCREMENT,
+    name varchar(255) NOT NULL,
+    logo varchar(255) NULL,
+    domain varchar(255) NULL,
+    address1 varchar(255) NULL,
+    address2 varchar(255) NULL,
+    postCode varchar(255) NULL,
+    cityId int,
+    northLatitude varchar(255),
+    westLongitude varchar(255),
+    southLatitude varchar(255),
+    eastLongitude varchar(255),
+    CONSTRAINT FOREIGN KEY (cityId) REFERENCES city(id)    
+);
+
+DROP TABLE IF EXISTS office;
+CREATE TABLE office(
+	companyId int,
+    officeId int,
+    name varchar(255) NOT NULL,
+    address1 varchar(255) NULL,
+    address2 varchar(255) NULL,
+    postCode varchar(255) NULL,
+    cityId int,
+    northLatitude varchar(255),
+    westLongitude varchar(255),
+    southLatitude varchar(255),
+    eastLongitude varchar(255),
+    CONSTRAINT FOREIGN KEY (companyId) REFERENCES company(id),    
+    CONSTRAINT FOREIGN KEY (cityId) REFERENCES city(id),  
+	CONSTRAINT UNIQUE KEY (companyId,officeId) 
+);
+
+DROP TABLE IF EXISTS personOffice;
+CREATE TABLE personOffice(
+	personId int,
+    companyId int,
+    officeId int,
+    startDate datetime,
+    endDate datetime,
+    CONSTRAINT FOREIGN KEY (personId) REFERENCES person(id)
+);
+
+DROP TABLE IF EXISTS locationCheck;
+CREATE TABLE locationCheck(
+	personId int,
+    checkDate datetime,
+    isCheckIn bool,
+    companyId int, 
+    officeId int,
+    CONSTRAINT FOREIGN KEY (personId) REFERENCES person(id),
+    CONSTRAINT FOREIGN KEY (companyId) REFERENCES company(id)
+);
+
 
 
 

@@ -37,6 +37,11 @@ CALL CreateAttachmentType('Video');
 CALL CreateMessageType('Message');
 CALL CreateMessageType('Log');
 
+CALL CreateCompany('TestCorp', NULL, 'testcorp.co.uk', '13 Endcliffe Avenue', 'Flat 2', 'S103EA', 1, '53.372016', '-1.504118', '53.371922', '-1.503759');
+CALL EditCompany(1, 'TestCorp2', NULL, 'testcrop.com', '13 Endcliffe Avenue', 'Flat 2', 'S103EA', 1, '53.372016', '-1.504118', '53.371922', '-1.503759');
+
+CALL CreateOffice(1, 'Headquarters2', '13 Endcliffe Avenue', 'Flat 2', 'S103EA', 1, '53.372016', '-1.504118', '53.371922', '-1.503759');
+CALL EditOffice(1, 1, 'Headquarters', '13 Endcliffe Avenue', 'Flat 2', 'S103EA', 1, '53.372016', '-1.504118', '53.371922', '-1.503759');
 
 
 
@@ -74,6 +79,14 @@ CALL CreatePerson('Erik','Davis','','1985-10-29','erick.davis@testcorp.com','555
 CALL CreatePerson('John','Mark','','1985-10-29','john.mark@testcorp.com','555-5555','','1210','password',1,10,'','token123',3);
 CALL CreatePerson('Joshua','Charles','','1985-10-29','joshua.charles@testcorp.com','555-5555','','1210','password',1,NULL,'','token123',3);
 /*---------------------HASTA AQUI ALCANZA---------------------------------*/
+
+CALL CreatePersonOffice(1, 1, 1, NOW(), NULL);
+CALL CreatePersonOffice(2, 1, 1, NOW(), NULL);
+CALL CreatePersonOffice(3, 1, 1, NOW(), NULL);
+CALL EditPersonOffice(1, 1, 1, NOW(), '2017-12-31');
+
+CALL CreateLocationCheck(1, '2017-07-24 11:54:26', true, 1, 1);
+CALL EditLocationCheck(1, '2017-07-24 11:54:26', 1, 1, true);
 
 CALL CreatePost(1,'This is my first post. Welcome!', 1, NULL, NULL, 1, NULL);
 

@@ -260,6 +260,247 @@ BEGIN
     
 END$$
 /*CALL EditMessageType(2,'Log');*/
+/*================COMPANY===========================*/
+DELIMITER $$
+DROP procedure IF EXISTS `CreateCompany`$$
+CREATE PROCEDURE `CreateCompany` (IN _name varchar(255), IN _logo varchar(255), IN _domain varchar(255), IN _address1 varchar(255),
+								  IN _address2 varchar(255), _postCode varchar(255), _cityId int,
+								  IN _northLatitude varchar(255),IN _westLongitude varchar(255),IN _southLatitude varchar(255),IN _eastLongitude varchar(255))
+BEGIN
+
+	INSERT INTO company (name, logo, domain, address1, address2, postCode, cityId, northLatitude, westLongitude, southLatitude, eastLongitude)
+    VALUES(_name, _logo, _domain, _address1, _address2, _postCode, _cityId,  _northLatitude, _westLongitude, _southLatitude, _eastLongitude);
+    
+END$$
+
+DELIMITER $$
+DROP procedure IF EXISTS `GetCompany`$$
+CREATE PROCEDURE `GetCompany` ( IN _id int )
+BEGIN
+
+    SELECT 	name, 
+			logo, 
+            domain,
+            address1, 
+            address2,
+            postCode,
+            cityId,
+            northLatitude, 
+            westLongitude, 
+            southLatitude, 
+            eastLongitude
+    FROM company
+    WHERE id = coalesce(_id,id);
+    
+END$$
+
+/*CALL GetCompany(1);*/
+
+DELIMITER $$
+DROP procedure IF EXISTS `EditCompany`$$
+CREATE PROCEDURE `EditCompany` (IN _companyId int, IN _name varchar(255), IN _logo varchar(255), IN _domain varchar(255), IN _address1 varchar(255),
+								IN _address2 varchar(255), _postCode varchar(255), _cityId int,
+								IN _northLatitude varchar(255),IN _westLongitude varchar(255),IN _southLatitude varchar(255),IN _eastLongitude varchar(255))
+BEGIN
+
+    UPDATE company
+    SET name = coalesce(_name, name), 
+		logo = coalesce(_logo, logo), 
+        domain = coalesce(_domain, domain),
+        address1 = coalesce(_address1, address1), 
+        address2 = coalesce(_address2, address2), 
+        postCode = coalesce(_postCode, postCode), 
+        cityId = coalesce(_cityId, cityId), 
+        northLatitude = coalesce(_northLatitude, northLatitude), 
+        westLongitude = coalesce(_westLongitude, westLongitude), 
+        southLatitude = coalesce(_southLatitude, southLatitude), 
+        eastLongitude = coalesce(_eastLongitude, eastLongitude)
+    WHERE id = _companyId;
+    
+END$$
+	companyId int,
+    officeId int,
+    name varchar(255) NOT NULL,
+    address1 varchar(255) NULL,
+    address2 varchar(255) NULL,
+    postCode varchar(255) NULL,
+    cityId int,
+    northLatitude varchar(255),
+    westLongitude varchar(255),
+    southLatitude varchar(255),
+    eastLongitude varchar(255),
+/*================OFFICE===========================*/
+DELIMITER $$
+DROP procedure IF EXISTS `CreateOffice`$$
+CREATE PROCEDURE `CreateOffice` (IN _companyId int, IN _name varchar(255), IN _address1 varchar(255), IN _address2 varchar(255), _postCode varchar(255), _cityId int,
+								  IN _northLatitude varchar(255),IN _westLongitude varchar(255),IN _southLatitude varchar(255),IN _eastLongitude varchar(255))
+BEGIN
+	
+    DECLARE _officeId int;
+    
+    SELECT ifnull(max(officeId),0) + 1 INTO _officeId
+    FROM office
+    WHERE companyId = _companyId;
+
+	INSERT INTO office (officeId, companyId, name, address1, address2, postCode, cityId, northLatitude, westLongitude, southLatitude, eastLongitude)
+    VALUES(_officeId, _companyId, _name, _address1, _address2, _postCode, _cityId,  _northLatitude, _westLongitude, _southLatitude, _eastLongitude);
+    
+END$$
+
+
+DELIMITER $$
+DROP procedure IF EXISTS `GetOffice`$$
+CREATE PROCEDURE `GetOffice` ( IN _companyId int, IN _officeId int )
+BEGIN
+
+    SELECT 	companyId,
+			officeId,
+			name, 
+            address1, 
+            address2,
+            postCode,
+            cityId,
+            northLatitude, 
+            westLongitude, 
+            southLatitude, 
+            eastLongitude
+    FROM office
+    WHERE officeId = coalesce(_officeId,officeId) AND companyId = coalesce(_companyId, companyId);
+    
+END$$
+
+/*CALL GetOffice(1,1);*/
+
+DELIMITER $$
+DROP procedure IF EXISTS `EditOffice`$$
+CREATE PROCEDURE `EditOffice` (IN _companyId int, IN _officeId int, IN _name varchar(255), IN _address1 varchar(255),
+								IN _address2 varchar(255), _postCode varchar(255), _cityId int,
+								IN _northLatitude varchar(255),IN _westLongitude varchar(255),IN _southLatitude varchar(255),IN _eastLongitude varchar(255))
+BEGIN
+
+    UPDATE office
+    SET name = coalesce(_name, name), 
+        address1 = coalesce(_address1, address1), 
+        address2 = coalesce(_address2, address2), 
+        postCode = coalesce(_postCode, postCode), 
+        cityId = coalesce(_cityId, cityId), 
+        northLatitude = coalesce(_northLatitude, northLatitude), 
+        westLongitude = coalesce(_westLongitude, westLongitude), 
+        southLatitude = coalesce(_southLatitude, southLatitude), 
+        eastLongitude = coalesce(_eastLongitude, eastLongitude)
+    WHERE companyId = _companyId AND officeId = _officeId;
+    
+END$$
+
+/*================PERSON OFFICE===========================*/
+DELIMITER $$
+DROP procedure IF EXISTS `CreatePersonOffice`$$
+CREATE PROCEDURE `CreatePersonOffice` (IN _personId int, IN _companyId int, IN _officeId int,IN _startDate datetime, _endDate datetime)
+BEGIN
+
+	INSERT INTO personOffice (personId, companyId, officeId, startDate, endDate)
+    VALUES(_personId, _companyId, _officeId, _startDate, _endDate);
+    
+END$$
+
+CALL CreatePersonOffice(1, 1, 1, NOW(), NULL);
+
+DELIMITER $$
+DROP procedure IF EXISTS `GetPersonOffice`$$
+CREATE PROCEDURE `GetPersonOffice` ( IN _personId int )
+BEGIN
+
+    SELECT 	personId, 
+			companyId, 
+            officeId, 
+            startDate, 
+            endDate
+    FROM personOffice
+    WHERE personId = _personId;
+    
+END$$
+
+/*CALL GetPersonOffice(1);*/
+
+DELIMITER $$
+DROP procedure IF EXISTS `EditPersonOffice`$$
+CREATE PROCEDURE `EditPersonOffice` (IN _personId int, IN _companyId int, IN _officeId int,IN _startDate datetime, _endDate datetime)
+BEGIN
+
+    UPDATE personOffice
+    SET startDate = coalesce(_startDate, startDate), 
+        endDate = coalesce(_endDate, endDate)
+    WHERE personId = _personId AND companyId = _companyId AND officeId = _officeId;
+    
+END$$
+
+/*================LOCATION CHECK===========================*/
+DELIMITER $$
+DROP procedure IF EXISTS `CreateLocationCheck`$$
+CREATE PROCEDURE `CreateLocationCheck` (IN _personId int, IN _checkDate datetime, IN _isCheckIn bool, IN _companyId int, IN _officeId int)
+BEGIN
+
+	INSERT INTO locationCheck (personId, checkDate, isCheckIn, companyId, officeId)
+    VALUES(_personId, _checkDate, _isCheckIn, _companyId, _officeId);
+    
+    SELECT 	personId, 
+			checkDate, 
+            isCheckIn, 
+            companyId, 
+            officeId 
+    FROM locationCheck
+    WHERE personId = _personId
+    ORDER BY checkDate DESC LIMIT 1;
+    
+END$$
+
+DELIMITER $$
+DROP procedure IF EXISTS `GetLocationCheck`$$
+CREATE PROCEDURE `GetLocationCheck` ( IN _personId int )
+BEGIN
+
+    SELECT 	personId, 
+			checkDate, 
+            isCheckIn, 
+            companyId, 
+            officeId
+    FROM locationCheck
+    WHERE personId = _personId;
+    
+END$$
+
+/*CALL GetLocationCheck(1);*/
+
+DELIMITER $$
+DROP procedure IF EXISTS `EditLocationCheck`$$
+CREATE PROCEDURE `EditLocationCheck` (IN _personId int, IN _checkDate datetime, IN _companyId int, IN _officeId int,IN _isCheckIn bool)
+BEGIN
+
+    UPDATE locationCheck
+    SET isCheckIn = _isCheckIn
+    WHERE personId = _personId AND companyId = _companyId AND officeId = _officeId AND checkDate = _checkDate;
+    
+END$$
+
+
+
+
+
+DROP TABLE IF EXISTS locationCheck;
+CREATE TABLE locationCheck(
+	personId int,
+    checkDate datetime,
+    isCheckIn bool,
+    latitude varchar(255),
+    longitude varchar(255)
+);
+
+
+
+
+
+
+);
 
 /*===================================================================================================*/
 /*===================================================================================================*/
@@ -1052,7 +1293,7 @@ BEGIN
 					p.logo,
                     getTaskCount(p.id, 1) as activeTasks,
                     getTaskCount(p.id, NULL) as totalTasks,
-                    (getTaskCount(p.id, NULL)  - getTaskCount(p.id, 1))/getTaskCount(p.id, NULL) as progress,
+                    getProjectProgress(p.id) as progress,
                     getProjectMembers(p.id,1) as members
 	FROM project as p
     LEFT JOIN projectMember as pm on pm.projectId = p.id
@@ -1079,7 +1320,7 @@ BEGIN
 					p.logo,
                     getTaskCount(p.id, 1) as activeTasks,
                     getTaskCount(p.id, NULL) as totalTasks,
-                    ifnull((getTaskCount(p.id, NULL)  - getTaskCount(p.id, 1))/getTaskCount(p.id, NULL),0) as progress,
+                    ifnull((getTaskCount(p.id, NULL)  - getTaskCount(p.id, 1))/getTaskCount(p.id, NULL),0) as progress,/*getProjectProgress(p.id) as progress,*/
                     getProjectMembers(p.id,null) as members
 	FROM project as p
     LEFT JOIN projectMember as pm on pm.projectId = p.id

@@ -276,6 +276,19 @@ BEGIN
     
 END$$
 
+DELIMITER $$
+DROP FUNCTION IF EXISTS getProjectProgress$$
+CREATE FUNCTION getProjectProgress(_projectId int) RETURNS text
+BEGIN
+	DECLARE _progress int;
+	SELECT  (SUM( CASE WHEN t.stateId <> 1 THEN 100 ELSE progress END)*100) / (count(*)*100) INTO _progress
+	FROM task as t
+	INNER JOIN project as p on p.id = t.projectId
+	WHERE p.id = _projectId
+	GROUP BY projectId;
+    
+    RETURN _progress;
+END$$
 
 DELIMITER $$
 DROP FUNCTION IF EXISTS getJsonMembers$$
