@@ -1,18 +1,18 @@
 import React, { Component } from 'react';
-import { View, StyleSheet } from 'react-native';
-import { Form, Button } from '../components';
-import { Config, Database } from '../settings';
+import { View, StyleSheet, ScrollView, Alert, ActivityIndicator } from 'react-native';
+import { Form, Button, FlatListe } from '../components';
+import { Config, Database, Helper } from '../settings';
 
 const { texts } = Config;
 const session = Database.realm('Session', { }, 'select', '');
 
 class TimeSheetForm extends Component {
-    state = { pageLoading: false, loading: false, message: '' }
+    state = { pageLoading: false, loading: 0, message: '' }
 
     componentWillMount() {
         this.setState({ pageLoading: true });
-        Database.request2('GET',`getLocationCheck/${session[0].personId}`,{},2, (err, response) => {
-            if(err) {
+        Database.request2('GET', `locationCheck/${session[0].personId}`, {}, 2, (err, response) => {
+            if (err) {
                 Alert.alert('Error', response.message);
                 this.setState({ pageLoading: false });
             } else {
@@ -22,13 +22,21 @@ class TimeSheetForm extends Component {
     }
 
     onCheckPress() {
-        this.setState({ loading: true });
-        Database.request2('POST','postLocationCheck',{},2, (err, response) => {
-            if(err) {
+        this.setState({ loading: 1 });
+        const data = {
+            personId: session[0].personId,
+            checkDate: Helper.getDateISOfromDate(new Date()),
+            isCheckIn: 1,
+            company: 1,
+            office: 1
+        };
+
+        Database.request2('POST', 'locationCheck', data, 1, (err, response) => {
+            if (err) {
                 Alert.alert('Error', response.message);
-                this.setState({ loading: false });
+                this.setState({ loading: 0 });
             } else {
-                this.setState({ elements: [response[0], ...this.state.elements], loading: false });
+                this.setState({ elements: [response[0], ...this.state.elements], loading: 0 });
             }
         });        
     }    
@@ -38,12 +46,19 @@ class TimeSheetForm extends Component {
             return <ActivityIndicator size='large' />;
         }
 
+        let list = [];
+        let count = 1;
+        for (let row of this.state.elements) {
+            list.push({ id: count, text: Helper.prettyfyDate(row.checkDate).datetime });
+            count++;
+        }
+
         return (
             <FlatListe 
-                keyEx='checkDate'
-                data={this.state.elements}
+                keyEx='id'
+                data={list}
                 initialNumToRender={5}
-                onPress={(props) => { console.log('') }}
+                onPress={(props) => { console.log(''); }}
             />                       
         );           
     }
@@ -53,7 +68,7 @@ class TimeSheetForm extends Component {
             <Form
                 title={texts.timesheet}
             >
-                <ScrollView style={{  }}>
+                <ScrollView>
                     <Button 
                         title={texts.addCheck} 
                         animating={this.state.loading}
@@ -66,3 +81,5 @@ class TimeSheetForm extends Component {
         );
     }
 }
+
+export { TimeSheetForm };

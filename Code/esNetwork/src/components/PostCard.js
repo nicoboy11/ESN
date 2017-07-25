@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { View, Image, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { Actions } from 'react-native-router-flux';
 import { LinkButton } from './';
-import { Config } from '../settings';
+import { Config, Helper } from '../settings';
 
 const { colors } = Config;
 
@@ -58,7 +58,7 @@ class PostCard extends Component {
                             title={person} 
                             onPress={this.personPress.bind(this)}
                         />
-                        <Text style={dateStyle} >{creationDate}</Text>
+                        <Text style={dateStyle} >{Helper.prettyfyDate(creationDate).date}</Text>
                     </View>
                     <View style={unfollowViewStyle} >
                         <TouchableOpacity>

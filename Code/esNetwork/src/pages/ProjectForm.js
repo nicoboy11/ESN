@@ -144,10 +144,11 @@ class ProjectForm extends Component {
     }
 
     renderProgress(progress) {
+        let prog = parseFloat(progress);
         if (Platform.OS === 'ios') {
             return (
                 <ProgressViewIOS 
-                    progress={progress}
+                    progress={prog}
                 />
             );
         } 
@@ -156,7 +157,7 @@ class ProjectForm extends Component {
             <ProgressBarAndroid 
                 styleAttr='Horizontal'
                 indeterminate={false}
-                progress={progress}
+                progress={prog}
             />
         );
     }

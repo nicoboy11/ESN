@@ -441,7 +441,7 @@ CREATE PROCEDURE `CreateLocationCheck` (IN _personId int, IN _checkDate datetime
 BEGIN
 
 	INSERT INTO locationCheck (personId, checkDate, isCheckIn, companyId, officeId)
-    VALUES(_personId, _checkDate, _isCheckIn, _companyId, _officeId);
+    VALUES(_personId, NOW(), _isCheckIn, _companyId, _officeId);
     
     SELECT 	personId, 
 			checkDate, 
@@ -481,26 +481,6 @@ BEGIN
     WHERE personId = _personId AND companyId = _companyId AND officeId = _officeId AND checkDate = _checkDate;
     
 END$$
-
-
-
-
-
-DROP TABLE IF EXISTS locationCheck;
-CREATE TABLE locationCheck(
-	personId int,
-    checkDate datetime,
-    isCheckIn bool,
-    latitude varchar(255),
-    longitude varchar(255)
-);
-
-
-
-
-
-
-);
 
 /*===================================================================================================*/
 /*===================================================================================================*/
@@ -884,7 +864,7 @@ BEGIN
 	INSERT INTO post (personId,message,messageTypeId,attachment,attachmentTypeId,scopeTypeId,scopeId,creationDate)
 	VALUES(_personId,_message,_messageTypeId,_attachment,_attachmentTypeId,_scopeTypeId,_scopeId,NOW());
 
-	SELECT LAST_INSERT_ID() as id;
+    CALL GetPost(LAST_INSERT_ID());
 
 END$$
 
@@ -895,17 +875,19 @@ BEGIN
 
 	SELECT 	pst.id,
 			pst.personId,
-			getFullName(pe.id) as person,
 			pst.message,
-            pst.messageTypeId,
-            ifnull(attachment,'') as attachment,
-            attachmentTypeId,
-            scopeTypeId,
-            scopeId,
-            formatDate(creationDate) as creationDate
-    FROM post as pst
-    INNER JOIN person as pe on pe.id = pst.personId
-    WHERE pst.id = _postId;
+			pst.messageTypeId,
+			getFullName(pst.personId) as person,
+			messageTypeId,
+			attachment,
+			attachmentTypeId,
+			formatDate(creationDate) as creationDate,
+            getAvatar(pst.personId) as avatar,
+            p.theme,
+            'Post' as category
+	FROM post as pst
+    INNER JOIN person as p on pst.personId = p.id
+	WHERE pst.id = _postId;
 
 END$$
 
@@ -1320,7 +1302,7 @@ BEGIN
 					p.logo,
                     getTaskCount(p.id, 1) as activeTasks,
                     getTaskCount(p.id, NULL) as totalTasks,
-                    ifnull((getTaskCount(p.id, NULL)  - getTaskCount(p.id, 1))/getTaskCount(p.id, NULL),0) as progress,/*getProjectProgress(p.id) as progress,*/
+                    /*ifnull((getTaskCount(p.id, NULL)  - getTaskCount(p.id, 1))/getTaskCount(p.id, NULL),0) as progress,*/getProjectProgress(p.id) as progress,
                     getProjectMembers(p.id,null) as members
 	FROM project as p
     LEFT JOIN projectMember as pm on pm.projectId = p.id
@@ -1814,7 +1796,7 @@ BEGIN
     LEFT JOIN priority as pr on pr.id = t.priorityId
     LEFT JOIN checkList as chk on chk.taskId = t.id
     WHERE tm.personId = _personId AND t.projectId = ifnull(_projectId, t.projectId)
-    ORDER BY tm.isPinned desc;
+    ORDER BY tm.isPinned desc, t.stateId, t.dueDate is not null desc, t.duedate;
 
 END$$   
 

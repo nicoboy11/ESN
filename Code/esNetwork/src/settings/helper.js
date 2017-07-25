@@ -51,24 +51,27 @@ class Helper {
         }
 
         const date = this.toDate(uglyDate);
-
+        const realDate = new Date(uglyDate);
 		const today = new Date();
 		today.setHours(0, 0, 0, 0);
 
-		const diff = this.getDifference(date, today) / (3600 * 24 * 1000);
+        const diff = this.getDifference(date, today) / (3600 * 24 * 1000);
+        const time =  ' ' + realDate.getHours().toString() + ':' + realDate.getMinutes().toString() + ':' + realDate.getSeconds().toString();
+
 		if (diff === 0) {
-			return { color: colors.main, date: 'Today' };
+			return { color: colors.main, date: 'Today', datetime: `Today${time}` };
 		} else if (diff === 1) {
-			return { color: colors.main, date: 'Tomorrow' };
+			return { color: colors.main, date: 'Tomorrow', datetime: `Tomorrow${time}` };
 		} else if (diff === -1) {
-			return { color: colors.error, date: 'Yesterday' };
+			return { color: colors.error, date: 'Yesterday', datetime: `Yesterday${time}` };
 		} else if (diff > -6 && diff < 6) {
 			return { color: (diff > 0) ? colors.main : colors.error, date: this.getDayOfWeek(date) };		
 		} 
 
         return {
                     color: (diff > 0) ? colors.main : colors.error, 
-                    date: date.getDate().toString() + ' ' + texts.month[date.getMonth()] + ((date.getYear() !== today.getYear()) ? (', ' + date.getFullYear().toString()) : '')
+                    date: date.getDate().toString() + ' ' + texts.month[date.getMonth()] + ((date.getYear() !== today.getYear()) ? (', ' + date.getFullYear().toString()) : ''),
+                    datetime: date.getDate().toString() + ' ' + texts.month[date.getMonth()] + ((date.getYear() !== today.getYear()) ? (', ' + date.getFullYear().toString()) : '') + time
                 };		
 	}
 

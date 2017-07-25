@@ -1,11 +1,11 @@
 import React from 'react';
-import { View, StyleSheet } from 'react-native';
-import { Input, Avatar } from './';
+import { View, StyleSheet, Image } from 'react-native';
+import { Input, Avatar, LinkButton } from './';
 import { Config } from '../settings';
 
 const { colors } = Config;
 
-const NewCard = ({ placeholder, name, avatar, color, value, onChangeText, onSubmitEditing }) => {
+const NewCard = ({ placeholder, name, avatar, color, value, attachment, onChangeText, onSubmitEditing }) => {
     return (
         <View style={styles.containerStyle}>
             <Input 
@@ -18,6 +18,10 @@ const NewCard = ({ placeholder, name, avatar, color, value, onChangeText, onSubm
                 value={value}      
                 editable={true}
             /> 
+            <View>
+                <LinkButton title='POST' style={{ position: 'absolute', right: -5, bottom: -5 }} />
+                {(attachment) ? <Image source={{ uri: 'attach' }} style={styles.attachStyle} /> : <View />}
+            </View>
         </View>
     );
 };
@@ -29,6 +33,14 @@ const styles = StyleSheet.create({
         padding: 10,
         marginTop: 5,
         backgroundColor: colors.elementBackground
+    },
+    attachStyle: {
+        position: 'absolute', 
+        width: 20, 
+        height: 20,
+        left: -5,
+        bottom: -5,
+        tintColor: colors.clickable
     }
 });
 

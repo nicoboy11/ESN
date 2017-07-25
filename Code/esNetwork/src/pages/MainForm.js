@@ -1,10 +1,11 @@
 import React, { Component } from 'react';
 import { ScrollView, Alert, ActivityIndicator, TouchableOpacity, Image, View, Text } from 'react-native';
 import { Actions } from 'react-native-router-flux';
-import { CardList, Menu, Header, Form } from '../components';
+import { CardList, Menu, Header, Form, NewCard } from '../components';
 import { Database, Config } from '../settings';
 
 const { texts, colors } = Config;
+const session = Database.realm('Session', { }, 'select', '');
 
 class MainForm extends Component {
 
@@ -13,8 +14,7 @@ class MainForm extends Component {
     componentWillMount() {
         this.setState({ isLoading: true });
         //get current log in
-        const data = Database.realm('Session', { }, 'select', '');
-        const personId = data[0].personId;
+        const personId = session[0].personId;
         this.setState({ personId });
         /** Get elements from API */
         Database.request(
@@ -69,6 +69,25 @@ class MainForm extends Component {
         this.setState({ elements: [], isLoading: false });
     }   
 
+    createPost() {
+        const data = {
+                personId: session[0].personId,
+                message: this.state.newPostText,
+                messageTypeId: 1,
+                fileName: this.state.file,
+                attachmentTypeId: this.state.attachmentTypeId,
+                scopeTypeId: 1            
+        };
+
+        Database.request2('POST', 'post', data, 1, (err, response) => {
+            if (err) {
+                Alert.alert('Error', response.message);
+            } else {
+                this.setState({ elements: [response[0], ...this.state.elements] });
+            }
+        });
+    }    
+
     renderList() {
         if (this.state.isLoading) {
             return <ActivityIndicator size='large' />;
@@ -96,6 +115,13 @@ class MainForm extends Component {
                 }
             >
                 <ScrollView style={{ backgroundColor: colors.background }}>
+                    <NewCard
+                        value={this.state.newPostText}
+                        onChangeText={(newPostText) => this.setState({ newPostText })}
+                        onSubmitEditing={this.createPost.bind(this)}
+                        placeholder='Type a new post'
+                        attachment
+                    />                      
                     {this.renderList()}    
                 </ScrollView>                
             </Form>            

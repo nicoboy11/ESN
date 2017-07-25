@@ -280,8 +280,8 @@ DELIMITER $$
 DROP FUNCTION IF EXISTS getProjectProgress$$
 CREATE FUNCTION getProjectProgress(_projectId int) RETURNS text
 BEGIN
-	DECLARE _progress int;
-	SELECT  (SUM( CASE WHEN t.stateId <> 1 THEN 100 ELSE progress END)*100) / (count(*)*100) INTO _progress
+	DECLARE _progress double;
+	SELECT  (SUM( CASE WHEN t.stateId <> 1 THEN 100 ELSE progress END)*100) / (count(*)*100)/100 INTO _progress
 	FROM task as t
 	INNER JOIN project as p on p.id = t.projectId
 	WHERE p.id = _projectId

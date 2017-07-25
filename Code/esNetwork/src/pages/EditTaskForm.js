@@ -85,13 +85,13 @@ class EditTaskForm extends Component {
     }
 
     onChangeDateStart(date) {
-        this.setState({ newStartDate: date });
-        this.saveTask({ startDate: date });  
+        this.setState({ newStartDate: Helper.getDateISOfromDate(date) });
+        this.saveTask({ startDate: Helper.getDateISOfromDate(date) });  
     }
 
     onChangeDateDue(date) {
-        this.setState({ newDueDate: date });
-        this.saveTask({ dueDate: date });        
+        this.setState({ newDueDate: Helper.getDateISOfromDate(date) });
+        this.saveTask({ dueDate: Helper.getDateISOfromDate(date) });        
     }
 
     onPrioritySelection(priorityId) {

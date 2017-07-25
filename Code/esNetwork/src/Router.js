@@ -16,6 +16,7 @@ import {
     EditProfileForm,
     EditTaskForm,
     NewHierarchyForm,
+    TimeSheetForm,
     Dummy
 } from './pages';
 import { Config, Helper } from './settings';
@@ -85,7 +86,7 @@ class RouterComponent extends Component {
                     <Scene 
                         key='hierarchy'
                         hideNavBar
-                        title='profile'
+                        title='hierarchy'
                         icon={TabIcon}
                         style={{ paddingBottom: 46 }}
                     >    
@@ -117,20 +118,12 @@ class RouterComponent extends Component {
                         style={{ paddingBottom: 46 }}
                     />       
                     <Scene
-                        key='myprofile'
+                        key='timesheet'
                         icon={TabIcon}
-                        title='profile'
+                        title='marker'
                         hideNavBar
                     >
-                        <Scene 
-                            key='myProfileForm' 
-                            component={ProfileForm} 
-                            hideNavBar
-                            title='profile'
-                            icon={TabIcon}
-                            style={{ paddingBottom: 46 }}
-                        />                      
-                        <Scene key='myEditProfileForm' component={EditProfileForm} hideTabBar />     
+                        <Scene key='timeSheetform' component={TimeSheetForm} style={{ paddingBottom: 46 }} />                       
                     </Scene>                                 
                 </Scene>    
                 <Scene key='dummy' component={Dummy} hideNavBar />

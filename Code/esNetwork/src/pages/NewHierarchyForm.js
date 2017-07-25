@@ -93,6 +93,7 @@ class NewHierarchyForm extends Component {
             <Form
                 title='Users without a network'
                 leftIcon='back'
+                onPressLeft={() => Actions.pop()}
             >
                 <View style={mainContainer}>
                     <FlatList 

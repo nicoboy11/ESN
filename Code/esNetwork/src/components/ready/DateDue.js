@@ -58,7 +58,7 @@ class DateDue extends Component {
                 const dateISO = Helper.getDateISO(year, month, day);
                 this.setState({ date });
                 //Back to the parent component
-                this.props.onChangeDate(dateISO);
+                this.props.onChangeDate(date);
             }
         } catch ({ code, message }) {
             console.log('Could not load date picker');
