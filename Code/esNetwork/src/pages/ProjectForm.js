@@ -149,6 +149,7 @@ class ProjectForm extends Component {
             return (
                 <ProgressViewIOS 
                     progress={prog}
+                    progressTintColor={colors.clickable}
                 />
             );
         } 
@@ -158,6 +159,7 @@ class ProjectForm extends Component {
                 styleAttr='Horizontal'
                 indeterminate={false}
                 progress={prog}
+                color={colors.clickable}
             />
         );
     }
@@ -312,11 +314,13 @@ const styles = new StyleSheet.create({
     },
     labelStyle: {
         color: colors.mainDark,
-        fontWeight: '500'
+        fontSize: 18,
+        lineHeight: 20,
+        fontWeight: '400'
     },
     labelDateStyle: {
         color: colors.secondText,
-        fontSize: 10
+        fontSize: 14
     },
     progressContainer: {
         flexDirection: 'column'
@@ -327,20 +331,20 @@ const styles = new StyleSheet.create({
         justifyContent: 'center'
     },
     circleStyle: {
-        width: 60,
-        height: 60,
+        width: 80,
+        height: 80,
         borderWidth: 1,
-        borderRadius: 30,
+        borderRadius: 40,
         borderColor: colors.main,
         alignItems: 'center',
         justifyContent: 'center'
     },
     countStyle: {
-        fontSize: 14,
+        fontSize: 16,
         color: colors.mainDark
     },
     statStyle: {
-        fontSize: 8,
+        fontSize: 12,
         color: colors.secondText
     },
     avatarStyles: {

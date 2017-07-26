@@ -107,7 +107,9 @@ class ProfileForm extends Component {
         if (props.personId !== undefined) {
             if (session[0].personId === props.personId) {
                 this.setState({ currentOption: 'edit', currentLeft: 'back', editable: true });
-            }  
+            } else {
+                this.setState({ currentOption: '', currentLeft: 'back', editable: false });
+            }
             personId = props.personId;
         } else {
             personId = session[0].personId;
@@ -139,7 +141,12 @@ class ProfileForm extends Component {
         this.setState(
             Database.realmToObject(profile, 'Person')[0]
         );         
-        this.setState({ currentOption: 'edit', editable: true });
+        
+        if (session[0].personId === profile[0].personId) {
+            this.setState({ currentOption: 'edit', currentLeft: 'back', editable: true });
+        } else {
+            this.setState({ currentOption: '', currentLeft: 'back', editable: false });
+        }        
     }
 
     saveProfile() {

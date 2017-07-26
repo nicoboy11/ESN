@@ -3,7 +3,7 @@ import Router from './Router';
 import { Database } from './settings';
 
 export default class App extends Component {
-  componentWillMount() {
+  componentWillMount() {  
      /* Database.request('GET', 'gender/null', {}, 0,
           this.onHandleResponse.bind(this), 
           this.onSuccessGender.bind(this),

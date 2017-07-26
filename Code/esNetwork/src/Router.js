@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import { StyleSheet, AppState, Image, Alert } from 'react-native';
 import { Scene, Router, ActionConst, Actions, TabBar } from 'react-native-router-flux';
+import OneSignal from 'react-native-onesignal';
 import { Menu } from './components';
 import { 
     LoginForm, 
@@ -38,20 +39,45 @@ class TabIcon extends React.Component {
 }
 
 class RouterComponent extends Component {
-
     state = { appState: AppState.currentState };
 
     componentDidMount() {
-
-        //Check if there are any changes in the server
-        //then load accordingly
-
-        //AppState.addEventListener('change', this.handleAppState);
+        OneSignal.addEventListener('received', this.onReceived);
+        OneSignal.addEventListener('opened', this.onOpened);
+        OneSignal.addEventListener('registered', this.onRegistered);
+        OneSignal.addEventListener('ids', this.onIds);    
     }
 
     componentWillUnmount() {
         AppState.removeEventListener('change', this.handleAppState);
+
+        OneSignal.removeEventListener('received', this.onReceived);
+        OneSignal.removeEventListener('opened', this.onOpened);
+        OneSignal.removeEventListener('registered', this.onRegistered);
+        OneSignal.removeEventListener('ids', this.onIds);              
     }    
+
+    onReceived(notification) {
+        Alert.alert("got it");
+        console.log('Notification received: ', notification);
+        Actions.hierarchyForm();
+    }
+
+    onOpened(openResult) {
+      console.log('Message: ', openResult.notification.payload.body);
+      console.log('Data: ', openResult.notification.payload.additionalData);
+      console.log('isActive: ', openResult.notification.isAppInFocus);
+      console.log('openResult: ', openResult);
+    }
+
+    onRegistered(notifData) {
+        console.log('Device had been registered for push notifications!', notifData);
+        Alert.alert('suscribed');
+    }
+
+    onIds(device) {
+		console.log('Device info: ', device);
+    }  
 
     handleAppState(nextAppState) {
         if (this.state.appState.match('/inactive|background/') && nextAppState === 'Active') {
@@ -132,7 +158,7 @@ class RouterComponent extends Component {
                     hideNavBar
                 >
                     <Scene key='profileview' initial component={ProfileForm} hideNavBar />
-                    <Scene key='editProfileForm' component={EditProfileForm} hideTabBar />    
+                    <Scene key='myEditProfileForm' component={EditProfileForm} hideTabBar />    
                 </Scene>
                 <Scene key='profileImage' component={ProfileImage} hideNavBar />                              
                 {/*<Scene key="statusModal" component={PostCardMenu} direction='vertical' 
