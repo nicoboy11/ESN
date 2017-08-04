@@ -39,7 +39,7 @@ class FlatListe extends Component {
             case 'checkList':
                 return (
                     <CheckListItem 
-                        updating={this.props.chkListProcessing} 
+                        processing={item.processing} 
                         item={item.item} 
                         isChecked={item.isChecked} 
                         onPress={this.props.onPress} 

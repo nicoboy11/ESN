@@ -1,20 +1,23 @@
 import React, { Component } from 'react';
 import { View, Image, Text, StyleSheet } from 'react-native';
 import { Touchable } from '../';
+import { Config } from '../../settings';
+
+const { colors } = Config;
 
 class CheckListItem extends Component {
     state = { 
-                updating: (this.props.updating) ? false : this.props.updating,
+                processing: (this.props.processing) ? this.props.processing : false,
                 isChecked: this.props.isChecked
              };
 
     componentWillReceiveProps(newProps) {
-        this.setState({ updating: newProps.updating });
+        this.setState({ processing: newProps.processing });
     }
 
     onPress() {
         if (this.props.waitUpdate) {
-            this.setState({ updating: true, isChecked: !this.state.isChecked });
+            this.setState({ processing: true, isChecked: !this.state.isChecked });
         }
 
         if (this.props.onPress) {
@@ -30,7 +33,7 @@ class CheckListItem extends Component {
                     [contStyle, 
                      mainStyle, 
                      { opacity: (this.state.isChecked) ? 0.5 : 1 },
-                     { opacity: (this.state.updating) ? 0.2 : (this.state.isChecked) ? 0.5 : 1 }
+                     { opacity: (this.state.processing) ? 0.2 : (this.state.isChecked) ? 0.5 : 1 }
                     ]
                 }
             >
@@ -44,6 +47,7 @@ class CheckListItem extends Component {
                             <Image 
                                 style={checkBoxStyle} 
                                 source={{ uri: (this.state.isChecked) ? 'checked' : 'unchecked' }} 
+                                tintColor={colors.mainDark}
                             />
                             <Text 
                                 allowFontScaling 
@@ -81,11 +85,13 @@ const styles = new StyleSheet.create({
     },
     checkBoxStyle: {
         width: 24,
-        height: 24
+        height: 24,
+        tintColor: colors.mainDark
     },
     textStyle: {
         paddingLeft: 5,
-        flex: 1
+        flex: 1,
+        color: colors.mainDark
     }
 });
 

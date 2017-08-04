@@ -58,9 +58,9 @@ class CheckListForm extends Component {
 
     createCheckListItem() {
         this.setState({ 
-            elements: [...this.state.elements, { sortNumber: 0, item: this.state.newCheckList, isChecked: false }],
+            elements: [{ processing: true, sortNumber: 0, item: this.state.newCheckList, isChecked: false }, ...this.state.elements],
             newCheckList: '',
-            updating: true
+            processing: true
         });
 
         const data = {
@@ -101,7 +101,6 @@ class CheckListForm extends Component {
     render() {
         return (
             <View>
-                <View>
                     {/*Aqui va para la nueva tarea*/} 
                     <NewCard
                         value={this.state.newCheckList}
@@ -118,7 +117,6 @@ class CheckListForm extends Component {
                         onPress={this.checkPressed.bind(this)}
                         chkListProcessing={this.state.processing}
                     />                    
-                </View>
             </View>
         );
     }

@@ -81,6 +81,11 @@ class Input extends Component {
                     newText = text.replace(regex.textOnly, '');
                 }
                 break;
+            case 'extendedText':
+                if (!Helper.isValidText(text)) {
+                    newText = text.replace(regex.extendedText, '');
+                }
+                break;                
             case 'number':
                 break;
             default:

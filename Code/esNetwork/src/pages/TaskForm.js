@@ -61,7 +61,7 @@ class TaskForm extends Component {
         }
     }
     
-    onSuccess(responseData) {
+    onSuccess(responseData) {     
         if (this.state.status === 403) {
             Database.realm('Session', { }, 'delete', '');
             Actions.authentication();
