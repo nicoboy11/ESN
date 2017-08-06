@@ -270,6 +270,7 @@ import { Config } from './';
                 if (method === 'GET') {
                     data = null;
                 }
+                let responseStatus = 0;
 
                 fetch(Config.network.server + sp, { 
                     method, 
@@ -277,12 +278,14 @@ import { Config } from './';
                     body: data
                 })
                 .then((response) => {
-                    const status = response.status;
-                    let jsonResponse = response.json();
-                    jsonResponse.status = status;
-                    return jsonResponse;
+                    responseStatus = response.status;
+
+                    return response.json();
                 })
-                .then((responseJson) => callback(false,responseJson))
+                .then((responseJson) => {
+                    responseJson.status = responseStatus;
+                    callback(false, responseJson);
+                })
                 .catch((error) => callback(true,error));                  
             }
 

@@ -42,19 +42,19 @@ class EditProjectForm extends Component {
 
     onChangeDateStart(date) {
         if (this.state.projectId !== 0) { //If the project is not new...        
-            this.setState({ newStartDate: date });
-            this.saveProject({ startDate: date });
+            this.setState({ newStartDate: Helper.getDateISOfromDate(date) });
+            this.saveProject({ startDate: Helper.getDateISOfromDate(date) });
         } else {
-            this.setState({ startDate: date });
+            this.setState({ startDate: Helper.getDateISOfromDate(date) });
         }
     }
 
     onChangeDueDate(date) {
         if (this.state.projectId !== 0) { //If the project is not new...        
-            this.setState({ newDueDate: date });
-            this.saveProject({ dueDate: date });
+            this.setState({ newDueDate: Helper.getDateISOfromDate(date) });
+            this.saveProject({ dueDate: Helper.getDateISOfromDate(date) });
         } else {
-            this.setState({ dueDate: date });
+            this.setState({ dueDate: Helper.getDateISOfromDate(date) });
         }
     }
 

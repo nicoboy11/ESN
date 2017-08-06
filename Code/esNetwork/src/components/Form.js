@@ -121,6 +121,7 @@ class Form extends Component {
                     <Header 
                         onPressLeft={this.onLeft.bind(this)}
                         onPressRight={this.onRight.bind(this)}
+                        onSearch={(text) => this.props.onSearch(text)}
                         rightIcon={rightIcon}
                         rightColor={rightColor}
                         leftIcon={leftIcon}
@@ -131,6 +132,7 @@ class Form extends Component {
                         background={this.props.background}
                         titleStyle={this.props.titleStyle}
                         iconsStyle={this.props.iconsStyle}
+                        isSearching={this.props.isSearching}
                     />                
                     <View style={{ flex: 1 }}>
                         {this.props.children}

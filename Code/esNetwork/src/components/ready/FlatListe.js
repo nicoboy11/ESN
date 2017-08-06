@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { View, FlatList, StyleSheet, TouchableOpacity } from 'react-native';
-import { CheckListItem, ListItem, PersonListItem, Avatar, TaskCard3 } from '../';
+import { CheckListItem, ListItem, PersonListItem, Avatar, TaskCard3, Input, Label } from '../';
 import { Config } from '../../settings';
 
 const { colors } = Config;
@@ -32,6 +32,13 @@ class FlatListe extends Component {
         }
 
         return <View />;
+    }
+
+    renderHeader() {
+        return (
+            <View>
+            </View>
+        );
     }
 
     renderItem({ item }) {
@@ -127,6 +134,7 @@ class FlatListe extends Component {
                 style={style}
                 horizontal={horizontal}
                 initialNumToRender={initialNumToRender}
+                ListHeaderComponent={this.renderHeader}
             />
         );
     }

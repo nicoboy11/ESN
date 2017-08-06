@@ -20,7 +20,7 @@ import { Config, Helper, Database } from '../settings';
 const { colors } = Config;
 
 class ProjectForm extends Component {
-    state = { isLoading: true, selectedProjects: null, title: 'Projects' }
+    state = { isLoading: true, selectedProjects: null, title: 'Projects', rightButton: 'search', visibleProjects: [] }
     componentWillMount() {
         const data = Database.realm('Session', { }, 'select', '');
 
@@ -46,7 +46,7 @@ class ProjectForm extends Component {
                             startDate: Helper.getDateISOfromDate(new Date())
                         };
 
-                        this.setState({ projects: [newProj, ...response], isLoading: false });
+                        this.setState({ projects: [newProj, ...response], visibleProjects: [newProj, ...response], isLoading: false });
                     }
                 }
             }); 
@@ -82,15 +82,7 @@ class ProjectForm extends Component {
             });
         }
 
-        this.setState({ projects });
-    }
-
-    onError(error) {
-
-    }
-    
-    onSuccess(responseData) {
-
+        this.setState({ projects, visibleProjects: projects });
     }
 
     handleResponse(response) {
@@ -121,10 +113,11 @@ class ProjectForm extends Component {
 
         this.setState({ 
             selectedProjects: null, 
-            showEditButton: undefined, 
+            rightButton: undefined, 
             showCancelButton: undefined, 
             title: 'Projects', 
-            projects 
+            projects,
+            visibleProjects: projects
         });
     }
 
@@ -140,7 +133,29 @@ class ProjectForm extends Component {
             }
         }
         Vibration.vibrate([0, 50], false);
-        this.setState({ selectedProjects: item, showEditButton: 'edit', showCancelButton: 'cancel', title: '', projects });
+        this.setState({ selectedProjects: item, rightButton: 'edit', showCancelButton: 'cancel', title: '', projects, visibleProjects: projects });
+    }
+
+    onPressRight() {
+        if (this.state.rightButton === 'search') {
+            this.setState({ isSearching: true, rightButton: 'cancel' });
+        } else if (this.state.rightButton === 'cancel') {
+            this.setState({ isSearching: false, rightButton: 'search', visibleProjects: this.state.projects });
+        } else {
+            Actions.editProjectForm(this.state.selectedProjects);
+        }
+    }
+
+    onSearch(text) {
+        if (text === '') {
+            this.setState({ visibleProjects: this.state.projects });
+        } else {
+            const visibleProjects = this.state.projects.filter((project) => {
+                return project.name.toLowerCase().includes(text.toLowerCase());
+            });
+
+            this.setState({ visibleProjects });
+        }
     }
 
     renderProgress(progress) {
@@ -267,7 +282,7 @@ class ProjectForm extends Component {
         return (
             <FlatList 
                 keyExtractor={item => item.projectId}
-                data={this.state.projects}                    
+                data={this.state.visibleProjects}                    
                 renderItem={this.renderItem.bind(this)}
                 horizontal={false}
                 numColumns={2}
@@ -281,10 +296,12 @@ class ProjectForm extends Component {
         return (
             <Form
                 title={this.state.title}
-                rightIcon={this.state.showEditButton}
+                rightIcon={this.state.rightButton}
                 leftIcon={this.state.showCancelButton}
-                onPressRight={() => Actions.editProjectForm(this.state.selectedProjects)}
+                onPressRight={() => this.onPressRight()}
                 onPressLeft={() => this.unSelect()}
+                onSearch={this.onSearch.bind(this)}
+                isSearching={this.state.isSearching}
             >
                 <View style={mainContainer}>
                     {this.renderProjects()}

@@ -1,15 +1,25 @@
 import React, { Component } from 'react';
-import { View, TouchableOpacity, Text, Image, StyleSheet, Platform, Alert } from 'react-native';
+import { View, TouchableOpacity, Text, Image, StyleSheet, Platform, Alert, TextInput } from 'react-native';
 import { Actions } from 'react-native-router-flux';
 import { Config } from '../settings';
 
 const { colors, font } = Config;
 
 class Header extends Component {
-    state = { localStyle: {} };
+    state = { localStyle: {}, isSearching: false };
 
     componentWillMount() {
         this.setState({ localStyle: styles.localTitleStyle });
+    }
+
+    componentWillReceiveProps(newProps) {
+        this.setState({ isSearching: newProps.isSearching });
+    }
+
+    componentDidUpdate() {
+        if (this.input) {
+            this.input.focus();
+        }
     }
 
     onPressLeft() {
@@ -24,11 +34,17 @@ class Header extends Component {
         this.props.onPressRight();
     }
 
+    onChangeText(text) {
+        this.setState({ searchText: text });
+        this.props.onSearch(text);
+        //console.log(newText);
+    }   
+
     handleTitleLayout(event) {
         if (event.nativeEvent.layout.height > 28) {
             this.setState({ localStyle: styles.localTitleStyleSmall });
         }
-    }
+    } 
 
     renderButton(icon, color) {
         const { imageStyle } = styles;
@@ -61,12 +77,50 @@ class Header extends Component {
     }
 
     renderRight() {
+        const { rightIcon, rightColor } = this.props;
 
+        if (rightIcon === undefined) {
+            return <View style={{ paddingLeft: 10 }} />;
+        }
+
+        return (
+            <TouchableOpacity style={{ width: 44 }} onPress={this.onPressRight.bind(this)} >
+                {this.renderButton(rightIcon, rightColor)}
+            </TouchableOpacity>               
+        );
     }    
 
+    renderTitle() {
+        if (this.state.isSearching) {
+            return (
+                <TextInput 
+                    placeholder={this.props.searchPlaceholder} 
+                    style={styles.localTitleStyle} 
+                    autoCorrect={false}
+                    value={this.state.searchText}
+                    onChangeText={this.onChangeText.bind(this)}
+                    ref={(input) => { this.input = input; }}
+                />
+            );
+        }
+
+        return (
+            <Text 
+                ref={(ref) => { this.txt = ref; }}
+                allowFontScaling 
+                ellipsizeMode='tail' 
+                numberOfLines={2} 
+                style={[this.state.localStyle, styles.localTitleStyle]}
+                onLayout={this.handleTitleLayout.bind(this)}
+            >
+                {this.props.title}
+            </Text>            
+        );
+    }
+
     render() {
-        const { containerStyle, localTitleStyle, shadow } = styles;
-        const { rightIcon, rightColor, title, isVisible, background, titleStyle } = this.props;
+        const { containerStyle, shadow } = styles;
+        const { isVisible, background } = this.props;
 
         if (!isVisible) {
             return null;
@@ -83,19 +137,8 @@ class Header extends Component {
                 ]}
             >
                 {this.renderLeft()}
-                <Text 
-                    ref={(ref) => { this.txt = ref; }}
-                    allowFontScaling 
-                    ellipsizeMode='tail' 
-                    numberOfLines={2} 
-                    style={[this.state.localStyle, titleStyle]}
-                    onLayout={this.handleTitleLayout.bind(this)}
-                >
-                    {title}
-                </Text>
-                <TouchableOpacity style={{ width: 44 }} onPress={this.onPressRight.bind(this)} >
-                    {this.renderButton(rightIcon, rightColor)}
-                </TouchableOpacity>                    
+                {this.renderTitle()}
+                {this.renderRight()}                 
             </View>        
         );
     }

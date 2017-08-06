@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
-import { ScrollView, ActivityIndicator, Alert } from 'react-native';
+import { ScrollView, ActivityIndicator, Alert, View } from 'react-native';
 import { Actions } from 'react-native-router-flux';
-import { Form, CardList, NewCard, FlatListe } from '../components';
+import { Form, CardList, NewCard, FlatListe, Label } from '../components';
 import { Config, Database } from '../settings';
 
 const { texts, network, colors } = Config;
@@ -9,7 +9,7 @@ const data = Database.realm('Session', { }, 'select', '');
 
 class TaskForm extends Component {
 
-    state = { elements: [], isLoading: false, newTaskText: '' };
+    state = { elements: [], isLoading: false, newTaskText: '', isLoadingTask: false, rightButton: 'search' };
 
     componentWillMount() {
         if (data[0] === undefined) {
@@ -25,15 +25,9 @@ class TaskForm extends Component {
             }
 
             /** Get elements from API */
-            Database.request(
-                'GET', 
-                `personTasks/${data[0].personId}/${projectId}`, 
-                {}, 
-                2,
-                this.handleResponse.bind(this), 
-                this.onSuccess.bind(this),
-                this.onError.bind(this)
-            );
+            Database.request2('GET', `personTasks/${data[0].personId}/${projectId}`, {}, 2, (error, response) => {
+                this.handleResponse(error, response);
+            });
         }
     }
 
@@ -50,33 +44,32 @@ class TaskForm extends Component {
         }
 
         this.setState({
-            elements
+            elements,
+            visibleTasks: elements
         }); 
     }
 
-    onError(error) {
-        Alert.alert('Error', error.message);
-        if (this.state.status === 403) {
-            Actions.authentication();
-        }
-    }
-    
-    onSuccess(responseData) {     
-        if (this.state.status === 403) {
-            Database.realm('Session', { }, 'delete', '');
-            Actions.authentication();
-        } else if (this.state.status > 299) {
-            Alert.alert('Error', 'There was an error with the request.');
+    onPressRight() {
+        if (this.state.rightButton === 'search') {
+            this.setState({ isSearching: true, rightButton: 'cancel' });
+        } else if (this.state.rightButton === 'cancel') {
+            this.setState({ isSearching: false, rightButton: 'search', visibleTasks: this.state.elements });
         } else {
-            this.setState(
-                { 
-                    elements: responseData.concat(this.state.elements), 
-                    isLoading: false, 
-                    newTaskText: '' 
-                }
-            );
+            //
         }
     }
+
+    onSearch(text) {
+        if (text === '') {
+            this.setState({ visibleTasks: this.state.elements });
+        } else {
+            const visibleTasks = this.state.elements.filter((task) => {
+                return task.name.toLowerCase().includes(text.toLowerCase());
+            });
+
+            this.setState({ visibleTasks });
+        }
+    }    
 
     openComments(props) {
         Actions.taskMessage(props.data);
@@ -92,30 +85,43 @@ class TaskForm extends Component {
         }
 
         this.setState({
-            elements
+            elements,
+            visibleTasks: elements
         });
     }
 
-    handleResponse(response) {
-        console.log(response.status);
-        this.setState({ status: response.status });
-        return response.json();
+    handleResponse(error, response) {
+        if (error) {
+            Alert.alert('Error', error.message);
+            if (this.state.status === 403) {
+                Actions.authentication();
+            }                    
+        } else {
+            this.setState(
+                { 
+                    elements: response.concat(this.state.elements), 
+                    visibleTasks: response.concat(this.state.elements), 
+                    isLoading: false, 
+                    newTaskText: '',
+                    isLoadingTask: false
+                }
+            );                    
+        }
     }      
 
     createTask() {
-        Database.request(
-            'POST', 
-            'task', 
+        this.setState({ 
+            isLoadingTask: true
+        });
+        Database.request2('POST', 'task', 
             {
                 name: this.state.newTaskText,
                 creatorId: this.state.personId,
                 projectId: this.props.projectId
-            }, 
-            1,
-            this.handleResponse.bind(this), 
-            this.onSuccess.bind(this),
-            this.onError.bind(this)
-        );
+            }, 1, (error, response) => {
+                this.handleResponse(error, response);
+            }
+        );                   
     }
 
     renderList() {
@@ -127,7 +133,7 @@ class TaskForm extends Component {
             <FlatListe 
                 keyEx='taskId'
                 itemType='task'
-                data={this.state.elements}
+                data={this.state.visibleTasks}
                 initialNumToRender={4}
                 onPress={(props) => { this.openComments(props); }}
                 updateFromChildren={(update) => this.updateFromChildren(update)}
@@ -135,13 +141,29 @@ class TaskForm extends Component {
         );        
     }
 
+    renderNewTaskLoad() {
+        if (this.state.isLoadingTask) {
+            return (
+                <View style={{ flexDirection: 'row', loading: this.state.loadingTask, alignSelf: 'center', margin: 10 }}>
+                    <Label>{this.state.newTaskText}</Label>
+                    <ActivityIndicator size='small' />
+                </View>                  
+            );
+        }
+
+        return <View />;
+    }
+
     render() {
         return (
             <Form
-                rightIcon='menu'
+                rightIcon={this.state.rightButton}
                 leftIcon='back'
                 onPressLeft={() => Actions.pop()}
+                onPressRight={() => this.onPressRight()}
                 title={this.props.title}
+                onSearch={this.onSearch.bind(this)}
+                isSearching={this.state.isSearching}
                 menuList={
                     [
                         { name: 'Search', form: 'search', id: 1 }
@@ -155,7 +177,8 @@ class TaskForm extends Component {
                         onChangeText={(newTaskText) => this.setState({ newTaskText })}
                         onSubmitEditing={this.createTask.bind(this)}
                         placeholder='Type a new task'
-                    />                    
+                    />                
+                    {this.renderNewTaskLoad()}
                     {this.renderList()}
                 </ScrollView>                
             </Form>            
