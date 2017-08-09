@@ -1000,7 +1000,7 @@ BEGIN
             'Post' as category
 	FROM post as pst
     INNER JOIN person as p on pst.personId = p.id
-	WHERE pst.personId = _personId and pst.scopeTypeId = _scopeTypeId
+	WHERE pst.scopeTypeId = 1
 	UNION ALL
 	SELECT 	pst.id,
 			pst.personId,
@@ -1017,7 +1017,7 @@ BEGIN
 	FROM post as pst
 	INNER JOIN followers as f on pst.personId = f.personId
     INNER JOIN person as p on pst.personId = p.id    
-	WHERE f.followerId = _personId and pst.scopeTypeId = _scopeTypeId
+	WHERE f.followerId = _personId and pst.scopeTypeId = 5
     ORDER BY creationDate desc;
 
 END$$
