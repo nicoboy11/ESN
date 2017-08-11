@@ -10,6 +10,8 @@
     "react": "16.0.0-alpha.6",
     "react-native": "0.44.0",
     "react-native-image-picker": "^0.26.3",
+    "react-native-onesignal": "^3.0.5",
+    "react-native-push-notification": "^3.0.0",
     "react-native-router-flux": "^3.39.1",
     "realm": "^1.8.3"
   },
