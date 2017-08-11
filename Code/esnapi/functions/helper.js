@@ -3,7 +3,7 @@ module.exports = {
 
         if(param == undefined)  return "NULL";
 
-        return "'" + param + "'";
+        return "'" + param.replace("'","''") + "'";
     },
     fpDate: function(param){
 
@@ -39,5 +39,36 @@ module.exports = {
                 ('00' + (date.getHours()).toString()).slice(-2) + ':' +
                 ('00' + (date.getMinutes()).toString()).slice(-2) + ':' +
                 ('00' + (date.getSeconds()).toString()).slice(-2);
-    }        
+    },
+    sendNotification: function(data) { 
+        // code obtained from documentation at https://documentation.onesignal.com/reference#create-notification 
+        var headers = {
+            "Content-Type": "application/json; charset=utf-8",
+            "Authorization": "Basic NTFiOTMxYzctY2RlZS00OGJhLTg5OGItYjZlMjI1MDQ3MWVk"
+        };
+        
+        var options = {
+            host: "onesignal.com",
+            port: 443,
+            path: "/api/v1/notifications",
+            method: "POST",
+            headers: headers
+        };
+        
+        var https = require('https');
+        var req = https.request(options, function(res) {  
+            res.on('data', function(data) {
+            console.log("Response:");
+            console.log(JSON.parse(data));
+            });
+        });
+        
+        req.on('error', function(e) {
+            console.log("ERROR:");
+            console.log(e);
+        });
+        
+        req.write(JSON.stringify(data));
+        req.end();
+    } 
 }

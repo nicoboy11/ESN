@@ -134,8 +134,8 @@ var apiRoutes = express.Router();
                     //Get token and send back to client
                     var token = jwt.sign(
                                     {"email":req.body.email, "password":req.body.password, "personId": result[0][0]["personId"]}, 
-                                    config.auth.secret,
-                                    {expiresIn: 36000}
+                                    config.auth.secret/*,
+                                    {expiresIn: 36000}*/
                     );
 
                     result[0][0]["token"] = token;
@@ -581,8 +581,42 @@ var apiRoutes = express.Router();
                         var message = JSON.stringify(result[0])
                         if(message === '' || message === undefined){
                             message = '[{"message": "ok"}]'
-                        }
+                        }                      
+
                         res.status(200).end( message );
+
+                        //Get people that should receive a notification
+                        var resultObj = JSON.parse(JSON.stringify(result[0]))[0];
+                        var members = JSON.parse(resultObj.members);
+                        var playerIds = [];
+
+                        //Obtain playerId from people
+                        for(member of members) {
+                            if(member.personId !== resultObj.personId) {
+                                var ids = member.playerIds.split(',');
+                                playerIds = playerIds.concat(ids);
+                            }
+                        }
+
+                        //Notification sent only if there is people to send to
+                        if(playerIds.length > 0) {
+                            //Message object
+                            console.log(config.server.url + 'thumbs/big/' + resultObj.avatar);
+                            var message = { 
+                                app_id: "9b857769-1cfb-4dbf-9e00-8c7c22c1f24e",
+                                contents: {"en": resultObj.person + ": " + resultObj.message},
+                                headings: {"en": resultObj.taskName},
+                                data:{ taskId: resultObj.taskId, projectId: resultObj.projectId },
+                                include_player_ids: playerIds,
+                                large_icon: config.server.url + 'thumbs/big/' + resultObj.avatar,
+                                android_group: "1",
+                                ios_badgeCount: 1,
+                                ios_badgeType: 'Increase',
+                                big_picture: config.server.url + resultObj.attachment
+                            };
+
+                            helper.sendNotification(message); 
+                        }                         
                     }
                 });
             });

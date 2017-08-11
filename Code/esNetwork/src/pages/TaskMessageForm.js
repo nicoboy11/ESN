@@ -39,7 +39,7 @@ class TaskMessageForm extends Component {
     renderForm() {
         if (this.state.isChatVisible) {
             return (
-                <Chat taskId={this.props.taskId} />
+                <Chat taskId={this.props.taskId} taskData={this.state.taskData} />
             );
         } 
 

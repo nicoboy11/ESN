@@ -97,6 +97,16 @@ class TaskForm extends Component {
                 Actions.authentication();
             }                    
         } else {
+            //If this was called by a notification open it directly
+            if (this.props.auto) {
+                const notifTask = response.filter((element) => { 
+                    return element.taskId === this.props.taskId; 
+                });
+                Actions.taskMessage(notifTask[0]);
+                return;
+            }
+
+            //else run normal flow
             this.setState(
                 { 
                     elements: response.concat(this.state.elements), 

@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import { View, Image, Alert, Keyboard, Platform } from 'react-native';
 import { Actions } from 'react-native-router-flux';
+import OneSignal from 'react-native-onesignal';
 import { Input, LinkButton, Button, KeyboardSpacer } from '../components';
 import { Config, Database, Helper } from '../settings';
 
@@ -15,6 +16,13 @@ class LoginForm extends Component {
         if (data[0] !== undefined && data.length > 0) {
             Actions.tabbar();
         }
+    }
+
+    componentDidMount() {
+        const self = this;
+        OneSignal.addEventListener('ids', (device) => {
+            this.setState({ playerId: device.userId });
+        });          
     }
 
     componentWillReceiveProps() {
@@ -35,7 +43,8 @@ class LoginForm extends Component {
         } else {
             /**
              * Create DataBase object for user
-             */
+             */                             
+
              const data = [{
                 token: responseData[0].token,
                 personId: responseData[0].personId,
@@ -57,9 +66,40 @@ class LoginForm extends Component {
 
             Database.realm('Session', data, 'create', '');
 
+            const officeData = [{
+                companyId: 1,
+                officeId: 1,
+                name: 'Matriz',
+                address1: 'string',
+                address2: 'string',
+                postCode: 'string',
+                cityId: 1,
+                northLatitude: '53.3846',
+                westLongitude: '-1.4793',
+                southLatitude: '53.3840,',
+                eastLongitude: '-1.4787',
+            }];
+
+            Database.realm('Office', officeData, 'create', '');
+
             Helper.loadRealms(responseData[0].personId);
-            /** Go to main screen */
-            Actions.tabbar({ personId: responseData[0].personId });
+            let dataOS = {};
+
+            if(Platform.OS == 'ios') {
+                dataOS = { os_ios: this.state.playerId };
+            } else {
+                dataOS = { os_android: this.state.playerId };
+            }
+
+            //update push notification token
+            Database.request2('PUT', `person/${responseData[0].personId}`, dataOS, 1, (err, response) => {
+                if (err) {
+                    Alert.alert('Error', response.message);
+                } else {
+                    /** Go to main screen */
+                    Actions.tabbar({ personId: responseData[0].personId });
+                }
+            });              
         }
     }
 

@@ -8,6 +8,25 @@ import { Config } from './';
  *      they should have an equivalent
  *      table in the mysql server. A class should be defined and then the schema
  */
+
+    class Office {}
+    Office.schema = {
+        name: 'Office',
+        properties: {
+            companyId: 'int',
+            officeId: 'int',
+            name: 'string',
+            address1: 'string',
+            address2: 'string',
+            postCode: 'string',
+            cityId: 'int',
+            northLatitude: 'string',
+            westLongitude: 'string',
+            southLatitude: 'string',
+            eastLongitude: 'string',
+        }
+    };
+
     class Session {}
     Session.schema = {
         name: 'Session',
@@ -27,6 +46,9 @@ import { Config } from './';
             abbr: 'string',  
             levelKey: 'string',
             theme: 'string',
+            latitude: { type: 'string', optional: true },
+            longitude: { type: 'string', optional: true },
+            playerId: { type: 'string', optional: true },
             isSync: 'bool'
         }
     };
@@ -146,7 +168,6 @@ import { Config } from './';
             description: 'string'
         }
     };       
-
 
 /** Database class
  *      This class controlls communication between the app and the databases (both local and remote)
@@ -302,7 +323,9 @@ import { Config } from './';
                     case 'Person':
                         return Person;
                     case 'Project':
-                        return Project;                        
+                        return Project;       
+                    case 'Office':
+                        return Office;                 
                     default:
                         return Session;
                 }
@@ -353,7 +376,7 @@ import { Config } from './';
          */
             static realm(table, fields, action, filter) {
                 const realm = new Realm({ 
-                    schema: [Session, Person, Project]   
+                    schema: [Session, Person, Project, Office]   
                 });
 
                 let data;

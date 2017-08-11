@@ -304,14 +304,29 @@ BEGIN
 						'"avatar":"',getAvatar(personId),'",',
 						'"abbr":"',getPersonAbbr(personId),'",',
 						'"person":"',getFullName(personId),'",',
-                        '"theme":"',ifnull(p.theme,'#555555'),'"',
+                        '"theme":"',ifnull(p.theme,'#555555'),'",',
+                        '"playerIds":"',getPlayerIds(personId),'"',
                     '}') separator ','),
 				  ']') INTO _members
     FROM taskMember as t
     INNER JOIN person as p on p.id = t.personId
-    WHERE taskId = _taskId and t.roleId = _roleId;
+    WHERE taskId = _taskId and t.roleId = ifnull(_roleId, t.roleId);
     
     RETURN _members;
+
+END$$
+
+DELIMITER $$
+DROP FUNCTION IF EXISTS getPlayerIds$$
+CREATE FUNCTION getPlayerIds(_personId int) RETURNS text
+BEGIN
+
+	DECLARE _playerId text;
+	SELECT CONCAT_WS(',',os_android, os_ios) INTO _playerId
+	FROM person
+	WHERE id = _personId;
+    
+    RETURN _playerId;
 
 END$$
 

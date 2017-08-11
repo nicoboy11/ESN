@@ -9,7 +9,7 @@ const session = Database.realm('Session', { }, 'select', '');
 
 class MainForm extends Component {
 
-    state = { elements: [], isLoading: false, showMenu: false, offset: 0, personId: 0 };
+    state = { elements: [], isLoading: false, showMenu: false, offset: 0, personId: 0, isCheckedIn: false };
 
     componentWillMount() {
         this.setState({ isLoading: true });
@@ -26,23 +26,6 @@ class MainForm extends Component {
             this.onSuccess.bind(this),
             this.onError.bind(this)
         );
-
-        this.watchId = navigator.geolocation.watchPosition(
-            (position) => {
-                this.setState({
-                    latitude: position.coords.latitude,
-                    longitude: position.coords.longitude,
-                    locationError: null
-                });
-                Alert.alert('Location', position.coords.latitude + ',' + position.coords.longitude);
-            },
-            (error) => this.setState({ locationError: error.message }),
-            { enableHighAccuracy: true, distanceFilter: 10 }
-        );
-    }
-
-    componentWillUnmount() {
-        navigator.geolocation.clearWatch(this.watchId);
     }
 
     onError(error) {

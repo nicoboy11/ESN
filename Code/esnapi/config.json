@@ -13,5 +13,8 @@
         "avatar":"avt_",
         "postatt": "pst_",
         "projatt": "proj_"
+    },
+    "server": {
+        "url": "http://ec2-34-211-203-109.us-west-2.compute.amazonaws.com:3001/"
     }
 }

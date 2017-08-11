@@ -236,6 +236,37 @@ class Chat extends Component {
         );
     }
 
+    refreshList() {
+        this.chatList.refreshing = true;
+        this.setState({
+            visibleElements: this.state.elements.slice(-this.state.visibleElements.length - 10)
+        });
+    }
+
+    renderAttachment(item) {
+        const { 
+            bubbleImgStyle
+        } = styles;
+
+        if (item.attachment === undefined || item.attachment === '' || item.attachment === null) {
+            return <View />;
+        }
+
+        return (
+            <View>
+                <Image 
+                    style={bubbleImgStyle} 
+                    source={{ uri: Config.network.server + 'thumbs/blured/' + item.attachment }} 
+                />
+                <View style={{ position: 'absolute', right: 5, top: 75 }}>
+                    <TouchableOpacity>
+                        <Image source={{ uri: 'download' }} style={{ width: 30, height: 30, tintColor: 'black' }} />
+                    </TouchableOpacity>
+                </View>
+            </ View>
+        );  
+    }
+
     renderMessages({ item }) {
         const { 
             bubbleLeftStyle,
@@ -268,10 +299,7 @@ class Chat extends Component {
                     <View style={{ flexDirection: 'row' }} >
                         <View style={spacer} />                        
                         <View style={[bubbleRightStyle, (item.key === 'loading') ? { opacity: 0.5 } : {}]}>
-                            <Image 
-                                style={(item.attachment) ? bubbleImgStyle : {}} 
-                                source={{ uri: Config.network.server + 'thumbs/blured/' + item.attachment }} 
-                            />
+                            {this.renderAttachment(item)}
                             <Text style={{ color: colors.mainText }}>{item.message}</Text>
                             <Text style={dateBubble}>{Helper.prettyfyDate(item.messageDate).date}</Text>
                         </View> 
@@ -283,10 +311,7 @@ class Chat extends Component {
                 <View style={{ flexDirection: 'row' }} >          
                     <View style={bubbleLeftStyle}>
                         <Text style={[personBubble, { color: item.theme }]}>{item.person}</Text>
-                        <Image 
-                            style={(item.attachment) ? bubbleImgStyle : {}} 
-                            source={{ uri: Config.network.server + 'thumbs/blured/' + item.attachment }} 
-                        />                        
+                        {this.renderAttachment(item)}                      
                         <Text>{item.message}</Text>
                         <Text style={dateBubble}>{(item.sending) ? item.sending : Helper.prettyfyDate(item.messageDate).date}</Text>
                     </View>
@@ -306,6 +331,8 @@ class Chat extends Component {
                 ref={(ref) => { this.chatList = ref; }}
                 data={this.state.visibleElements} 
                 renderItem={this.renderMessages.bind(this)}
+                onRefresh={() => { this.refreshList(); }}
+                refreshing={false}
             />            
         );
     }

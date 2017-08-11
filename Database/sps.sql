@@ -1829,6 +1829,8 @@ BEGIN
 
 	SELECT 	tmsg.id as taskMessageId,
 			tmsg.taskId,
+            t.name as taskName,
+            t.projectId,
 			tmsg.personId,
             getAvatar(tmsg.personId) as avatar,
             getFullName(tmsg.personId) as person,
@@ -1838,7 +1840,8 @@ BEGIN
             attachment,
 			attachmentTypeId,
             formatDate(messageDate) messageDate,
-            p.theme
+            p.theme,
+            getJsonMembers(t.id, NULL) as members
     FROM task as t
     INNER JOIN taskMessage as tmsg on tmsg.taskId = t.id
     INNER JOIN person as p on p.id = tmsg.personId
