@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
-import { ScrollView, ActivityIndicator, Alert, View } from 'react-native';
+import { ScrollView, ActivityIndicator, Alert, View, TouchableWithoutFeedback, Keyboard } from 'react-native';
 import { Actions } from 'react-native-router-flux';
-import { Form, CardList, NewCard, FlatListe, Label } from '../components';
+import { Form, CardList, NewCard, FlatListe, TaskCard3} from '../components';
 import { Config, Database } from '../settings';
 
 const { texts, network, colors } = Config;
@@ -9,9 +9,11 @@ const data = Database.realm('Session', { }, 'select', '');
 
 class TaskForm extends Component {
 
-    state = { elements: [], isLoading: false, newTaskText: '', isLoadingTask: false, rightButton: 'search' };
+    state = { elements: [], isLoading: false, newTaskText: '', isLoadingTask: false, leftButton: 'back', rightButton: 'search' };
 
     componentWillMount() {
+        this.setState({ title: this.props.title });
+
         if (data[0] === undefined) {
             Database.realm('Session', { }, 'delete', '');
             Actions.authentication();
@@ -50,12 +52,32 @@ class TaskForm extends Component {
     }
 
     onPressRight() {
-        if (this.state.rightButton === 'search') {
-            this.setState({ isSearching: true, rightButton: 'cancel' });
-        } else if (this.state.rightButton === 'cancel') {
-            this.setState({ isSearching: false, rightButton: 'search', visibleTasks: this.state.elements });
-        } else {
-            //
+        switch (this.state.rightButton) {
+            case 'search': 
+                this.setState({ isSearching: true, rightButton: 'cancel' });
+                return;
+            case 'cancel':
+                this.setState({ isSearching: false, rightButton: 'search', visibleTasks: this.state.elements });
+                return;
+            case 'ok':        
+                this.createTask();          
+            default:
+                return;
+        }
+    }
+
+    onPressLeft() {
+        switch (this.state.leftButton) {
+            case 'cancel':
+                this.setState({ rightButton: 'search', leftButton: 'back', title: this.props.title, listStyle: {} });
+                this.listWrapper.disabled = false;
+                Keyboard.dismiss();
+                return;
+            case 'back':
+                Actions.pop();
+                return;
+            default:
+                return;
         }
     }
 
@@ -123,6 +145,17 @@ class TaskForm extends Component {
         this.setState({ 
             isLoadingTask: true
         });
+
+        this.setState({ 
+            rightButton: 'search', 
+            leftButton: 'back', 
+            title: this.props.title, 
+            listStyle: {},
+            isLoadingTask: true 
+        });
+        this.listWrapper.disabled = false;
+        Keyboard.dismiss();  
+
         Database.request2('POST', 'task', 
             {
                 name: this.state.newTaskText,
@@ -134,30 +167,43 @@ class TaskForm extends Component {
         );                   
     }
 
+    focusedNewCard() {
+        this.setState({ rightButton: 'ok', leftButton: 'cancel', title: '', listStyle: { opacity: 0.2 } });
+        this.listWrapper.disabled = true;
+    }    
+
     renderList() {
         if (this.state.isLoading) {
             return <ActivityIndicator size='large' />;
         }
 
         return (
-            <FlatListe 
-                keyEx='taskId'
-                itemType='task'
-                data={this.state.visibleTasks}
-                initialNumToRender={4}
-                onPress={(props) => { this.openComments(props); }}
-                updateFromChildren={(update) => this.updateFromChildren(update)}
-            />                       
+            <TouchableWithoutFeedback ref={(listWrapper) => { this.listWrapper = listWrapper; }}>
+                <View style={this.state.listStyle} >
+                    <FlatListe 
+                        keyEx='taskId'
+                        itemType='task'
+                        data={this.state.visibleTasks}
+                        initialNumToRender={4}
+                        onPress={(props) => { this.openComments(props); }}
+                        updateFromChildren={(update) => this.updateFromChildren(update)}
+                    />      
+                </View>  
+            </TouchableWithoutFeedback>               
         );        
     }
 
     renderNewTaskLoad() {
         if (this.state.isLoadingTask) {
             return (
-                <View style={{ flexDirection: 'row', loading: this.state.loadingTask, alignSelf: 'center', margin: 10 }}>
-                    <Label>{this.state.newTaskText}</Label>
-                    <ActivityIndicator size='small' />
-                </View>                  
+                <TaskCard3 
+                title={this.state.newTaskText}
+                subtitle=''
+                id={0}
+                onPress={(props) => {}}
+                data={{ creator: '[{"avatar":"","theme":"#FFF"}]', progress: 0 }}
+                updateFromChildren={(update) => {}}
+                />               
             );
         }
 
@@ -168,10 +214,10 @@ class TaskForm extends Component {
         return (
             <Form
                 rightIcon={this.state.rightButton}
-                leftIcon='back'
-                onPressLeft={() => Actions.pop()}
+                leftIcon={this.state.leftButton}
+                onPressLeft={() => this.onPressLeft()}
                 onPressRight={() => this.onPressRight()}
-                title={this.props.title}
+                title={this.state.title}
                 onSearch={this.onSearch.bind(this)}
                 isSearching={this.state.isSearching}
                 menuList={
@@ -180,14 +226,15 @@ class TaskForm extends Component {
                     ]
                 }
             >
-                <ScrollView style={{  }}>
+                <ScrollView>
                     {/*Aqui va para la nueva tarea*/} 
                     <NewCard
                         value={this.state.newTaskText}
-                        onChangeText={(newTaskText) => this.setState({ newTaskText })}
+                        onChangeText={(newTaskText) => this.setState({ newTaskText, title: newTaskText })}
                         onSubmitEditing={this.createTask.bind(this)}
+                        onFocus={this.focusedNewCard.bind(this)}
                         placeholder='Type a new task'
-                    />                
+                    />   
                     {this.renderNewTaskLoad()}
                     {this.renderList()}
                 </ScrollView>                

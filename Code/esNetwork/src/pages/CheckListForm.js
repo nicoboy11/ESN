@@ -106,6 +106,7 @@ class CheckListForm extends Component {
                         value={this.state.newCheckList}
                         onChangeText={(newCheckList) => this.setState({ newCheckList })}
                         onSubmitEditing={this.createCheckListItem.bind(this)}
+                        onFocus={() => {}}
                         placeholder='Type a new checklist item'
                     />                   
                     <FlatListe

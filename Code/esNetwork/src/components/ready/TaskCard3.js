@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { View, StyleSheet, Text, TouchableOpacity, Image, Alert } from 'react-native';
+import { View, StyleSheet, Text, TouchableOpacity, Image, Alert, ActivityIndicator } from 'react-native';
 import { Config, Helper, Database } from '../../settings';
 import { Avatar, DateDue } from '../';
 const { colors, font } = Config;
@@ -33,6 +33,7 @@ class TaskCard3 extends Component {
             Alert.alert('Authentication Error');
         } else {
             Alert.alert('Unable to save the data.', `Code: ${this.state.status}, ${error.message}`);
+            this.setState({ isChecking: false });
         }
     }
 
@@ -43,7 +44,7 @@ class TaskCard3 extends Component {
             const data = this.state.data;
             data.stateId = this.state.newStateId;
 
-            this.setState({ data });
+            this.setState({ data, isChecking: false });
             this.props.updateFromChildren(data);
         }        
     }
@@ -67,6 +68,7 @@ class TaskCard3 extends Component {
 
     toogleTask() {
         let stateId = this.state.data.stateId;
+        this.setState({ isChecking: true });
         if (stateId === 1) {
             this.setState({ newStateId: 2 });
             stateId = 2;
@@ -88,13 +90,36 @@ class TaskCard3 extends Component {
         );        
     }
 
+    renderCheck(data) {
+        const {
+            checkImage,
+            uncheckImage
+        } = styles;
+
+        if (this.state.isChecking) {
+            return <ActivityIndicator size='small' />;
+        }
+
+        if (data.stateId !== 1) {
+            return (<Image 
+                        source={{ uri: 'checked' }}
+                        style={checkImage}
+                        tintColor={colors.main}
+            />);
+        }
+
+        return (<Image 
+                    source={{ uri: 'unchecked' }}
+                    style={uncheckImage}
+                    tintColor={colors.secondText}
+        />);         
+    }
+
     render() {
         const {
             containerStyle,
             topContainerStyle,
             bottomContainerStyle,
-            checkImage,
-            uncheckImage,
             percentStyle,
             percentText,
             subTitleContainer,
@@ -103,8 +128,7 @@ class TaskCard3 extends Component {
             titlecontainer,
             smallTitle,
             smallContainers,
-            separator,
-            chevronClosed
+            separator
         } = styles;
 
         const { data, date, subtitle, title, id, onPress } = this.state;
@@ -118,26 +142,29 @@ class TaskCard3 extends Component {
                         <View style={[percentStyle, { borderColor: Helper.prettyfyDate(date).color }]}>
                             <Text style={percentText}>{`${data.progress}%`}</Text>
                         </View>
-                        <View style={{ flex: 1 }}>
-                            <View style={[subTitleContainer, { flex: 1, marginTop: 10 }]}>
-                                <Text style={subTitleText}>{subtitle}</Text>
-                            </View>
+                        <View style={{ flex: 1, justifyContent: 'space-around' }}>
                             <View style={[titlecontainer, { flex: 1 }]}>
                                 <Text style={titleText}>{title}</Text>
-                            </View>
-                            <View style={[subTitleContainer, { flex: 1, marginBottom: 10 }]}>
-                                <Avatar 
-                                    avatar={creator.avatar}
-                                    color={creator.theme}
-                                    size='mini'
-                                    name={creator.person}
-                                    nameColor={colors.secondText}
-                                />
-                            </View>                            
+                            </View>                                   
+                            <View style={[subTitleContainer, { flex: 1, marginTop: 10 }]}>
+                                <Text style={subTitleText}>{subtitle}</Text>
+                            </View>                  
                         </View>
                     </View>
                 </TouchableOpacity>                
                 <View style={bottomContainerStyle}>
+                    <View style={[smallContainers, separator, { flex: 0.5 }]}>
+                        <TouchableOpacity
+                            style={{ flex: 1, alignSelf: 'center' }}
+                            onPress={() => onPress(this.props)}
+                        >
+                                <Avatar 
+                                    avatar={creator.avatar}
+                                    color={creator.theme}
+                                    size='medium'
+                                />
+                        </TouchableOpacity>
+                    </View>                       
                     <View style={[smallContainers, separator]}>
                         <DateDue 
                             ref={(date) => { this.dueDate = date; }}
@@ -153,33 +180,9 @@ class TaskCard3 extends Component {
                         <TouchableOpacity
                             onPress={this.toogleTask.bind(this)}
                         >
-                            {
-                                (data.stateId !== 1) ?
-                                <Image 
-                                    source={{ uri: 'checked' }}
-                                    style={checkImage}
-                                    tintColor={colors.main}
-                                /> :
-                                <Image 
-                                    source={{ uri: 'unchecked' }}
-                                    style={uncheckImage}
-                                    tintColor={colors.secondText}
-                                />                                 
-                            }
+                            {this.renderCheck(data)}
                         </TouchableOpacity>
-                    </View>         
-                    <View style={[smallContainers, { flex: 0.5 }]}>
-                        <TouchableOpacity
-                            style={{ flex: 1, alignSelf: 'center' }}
-                            onPress={() => onPress(this.props)}
-                        >
-                            <Image 
-                                source={{ uri: 'chevron' }}
-                                style={chevronClosed}
-                                tintColor={colors.mainDark}
-                            />
-                        </TouchableOpacity>
-                    </View>                                  
+                    </View>                                        
                 </View>                
             </View>
         );

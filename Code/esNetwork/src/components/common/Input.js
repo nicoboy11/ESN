@@ -35,6 +35,7 @@ class Input extends Component {
 
     onFocus() {
         this.setState({ isFocused: true });
+        this.props.onFocus();
     }
 
     onBlur() {
@@ -141,6 +142,7 @@ class Input extends Component {
                     returnKeyType={this.props.returnKeyType}
                     placeholder={(this.props.label ? this.props.label : this.props.placeholder)}
                     multiline={this.props.multiline}
+                    blur={this.props.blur}
                 />
                 <Text style={styles.errorTextStyle} >{this.renderError()}</Text>
             </View>
