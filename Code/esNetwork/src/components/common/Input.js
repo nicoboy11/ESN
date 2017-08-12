@@ -35,7 +35,9 @@ class Input extends Component {
 
     onFocus() {
         this.setState({ isFocused: true });
-        this.props.onFocus();
+        if (this.props.onFocus) {
+            this.props.onFocus();
+        }
     }
 
     onBlur() {

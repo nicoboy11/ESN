@@ -70,8 +70,8 @@ class TaskCard3 extends Component {
         let stateId = this.state.data.stateId;
         this.setState({ isChecking: true });
         if (stateId === 1) {
-            this.setState({ newStateId: 2 });
-            stateId = 2;
+            this.setState({ newStateId: 5 });
+            stateId = 5;
         } else {
             this.setState({ newStateId: 1 });
             stateId = 1;
@@ -131,13 +131,24 @@ class TaskCard3 extends Component {
             separator
         } = styles;
 
-        const { data, date, subtitle, title, id, onPress } = this.state;
+        const { data, date, subtitle, title, id, onPress, onLongPress, selected } = this.state;
 
         const creator = JSON.parse(data.creator)[0];
 
-        return (
+        return (            
             <View key={id} style={[containerStyle, (data.stateId === 1) ? {} : { opacity: 0.4 }]}>
-                <TouchableOpacity onPress={() => onPress(this.props)}>                
+                {
+                    (selected) ?
+                    
+                        <View style={{ zIndex: 100, position: 'absolute', top: 0, bottom: 0, left: 0, right: 0 }}>
+                            <TouchableOpacity style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }} onPress={() => onPress(this.props)}> 
+                                <View style={{ opacity: 0.6, backgroundColor: colors.main, position: 'absolute', top: 0, bottom: 0, left: 0, right: 0 }} />
+                                <Image style={{ width: 50, height: 50, tintColor: colors.elementBackground }} source={{ uri: 'ok' }} />
+                            </TouchableOpacity>                                
+                        </View> :
+                    <View />
+                }                  
+                <TouchableOpacity onPress={() => onPress(this.props)} onLongPress={() => onLongPress(this.props)}>                
                     <View style={topContainerStyle}>
                         <View style={[percentStyle, { borderColor: Helper.prettyfyDate(date).color }]}>
                             <Text style={percentText}>{`${data.progress}%`}</Text>

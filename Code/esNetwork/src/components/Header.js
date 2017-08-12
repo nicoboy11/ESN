@@ -30,8 +30,8 @@ class Header extends Component {
         }
     }
 
-    onPressRight() {
-        this.props.onPressRight();
+    onPressRight(pressedIcon) {
+        this.props.onPressRight(pressedIcon);
     }
 
     onChangeText(text) {
@@ -83,11 +83,21 @@ class Header extends Component {
             return <View style={{ paddingLeft: 10 }} />;
         }
 
-        return (
-            <TouchableOpacity style={{ width: 44 }} onPress={this.onPressRight.bind(this)} >
-                {this.renderButton(rightIcon, rightColor)}
-            </TouchableOpacity>               
-        );
+        const iconsArray = rightIcon.split(',');
+        let buttonsJSX = [];
+        for (let i = 0; i < iconsArray.length; i++) {
+            buttonsJSX.push(
+                <TouchableOpacity 
+                    key={iconsArray[i]}
+                    style={{ width: 44 }} 
+                    onPress={() => { this.onPressRight(iconsArray[i]); }} 
+                >
+                    {this.renderButton(iconsArray[i], rightColor)}
+                </TouchableOpacity>                   
+            );
+        }
+
+        return buttonsJSX;
     }    
 
     renderTitle() {
@@ -173,6 +183,7 @@ const styles = StyleSheet.create({
     },
     localTitleStyle: {
         fontSize: 18,
+        lineHeight: 20,
         color: Config.colors.mainDark,
         textAlign: 'left',
         flex: 3,

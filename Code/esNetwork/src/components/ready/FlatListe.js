@@ -21,7 +21,7 @@ class FlatListe extends PureComponent {
 
     shouldComponentUpdate(nextProps, nextState) {
 
-        if (this.props.data !== nextProps.data || nextState !== this.state) {
+        if (this.props.data !== nextProps.data || nextState !== this.state ) {
             return true;
         }
 
@@ -113,8 +113,10 @@ class FlatListe extends PureComponent {
                         title={item.name}
                         subtitle={item.projectName}
                         date={item.dueDate}
+                        selected={item.selected}
                         id={item.taskId}
                         onPress={(props) => { this.props.onPress(props); }}
+                        onLongPress={(props) => { this.props.onLongPress(props); }}
                         data={item}
                         updateFromChildren={(update) => this.props.updateFromChildren(update)}
                      />
