@@ -30,7 +30,7 @@ class TaskMessageForm extends Component {
             }
 
     componentWillMount() {
-        //BackHandler.addEventListener('hardwareBackPress', this.onPressBack.bind(this));
+        BackHandler.addEventListener('hardwareBackPress', this.onPressBack.bind(this));
         const props = JSON.parse(JSON.stringify(this.state.taskData));
         props.allNotif = 0;
         this.setState({ taskData: props });        
@@ -40,12 +40,17 @@ class TaskMessageForm extends Component {
         this.setState(newProps);
     }
 
+    componentWillUnmount() {
+        BackHandler.removeEventListener('hardwareBackPress', this.onPressBack.bind(this));
+    }
+
     onUpdateChild(updatedTask) {
         this.setState({ taskData: updatedTask });
     }
 
     onPressBack() {
         Actions.pop({ refresh: { updated: this.state.taskData } });
+        return true;
     }
 
     renderForm() {

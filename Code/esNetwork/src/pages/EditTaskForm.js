@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { ScrollView, View, Slider, Modal, Text, StyleSheet, Alert } from 'react-native';
+import { ScrollView, View, Slider, Modal, Text, StyleSheet, Alert, BackHandler } from 'react-native';
 import { Actions } from 'react-native-router-flux';
 import { 
     ESModal, 
@@ -43,6 +43,7 @@ class EditTaskForm extends Component {
     }
 
     componentWillMount() {
+        BackHandler.addEventListener('hardwareBackPress', this.onPressBack.bind(this));
         if (this.state.leader !== null) {
             this.setState({ leader: JSON.parse(this.state.leader)[0] });
         } else {
@@ -56,6 +57,10 @@ class EditTaskForm extends Component {
         }
     }
 
+    componentWillUnmount() {
+        BackHandler.removeEventListener('hardwareBackPress', this.onPressBack.bind(this));        
+    }
+
     onLeaderSelected(text, value) {
         Database.request(
             'PUT',
@@ -66,6 +71,11 @@ class EditTaskForm extends Component {
             this.onSuccessLeader.bind(this),
             this.onError.bind(this)
         );        
+    }
+
+    onPressBack() {
+        this.backToMain();
+        return true;        
     }
 
     onCollaboratorSelected(text, value) {

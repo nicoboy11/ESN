@@ -95,7 +95,7 @@ class RouterComponent extends Component {
                 }
             },
             (error) => this.setState({ locationError: error.message }),
-            { enableHighAccuracy: false, distanceFilter: 10 }
+            { enableHighAccuracy: true, distanceFilter: 50 }
         );          
     }
 

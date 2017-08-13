@@ -20,7 +20,7 @@ import { Config, Helper, Database } from '../settings';
 const { colors } = Config;
 
 class ProjectForm extends Component {
-    state = { isLoading: true, selectedProjects: null, title: 'Projects', rightButton: 'search', visibleProjects: [] }
+    state = { isLoading: true, selectedProjects: null, title: 'Projects', showCancelButton: 'menu', rightButton: 'search', visibleProjects: [] }
     componentWillMount() {
         const data = Database.realm('Session', { }, 'select', '');
 
@@ -137,7 +137,7 @@ class ProjectForm extends Component {
         this.setState({ 
             selectedProjects: null, 
             rightButton: 'search', 
-            showCancelButton: undefined, 
+            showCancelButton: 'menu', 
             title: 'Projects', 
             projects,
             visibleProjects: projects
@@ -286,6 +286,23 @@ class ProjectForm extends Component {
         );
     }
 
+    renderNotifications(data) {
+        const {
+            badgeStyle,
+            badgeText
+        } = styles;
+
+        if (data.allNotif > 0) {
+            return (
+                <View style={badgeStyle}>
+                    <Label style={badgeText}>{data.allNotif}</Label>
+                </View>
+            );
+        }
+
+        return <View />;
+    }
+
     renderItem({ item }) {
         const { 
             projectStyle, 
@@ -350,6 +367,7 @@ class ProjectForm extends Component {
                                 {`${Helper.prettyfyDate(item.startDate).date} - ${Helper.prettyfyDate(item.dueDate).date}`}
                             </Label>
                         </View>
+                        {this.renderNotifications(item)}
                         {/* <View style={{ flex: 1, alignItems: 'flex-end' }}>
                             <TouchableHighlight>
                                 <Image style={{ tintColor: colors.secondText, width: 14, height: 14 }} source={{ uri: 'chevron' }} />
@@ -403,6 +421,13 @@ class ProjectForm extends Component {
                 onPressLeft={() => this.unSelect()}
                 onSearch={this.onSearch.bind(this)}
                 isSearching={this.state.isSearching}
+                menuList={
+                    [
+                        { name: 'Profile', form: 'profile', id: this.state.personId },
+                        { name: 'Logout', form: 'authentication', id: 0 }
+
+                    ]
+                }                
             >
                 <View style={mainContainer}>
                     {this.renderProjects()}
@@ -485,6 +510,19 @@ const styles = new StyleSheet.create({
         borderColor: colors.main, 
         borderRadius: 15,
         tintColor: colors.main        
+    },
+    badgeStyle: {
+        width: 20,
+        height: 20,
+        borderRadius: 10,
+        backgroundColor: colors.main,
+        margin: 10,
+        justifyContent: 'center',
+        alignItems: 'center'
+    },
+    badgeText: {
+        fontSize: 14,
+        color: colors.mainText
     }
 });
 

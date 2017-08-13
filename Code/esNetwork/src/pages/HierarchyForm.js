@@ -230,8 +230,16 @@ class HierarchyForm extends Component {
         return (
             <Form
                 title={texts.managePeople}
+                leftIcon='menu'
                 rightIcon='plus'
                 onPressRight={() => Actions.newHierarchyForm()}
+                menuList={
+                    [
+                        { name: 'Profile', form: 'profile', id: this.state.personId },
+                        { name: 'Logout', form: 'authentication', id: 0 }
+
+                    ]
+                }                
             >
                 {this.renderList()}
             </Form>

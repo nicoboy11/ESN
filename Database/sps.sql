@@ -1304,12 +1304,22 @@ BEGIN
                     getTaskCount(p.id, 1) as activeTasks,
                     getTaskCount(p.id, NULL) as totalTasks,
                     getProjectProgress(p.id) as progress,
-                    getProjectMembers(p.id,1) as members
+                    getProjectMembers(p.id,1) as members,
+                    sum(ifnull(vwn.taskNotif,0) + ifnull(vwn.chatNotif,0) + ifnull(vwn.checkNotif,0)) as allNotif                   
 	FROM project as p
     LEFT JOIN projectMember as pm on pm.projectId = p.id
     LEFT JOIN task as t on t.projectId = p.id
 	LEFT JOIN taskMember as tm on tm.taskId = t.id
-	WHERE p.id = _projectId and p.stateId in (1,5);
+    LEFT JOIN vwTaskNotifications as vwn on vwn.taskId = t.id    
+	WHERE p.id = _projectId and p.stateId in (1,5)
+    GROUP BY p.id,
+                    p.name,
+					p.abbr,
+					p.startDate,
+					p.creatorId,
+					p.dueDate,
+					p.logo,
+                    p.stateId;
 
 END$$
 
@@ -1332,12 +1342,24 @@ BEGIN
                     getTaskCount(p.id, 1) as activeTasks,
                     getTaskCount(p.id, NULL) as totalTasks,
                     /*ifnull((getTaskCount(p.id, NULL)  - getTaskCount(p.id, 1))/getTaskCount(p.id, NULL),0) as progress,*/getProjectProgress(p.id) as progress,
-                    getProjectMembers(p.id,null) as members
+                    getProjectMembers(p.id,null) as members,
+                    sum(ifnull(vwn.taskNotif,0) + ifnull(vwn.chatNotif,0) + ifnull(vwn.checkNotif,0)) as allNotif     
 	FROM project as p
     LEFT JOIN projectMember as pm on pm.projectId = p.id
     LEFT JOIN task as t on t.projectId = p.id
 	LEFT JOIN taskMember as tm on tm.taskId = t.id
+	LEFT JOIN vwTaskNotifications as vwn on vwn.taskId = t.id        
 	WHERE (pm.personId = _personId OR tm.personId = _personId) AND p.stateId in (1, 5)
+    GROUP BY p.id,
+                    p.name,
+					p.id,
+					p.name,
+					p.abbr,
+					p.startDate,
+					p.creatorId,
+					p.dueDate,
+					p.logo,
+                    p.stateId
     ORDER BY p.stateId;
 
 END$$
@@ -1546,6 +1568,10 @@ BEGIN
         progress = coalesce(_progress, progress),
         lastChanged = NOW()
 	WHERE id = _taskId;
+    
+     UPDATE taskMember
+    SET lastSeen = NOW()
+    WHERE taskId = _taskId AND personId = _personId;   
 
 END$$
 
@@ -1843,6 +1869,10 @@ BEGIN
 
 	INSERT INTO taskMessage (taskId, personId, message, messageTypeId, attachment, attachmentTypeId, messageDate)
     VALUES(_taskId, _personId, _message, _messageTypeId, _attachment, _attachmentTypeId, NOW() );
+    
+    UPDATE taskMember
+    SET lastSeen = NOW()
+    WHERE taskId = _taskId AND personId = _personId;
     
     SET @taskMessageId = LAST_INSERT_ID();
     

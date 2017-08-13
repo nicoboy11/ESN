@@ -401,7 +401,8 @@ CREATE VIEW vwTaskNotifications AS
 	INNER JOIN taskMember as tm on tm.taskId = tk.id
 	LEFT JOIN vwSeenNotification AS SC1 on tk.id = SC1.taskId and SC1.personId = tm.personId
 	LEFT JOIN vwMessageNotification AS SC2 on tk.id = SC2.taskId and SC2.personId = tm.personId
-	LEFT JOIN vwCheckListNotification AS SC3 on tk.id = SC3.taskId and SC3.personId = tm.personId;$$
+	LEFT JOIN vwCheckListNotification AS SC3 on tk.id = SC3.taskId and SC3.personId = tm.personId
+    WHERE tk.stateId in (1);$$
 
 
 

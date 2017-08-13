@@ -68,6 +68,14 @@ class TimeSheetForm extends Component {
         return (
             <Form
                 title={texts.timesheet}
+                leftIcon='menu'
+                menuList={
+                    [
+                        { name: 'Profile', form: 'profile', id: this.state.personId },
+                        { name: 'Logout', form: 'authentication', id: 0 }
+
+                    ]
+                }                
             >
                 <ScrollView>
                     <Button 

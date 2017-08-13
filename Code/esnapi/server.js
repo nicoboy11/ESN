@@ -118,6 +118,19 @@ var apiRoutes = express.Router();
             conn,function(error,result){
                 if(data.handle(error,res,true)){
                     res.status(200).end( JSON.stringify(result[0]) );
+
+                    console.log(config.server.url + 'thumbs/big/' + resultObj.avatar);
+                    var message = { 
+                        app_id: "9b857769-1cfb-4dbf-9e00-8c7c22c1f24e",
+                        contents: {"en": resultObj.names + " joined the network "},
+                        headings: {"en": "New signup"},
+                        include_player_ids: ['179ec6c8-5339-42b6-aba6-e89c67ef4563'],
+                        android_group: "2",
+                        ios_badgeCount: 1,
+                        ios_badgeType: 'Increase'
+                    };
+
+                    helper.sendNotification(message);                     
                 }
                 
             });
