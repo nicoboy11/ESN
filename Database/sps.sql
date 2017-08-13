@@ -1223,8 +1223,8 @@ BEGIN
 			SIGNAL sqlstate 'ERROR' SET message_text = 'The start date is greater than the end date.';
 		END IF;
 
-		INSERT INTO project ( name, abbr, startDate, creatorId, dueDate, logo )
-		VALUES ( _name, _abbr, _startDate, _creatorId, _dueDate, _logo );
+		INSERT INTO project ( name, abbr, startDate, creatorId, dueDate, logo, stateId )
+		VALUES ( _name, _abbr, _startDate, _creatorId, _dueDate, _logo, 1 );
 		
 		SET _projectId = LAST_INSERT_ID();
 
@@ -1240,21 +1240,48 @@ END$$
 DELIMITER $$
 DROP PROCEDURE IF EXISTS `EditProject`$$
 CREATE PROCEDURE `EditProject` (	IN _id int, 			IN _name varchar(250), 	IN _abbr varchar(10), 	IN _startDate datetime, 
-									IN _dueDate datetime, 	IN _logo varchar(255) )
+									IN _dueDate datetime, 	IN _logo varchar(255), IN _stateId int )
 BEGIN
+    
+	DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+    
+		GET DIAGNOSTICS CONDITION 1 @sqlstate = RETURNED_SQLSTATE, @errno = MYSQL_ERRNO, @text = MESSAGE_TEXT; 
+			SET @full_error = CONCAT("ERROR ", @errno, " (", @sqlstate, "): ", @text); 
+		ROLLBACK;
+        
+        INSERT INTO esnLog ( errorDescription, dateOfError, personId )
+        VALUES (@full_error, NOW(), _creatorId );
+        
+		SIGNAL sqlstate 'ERROR' SET message_text = @full_error;
+            
+    END;
 
-	IF(areValidDates(_startDate,_dueDate) = FALSE) THEN
-		SIGNAL sqlstate 'ERROR' SET message_text = 'The start date is greater than the end date.';
-    END IF;
+	START TRANSACTION;
 
-	UPDATE project 
-    SET name = coalesce(_name, name),
-		abbr = coalesce(_abbr, abbr), 
-        startDate = coalesce(_startDate,startDate),
-        dueDate = coalesce(_dueDate, dueDate),
-        logo = coalesce(_logo,logo),
-        lastChanged = NOW()
-	WHERE id = _id;
+		IF(areValidDates(_startDate,_dueDate) = FALSE) THEN
+			SIGNAL sqlstate 'ERROR' SET message_text = 'The start date is greater than the end date.';
+		END IF;
+        
+        IF(_stateId = 2) THEN
+			UPDATE task
+            SET stateId = 2
+            WHERE projectId = _id;
+        END IF;
+		
+		UPDATE project 
+		SET name = coalesce(_name, name),
+			abbr = coalesce(_abbr, abbr), 
+			startDate = coalesce(_startDate,startDate),
+			dueDate = coalesce(_dueDate, dueDate),
+			logo = coalesce(_logo,logo),
+			lastChanged = NOW(),
+			stateId = coalesce(_stateId, stateId)
+		WHERE id = _id;
+        
+    COMMIT;       
+    
+    CALL GetProject(_id);
 
 END$$
 
@@ -1273,6 +1300,7 @@ BEGIN
 					p.creatorId,
 					p.dueDate,
 					p.logo,
+                    p.stateId,
                     getTaskCount(p.id, 1) as activeTasks,
                     getTaskCount(p.id, NULL) as totalTasks,
                     getProjectProgress(p.id) as progress,
@@ -1281,7 +1309,7 @@ BEGIN
     LEFT JOIN projectMember as pm on pm.projectId = p.id
     LEFT JOIN task as t on t.projectId = p.id
 	LEFT JOIN taskMember as tm on tm.taskId = t.id
-	WHERE p.id = _projectId;
+	WHERE p.id = _projectId and p.stateId in (1,5);
 
 END$$
 
@@ -1300,6 +1328,7 @@ BEGIN
 					p.creatorId,
 					p.dueDate,
 					p.logo,
+                    p.stateId,
                     getTaskCount(p.id, 1) as activeTasks,
                     getTaskCount(p.id, NULL) as totalTasks,
                     /*ifnull((getTaskCount(p.id, NULL)  - getTaskCount(p.id, 1))/getTaskCount(p.id, NULL),0) as progress,*/getProjectProgress(p.id) as progress,
@@ -1308,7 +1337,7 @@ BEGIN
     LEFT JOIN projectMember as pm on pm.projectId = p.id
     LEFT JOIN task as t on t.projectId = p.id
 	LEFT JOIN taskMember as tm on tm.taskId = t.id
-	WHERE pm.personId = _personId OR tm.personId = _personId;
+	WHERE (pm.personId = _personId OR tm.personId = _personId) AND p.stateId in (1, 5);
 
 END$$
 
@@ -1551,7 +1580,7 @@ BEGIN
     /*LEFT JOIN projectTeam as pte on pte.projectId = p.id
     LEFT JOIN team as te on te.id = pte.teamId*/
     LEFT JOIN checkList as chk on chk.taskId = t.id
-    WHERE t.id = _taskId;
+    WHERE t.id = _taskId and t.stateId in (1,5);
     /*ORDER BY tm.isPinned desc;*/
 
 END$$
@@ -1795,7 +1824,7 @@ BEGIN
     LEFT JOIN vwTaskNotifications as tn on tn.taskId = t.id AND tn.personId = tm.personId
     LEFT JOIN priority as pr on pr.id = t.priorityId
     LEFT JOIN checkList as chk on chk.taskId = t.id
-    WHERE tm.personId = _personId AND t.projectId = ifnull(_projectId, t.projectId)
+    WHERE tm.personId = _personId AND t.projectId = ifnull(_projectId, t.projectId) AND t.stateId in (1,5)
     ORDER BY tm.isPinned desc, t.stateId, t.dueDate is not null desc, t.duedate;
 
 END$$   
