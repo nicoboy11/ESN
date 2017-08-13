@@ -5,13 +5,14 @@ import { CardList, Menu, Header, Form, NewCard } from '../components';
 import { Database, Config } from '../settings';
 
 const { texts, colors } = Config;
-const session = Database.realm('Session', { }, 'select', '');
+let session = {};
 
 class MainForm extends Component {
 
     state = { elements: [], isLoading: false, showMenu: false, offset: 0, personId: 0, isCheckedIn: false };
 
     componentWillMount() {
+        session = Database.realm('Session', { }, 'select', '');
         this.setState({ isLoading: true });
         //get current log in
         const personId = session[0].personId;
@@ -104,7 +105,7 @@ class MainForm extends Component {
     render() {
         return (
             <Form
-                rightIcon='menu'
+                leftIcon='menu'
                 title={texts.feed}
                 menuList={
                     [

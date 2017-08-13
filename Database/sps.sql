@@ -1337,7 +1337,8 @@ BEGIN
     LEFT JOIN projectMember as pm on pm.projectId = p.id
     LEFT JOIN task as t on t.projectId = p.id
 	LEFT JOIN taskMember as tm on tm.taskId = t.id
-	WHERE (pm.personId = _personId OR tm.personId = _personId) AND p.stateId in (1, 5);
+	WHERE (pm.personId = _personId OR tm.personId = _personId) AND p.stateId in (1, 5)
+    ORDER BY p.stateId;
 
 END$$
 
@@ -1825,7 +1826,7 @@ BEGIN
     LEFT JOIN priority as pr on pr.id = t.priorityId
     LEFT JOIN checkList as chk on chk.taskId = t.id
     WHERE tm.personId = _personId AND t.projectId = ifnull(_projectId, t.projectId) AND t.stateId in (1,5)
-    ORDER BY tm.isPinned desc, t.stateId, t.dueDate is not null desc, t.duedate;
+    ORDER BY tm.isPinned desc, t.stateId, allNotif desc, t.dueDate is not null desc, t.duedate;
 
 END$$   
 

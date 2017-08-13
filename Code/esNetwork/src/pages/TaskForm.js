@@ -12,12 +12,13 @@ import {
     StyleSheet,
     Image 
 } from 'react-native';
+import OneSignal from 'react-native-onesignal';
 import { Actions } from 'react-native-router-flux';
 import { Form, CardList, NewCard, FlatListe, TaskCard3} from '../components';
 import { Config, Database } from '../settings';
 
 const { texts, network, colors } = Config;
-const session = Database.realm('Session', { }, 'select', '');
+let session = {};
 
 class TaskForm extends Component {
 
@@ -36,6 +37,9 @@ class TaskForm extends Component {
     };
 
     componentWillMount() {
+        OneSignal.addEventListener('received', this.onReceived.bind(this));
+
+        session = Database.realm('Session', { }, 'select', '');
         this.setState({ title: this.props.title });
 
         if (session[0] === undefined) {
@@ -58,7 +62,7 @@ class TaskForm extends Component {
     }
 
     componentWillReceiveProps(newProps) {
-        let tasks = this.state.tasks;
+        let tasks = JSON.parse(JSON.stringify(this.state.tasks));
 
         for (let i = 0; i < tasks.length; i++) {
             if (tasks[i].taskId === newProps.updated.taskId) {
@@ -66,6 +70,7 @@ class TaskForm extends Component {
                 tasks[i].dueDate = newProps.updated.dueDate;
                 tasks[i].progress = newProps.updated.progress;
                 tasks[i].priorityId = newProps.updated.priorityId;
+                tasks[i].allNotif = newProps.updated.allNotif;
             }
         }
 
@@ -74,6 +79,23 @@ class TaskForm extends Component {
             visibleTasks: tasks,
             forceRender: true
         }); 
+    }
+
+    onReceived(notification) {
+        let tasks = JSON.parse(JSON.stringify(this.state.tasks));
+
+        for (let i = 0; i < tasks.length; i++) {
+            if (tasks[i].taskId === notification.payload.additionalData.taskId) {
+                tasks[i].allNotif ++;
+                Vibration.vibrate([0, 200, 200], false);
+            }
+        }
+
+        this.setState({
+            tasks,
+            visibleTasks: tasks,
+            forceRender: true
+        });         
     }
 
     onPressRight(pressedIcon) {

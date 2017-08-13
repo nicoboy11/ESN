@@ -8,7 +8,8 @@ import {
     TouchableOpacity,
     Dimensions,
     Easing,
-    Alert
+    Alert,
+    Platform
 } from 'react-native';
 import { Actions } from 'react-native-router-flux';
 import { Config, Helper } from '../settings';
@@ -117,7 +118,10 @@ class Form extends Component {
                     screen: Dimensions.get('screen') 
                 })}
             >
-                <Animated.View style={{ right: this.state.width, width: this.state.screen.width }}>
+                <Animated.View style={[menuStyle, { left: 0, width: this.state.width }]}>
+                    {this.renderList()}
+                </Animated.View>                
+                <Animated.View style={{ width: this.state.screen.width }}>
                     <Header 
                         onPressLeft={this.onLeft.bind(this)}
                         onPressRight={this.onRight.bind(this)}
@@ -137,10 +141,7 @@ class Form extends Component {
                     <View style={{ flex: 1 }}>
                         {this.props.children}
                     </View>
-                </Animated.View>
-                <Animated.View style={[menuStyle, { right: this.state.width, width: this.state.width }]}>
-                    {this.renderList()}
-                </Animated.View>                
+                </Animated.View>            
             </View>
         );
     }
@@ -155,7 +156,7 @@ const styles = new StyleSheet.create({
         backgroundColor: colors.contrastColor
     },
     menuListContainerStyle: {
-        paddingTop: 10,
+        paddingTop: (Platform.OS === 'ios') ? 30 : 10,
         paddingBottom: 10,
         paddingLeft: 10,
         borderBottomWidth: 1,

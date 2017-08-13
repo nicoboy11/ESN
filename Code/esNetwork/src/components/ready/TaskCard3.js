@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { View, StyleSheet, Text, TouchableOpacity, Image, Alert, ActivityIndicator } from 'react-native';
 import { Config, Helper, Database } from '../../settings';
-import { Avatar, DateDue } from '../';
+import { Avatar, DateDue, Label } from '../';
 const { colors, font } = Config;
 
 class TaskCard3 extends Component {
@@ -115,6 +115,23 @@ class TaskCard3 extends Component {
         />);         
     }
 
+    renderNotifications(data) {
+        const {
+            badgeStyle,
+            badgeText
+        } = styles;
+
+        if (data.allNotif > 0) {
+            return (
+                <View style={badgeStyle}>
+                    <Label style={badgeText}>{data.allNotif}</Label>
+                </View>
+            );
+        }
+
+        return <View />;
+    }
+
     render() {
         const {
             containerStyle,
@@ -161,6 +178,7 @@ class TaskCard3 extends Component {
                                 <Text style={subTitleText}>{subtitle}</Text>
                             </View>                  
                         </View>
+                        {this.renderNotifications(data)}
                     </View>
                 </TouchableOpacity>                
                 <View style={bottomContainerStyle}>
@@ -283,7 +301,20 @@ const styles = StyleSheet.create({
         width: 24,
         height: 24,
         transform: [{ rotate: '-90deg' }]
-    }    
+    },
+    badgeStyle: {
+        width: 20,
+        height: 20,
+        borderRadius: 10,
+        backgroundColor: colors.main,
+        margin: 10,
+        justifyContent: 'center',
+        alignItems: 'center'
+    },
+    badgeText: {
+        fontSize: 14,
+        color: colors.mainText
+    }
 });
 
 export { TaskCard3 };

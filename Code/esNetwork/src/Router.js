@@ -59,7 +59,7 @@ class RouterComponent extends Component {
                     locationError: null
                 });
 
-                if (session[0] !== undefined) {
+                if (session[0] !== undefined && session[0].personId !== undefined) {
                     Database.realm(
                         'Session', 
                         { 

@@ -116,7 +116,17 @@ const lang = {
                         taskDue: 'Due date',
                         //TimeSheet
                         addCheck: 'Check in/out',
-                        timesheet: 'Timesheet'
+                        timesheet: 'Timesheet',
+                        //Hierarchy
+                        newUserTitle: 'Users in the network',
+                        managePeople: 'Manage personnel',
+                        noPeople: 'No people to manage',
+                        mark: 'Mark',
+                        as: 'as:',
+                        myManager: 'My manager',
+                        mySubordinate: 'My subordinate',
+                        //General
+                        cancel: 'Cancel'   
                 },
                 es: {   //Login page
                         email: 'Email',
@@ -196,11 +206,21 @@ const lang = {
                         taskDue: 'Fecha límite',
                         //TimeSheet
                         addCheck: 'Marcar entrada/salida',
-                        timesheet: 'Asistencia'                        
+                        timesheet: 'Asistencia',
+                        //Hierarchy
+                        newUserTitle: 'Usuarios en la red',
+                        managePeople: 'Gestionar personal',
+                        noPeople: 'No hay personal para gestionar',
+                        mark: 'Marcar a',
+                        as: 'como:',
+                        myManager: 'Mi superior',
+                        mySubordinate: 'Mi subordinado',
+                        //General
+                        cancel: 'Cancelar'                              
                 }
 
              };
 
-Config.texts = lang.es;
+Config.texts = lang.en;
 
 export { Config };

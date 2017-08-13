@@ -4,7 +4,8 @@ import {
     TouchableOpacity, 
     StyleSheet, 
     Image,
-    KeyboardAvoidingView
+    KeyboardAvoidingView,
+    BackHandler
 } from 'react-native';
 import { Actions } from 'react-native-router-flux';
 import { Chat, Form } from '../components';
@@ -28,12 +29,23 @@ class TaskMessageForm extends Component {
                 taskData: this.props
             }
 
+    componentWillMount() {
+        //BackHandler.addEventListener('hardwareBackPress', this.onPressBack.bind(this));
+        const props = JSON.parse(JSON.stringify(this.state.taskData));
+        props.allNotif = 0;
+        this.setState({ taskData: props });        
+    }
+    
     componentWillReceiveProps(newProps) {
         this.setState(newProps);
     }
 
     onUpdateChild(updatedTask) {
         this.setState({ taskData: updatedTask });
+    }
+
+    onPressBack() {
+        Actions.pop({ refresh: { updated: this.state.taskData } });
     }
 
     renderForm() {
@@ -59,7 +71,7 @@ class TaskMessageForm extends Component {
                 data={this.state.taskData}
                 title={this.state.taskData.name}
                 shadow={false}
-                onPressLeft={() => Actions.pop({ refresh: { updated: this.state.taskData } })}
+                onPressLeft={() => this.onPressBack()}
                 onPressRight={() => Actions.editTaskForm({ taskData: this.props })}
             >
                 <View style={mainContainerStyle}>

@@ -4,13 +4,15 @@ import { Actions } from 'react-native-router-flux';
 import { Form, Avatar } from '../components';
 import { Config, Database } from '../settings';
 
-const { colors } = Config;
-const session = Database.realm('Session', { }, 'select', '');
+const { colors, texts } = Config;
+let session = {};
+let meData = {};
 
 class NewHierarchyForm extends Component {
     componentWillMount() {
-
-        const data = Database.realm('Person', {}, 'select', `higherPersonId=0 AND personId!=${session[0].personId}`);
+        session = Database.realm('Session', { }, 'select', '');
+        meData = Database.realm('Person', {}, 'select', `personId=${session[0].personId}`);        
+        const data = Database.realm('Person', {}, 'select', `personId!=${session[0].personId}`);
         const people = Database.realmToObject(data, 'Person');
         this.setState({
             people
@@ -58,17 +60,26 @@ class NewHierarchyForm extends Component {
 
     selectPerson(item) {
             Alert.alert(
-                `Mark ${item.person} as:`,
+                `${texts.mark} ${item.person} ${texts.as}`,
                 '',
                 [
-                    { text: 'My manager', onPress: () => this.addManager(item.personId) },
-                    { text: 'My subordinate', onPress: () => this.addSubordinate(item.personId) },
-                    { text: 'Cancel', onPress: () => console.log('cancel'), style: 'cancel' }                    
+                    { text: texts.myManager, onPress: () => this.addManager(item.personId) },
+                    { text: texts.mySubordinate, onPress: () => this.addSubordinate(item.personId) },
+                    { text: texts.cancel, onPress: () => console.log('cancel'), style: 'cancel' }                    
                 ]
             );
     }
 
     renderItem({ item }) {
+        let extraInfo = '';
+        if (item.personId === meData[0].higherPersonId) {
+            extraInfo = ' (Manager)';
+        }
+
+        if (item.higherPersonId === meData[0].personId) {
+            extraInfo = ' (Subordinate)';
+        }
+
         return (
             <TouchableOpacity
                 onPress={() => this.selectPerson(item)}
@@ -77,7 +88,7 @@ class NewHierarchyForm extends Component {
                     <Avatar 
                         avatar={item.avatar}
                         color={item.theme}
-                        name={item.person}
+                        name={`${item.person}\n${extraInfo}`}
                         size='big'
                         flexDirection='column'
                         textStyle={{ fontSize: 12 }}
@@ -91,7 +102,7 @@ class NewHierarchyForm extends Component {
         const { mainContainer } = styles;
         return (
             <Form
-                title='Users without a network'
+                title={texts.newUserTitle}
                 leftIcon='back'
                 onPressLeft={() => Actions.pop()}
             >

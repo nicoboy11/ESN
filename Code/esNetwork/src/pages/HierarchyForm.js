@@ -4,14 +4,18 @@ import { Actions } from 'react-native-router-flux';
 import { Form, FlatListe, Label } from '../components';
 import { EditHierarchyForm } from './';
 import { Config, Database, Helper } from '../settings';
-const { colors } = Config;
-const session = Database.realm('Session', { }, 'select', '');
-let people = Database.realm('Person', { }, 'select', '').sorted('levelKey');
-let peopleNotSync = Database.realm('Person', { }, 'select', 'isSync=false');
+const { colors, texts } = Config;
+let session = {};
+let people = {};
+let peopleNotSync = {};
 
 class HierarchyForm extends Component {
     state ={ network: [], visibleNetwork: [], isLoading: true, isEditPersonOpen: false }
     componentWillMount() {
+        session = Database.realm('Session', { }, 'select', '');
+        people = Database.realm('Person', { }, 'select', '').sorted('levelKey');
+        peopleNotSync = Database.realm('Person', { }, 'select', 'isSync=false');
+        
         if (session[0] === undefined) {
             Database.realm('Session', { }, 'delete', '');
             Actions.authentication();
@@ -24,6 +28,7 @@ class HierarchyForm extends Component {
             } else {
                 this.setState({ network: Database.realmToObject(people, 'Person') });
                 this.loadPeople();
+                this.remoteRequest();
             }            
         }     
     }
@@ -45,7 +50,6 @@ class HierarchyForm extends Component {
             console.log(`error ${this.state.status}`);
         } else {
              let people = [];
-
              for (let row of data) {
                 people.push({
                     personId: row.personId,
@@ -76,11 +80,13 @@ class HierarchyForm extends Component {
                     isParent: (row.isParent === 1),
                     isSync: true
                 });         
-             }
-            
-            Database.realm('Person', people, 'create', '');
-            this.setState({ network: people });
-            this.loadPeople();
+             }      
+            if (people.length !== this.state.network.length) {
+                Database.realm('Person', { }, 'delete', '');            
+                Database.realm('Person', people, 'create', '');
+                this.setState({ network: people });
+                this.loadPeople();
+            }
         }
     }
 
@@ -217,13 +223,13 @@ class HierarchyForm extends Component {
             );
         }
 
-        return <Label style={{ textAlign: 'center', fontSize: 28, paddingTop: 60, color: colors.secondText }}>No people to manage</Label>;
+        return <Label style={{ textAlign: 'center', fontSize: 28, paddingTop: 60, color: colors.secondText }}>{texts.noPeople}</Label>;
     }   
 
     render() {
         return (
             <Form
-                title='Manage people'
+                title={texts.managePeople}
                 rightIcon='plus'
                 onPressRight={() => Actions.newHierarchyForm()}
             >

@@ -6,7 +6,7 @@ import { Input, DatePicker, Form, Avatar, MyPicker } from '../components';
 import { Config, Database, Helper } from '../settings';
 
 const { texts, colors } = Config;
-const session = Database.realm('Session', { }, 'select', '');
+let session = {};
 
 class ProfileForm extends Component {
 
@@ -29,6 +29,7 @@ class ProfileForm extends Component {
     }
 
     componentWillMount() {
+        session = Database.realm('Session', { }, 'select', '');
         this.getProfile(this.props);
     }
 

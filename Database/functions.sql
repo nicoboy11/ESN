@@ -228,7 +228,7 @@ DROP FUNCTION IF EXISTS areValidDates$$
 CREATE FUNCTION areValidDates(_lowerDate datetime,_higherDate datetime) RETURNS bool
 BEGIN
 
-	IF (_lowerDate > _higherDate) THEN
+	IF (_lowerDate >= _higherDate) THEN
 		RETURN FALSE;
     END IF;
     

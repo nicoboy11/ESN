@@ -4,12 +4,13 @@ import { Form, Button, FlatListe } from '../components';
 import { Config, Database, Helper } from '../settings';
 
 const { texts } = Config;
-const session = Database.realm('Session', { }, 'select', '');
+let session = {};
 
 class TimeSheetForm extends Component {
     state = { pageLoading: false, loading: 0, message: '' }
 
     componentWillMount() {
+        session = Database.realm('Session', { }, 'select', '');
         this.setState({ pageLoading: true });
         Database.request2('GET', `locationCheck/${session[0].personId}`, {}, 2, (err, response) => {
             if (err) {
