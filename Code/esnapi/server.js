@@ -360,7 +360,7 @@ var apiRoutes = express.Router();
         apiRoutes.put('/project/:projectId',function(req,res){    
             data.reqUpload(req,'projatt', helper.fpInt(req.params.projectId), function(fileName,params){
                 data.db("CALL EditProject(" + helper.fpInt(req.params.projectId) + "," + helper.fpVarchar(params.name) + "," + helper.fpVarchar(params.abbr) + "," + helper.fpDate(params.startDate) +
-                                    "," + helper.fpDate(params.dueDate) + "," + helper.fpVarchar(params.fileName) + ");",
+                                    "," + helper.fpDate(params.dueDate) + "," + helper.fpVarchar(params.fileName) + "," + helper.fpInt(params.stateId) + ");",
                 conn,function(error,result){
                     if(data.handle(error,res,true)){
                         data.handleResponse(result,res,"");

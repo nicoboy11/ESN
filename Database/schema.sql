@@ -229,8 +229,10 @@ CREATE TABLE project(
     startDate datetime,
     creatorId int,
 	dueDate datetime,
+    stateId int,
     logo varchar(255),
     lastChanged datetime,
+    CONSTRAINT FOREIGN KEY (stateId) REFERENCES stateType(id),    
     CONSTRAINT FOREIGN KEY (creatorId) REFERENCES person(id)
 );
 

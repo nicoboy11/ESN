@@ -58,7 +58,7 @@ class ProjectForm extends Component {
         projects = JSON.parse(JSON.stringify(this.state.projects));
 
         if (newProps.updated) {
-            const { name, startDate, dueDate, projectId /*, members*/} = newProps.updated;
+            const { name, startDate, dueDate, projectId } = newProps.updated;
             
             for (let i = 0; i < projects.length; i++) {
                 if (projects[i].projectId === projectId) {
@@ -93,7 +93,7 @@ class ProjectForm extends Component {
     
     projectPressed(item) {
         if (this.state.selectedProjects === null) {
-            Actions.taskForm({ projectId: item.projectId, title: item.text });
+            Actions.taskForm({ projectId: item.projectId, title: item.text, projectStateId: item.stateId });
         } else {
             if (item.projectId === this.state.selectedProjects.projectId) {
                 this.unSelect();
@@ -102,6 +102,29 @@ class ProjectForm extends Component {
             }
         }
     }
+
+    saveProject(data) {
+        Database.request2('PUT', `project/${this.state.selectedProjects.projectId}`, data, 1, 
+        (error, response) => {
+            if (error) {
+                Alert.alert('Error', error.message);
+            } else {
+                let projects = [];
+                projects = JSON.parse(JSON.stringify(this.state.projects));
+
+                const { stateId, projectId } = response[0];
+                
+                for (let i = 0; i < projects.length; i++) {
+                    if (projects[i].projectId === projectId) {
+                        projects.splice(i, 1);
+                    } 
+                }
+
+                this.setState({ projects, visibleProjects: projects });
+                this.unSelect();
+            }
+        });
+    }    
 
     unSelect() {
         let projects = [];
@@ -113,7 +136,7 @@ class ProjectForm extends Component {
 
         this.setState({ 
             selectedProjects: null, 
-            rightButton: undefined, 
+            rightButton: 'search', 
             showCancelButton: undefined, 
             title: 'Projects', 
             projects,
@@ -133,16 +156,62 @@ class ProjectForm extends Component {
             }
         }
         Vibration.vibrate([0, 50], false);
-        this.setState({ selectedProjects: item, rightButton: 'edit', showCancelButton: 'cancel', title: '', projects, visibleProjects: projects });
+        this.setState({ 
+            selectedProjects: item, 
+            rightButton: 'edit,rubbish,checked', 
+            showCancelButton: 'cancel', 
+            title: '', 
+            projects, 
+            visibleProjects: projects 
+        });
     }
 
-    onPressRight() {
+    onPressRight(pressedIcon) {
         if (this.state.rightButton === 'search') {
             this.setState({ isSearching: true, rightButton: 'cancel' });
         } else if (this.state.rightButton === 'cancel') {
             this.setState({ isSearching: false, rightButton: 'search', visibleProjects: this.state.projects });
         } else {
-            Actions.editProjectForm(this.state.selectedProjects);
+            if (pressedIcon === 'edit') {
+                Actions.editProjectForm(this.state.selectedProjects);
+            } else if (pressedIcon === 'rubbish') {
+                if (this.state.selectedProjects.activeTasks > 0) {
+                    Alert.alert('Warning!', 'Complete all tasks to delete a project.');
+                    return;
+                }      
+                
+                Alert.alert(
+                    'Delete project?',
+                    'Are you sure you want to delete the project',
+                    [
+                        { text: 'Yes', onPress: () => this.saveProject({ stateId: 2 }) },
+                        { text: 'Cancel', onPress: () => console.log('cancel'), style: 'cancel' }                    
+                    ]
+                );                
+
+            } else if (pressedIcon === 'checked') {
+                let message = 'Mark project as completed?';
+                let submessage = '';
+                let newStateId = { stateId: 5 };
+                if (this.state.selectedProjects.activeTasks > 0) {
+                    submessage = `${this.state.selectedProjects.activeTasks} tasks will be marked as completed. Are you sure?`;
+                }
+
+                if (this.state.selectedProjects.stateId === 5) {
+                    message = 'Do you want to reactivate the project?';
+                    submessage = '';
+                    newStateId = { stateId: 1 };
+                }
+
+                Alert.alert(
+                    message,
+                    submessage,
+                    [
+                        { text: 'Yes', onPress: () => this.saveProject(newStateId) },
+                        { text: 'Cancel', onPress: () => console.log('cancel'), style: 'cancel' }                    
+                    ]
+                );
+            }
         }
     }
 
@@ -179,6 +248,43 @@ class ProjectForm extends Component {
         );
     }
 
+    renderCompleteness(item) {
+        const { 
+            taskContStyle,
+            circleStyle,
+            countStyle,
+            statStyle
+        } = styles;    
+
+        if (item.stateId === 5) {
+            return (
+                <View style={taskContStyle}>
+                    <Image 
+                        style={{ 
+                            width: 50, 
+                            height: 50, 
+                            tintColor: colors.main 
+                        }} 
+                        source={{ uri: 'ok' }} 
+                    />                
+                </View>
+            );
+        }
+
+        return (
+            <View>
+                <View style={taskContStyle}>
+                    <View style={circleStyle}>
+                        <Label style={countStyle}>{item.activeTasks}</Label>
+                        <Label style={statStyle}>Active Tasks</Label>
+                    </View>
+                </View>
+                <View style={{ margin: 10 }}>
+                    {this.renderProgress(item.progress)}
+                </View>                
+            </View>
+        );
+    }
 
     renderItem({ item }) {
         const { 
@@ -187,14 +293,12 @@ class ProjectForm extends Component {
             labelDateStyle, 
             labelsContainerStyle,
             progressContainer,
-            taskContStyle,
-            circleStyle,
-            countStyle,
-            statStyle,
             avatarStyles,
             newProjectStyle,
             newImageStyle
         } = styles;
+
+        let completedStyle = {};
 
         if (item.projectId === 0) {
             return (//New peoject
@@ -214,11 +318,16 @@ class ProjectForm extends Component {
                 </TouchableOpacity>
             );
         }
+
+
+        if (item.stateId === 5) {
+            completedStyle = { opacity: 0.5 };
+        }
         
         return (
             <View 
                 key={item.projectId} 
-                style={[projectStyle]}
+                style={[projectStyle, completedStyle]}
             >             
                 <TouchableHighlight
                     underlayColor={colors.background}
@@ -241,22 +350,14 @@ class ProjectForm extends Component {
                                 {`${Helper.prettyfyDate(item.startDate).date} - ${Helper.prettyfyDate(item.dueDate).date}`}
                             </Label>
                         </View>
-                        <View style={{ flex: 1, alignItems: 'flex-end' }}>
+                        {/* <View style={{ flex: 1, alignItems: 'flex-end' }}>
                             <TouchableHighlight>
                                 <Image style={{ tintColor: colors.secondText, width: 14, height: 14 }} source={{ uri: 'chevron' }} />
                             </TouchableHighlight>    
-                        </View>
+                        </View> */}
                     </View>
                     <View style={progressContainer}>
-                        <View style={taskContStyle}>
-                            <View style={circleStyle}>
-                                <Label style={countStyle}>{item.activeTasks}</Label>
-                                <Label style={statStyle}>Active Tasks</Label>
-                            </View>
-                        </View>
-                        <View style={{ margin: 10 }}>
-                            {this.renderProgress(item.progress)}
-                        </View>
+                        {this.renderCompleteness(item)}
                         <View style={avatarStyles}>
                             <FlatListe 
                                 keyEx='personId'
@@ -298,7 +399,7 @@ class ProjectForm extends Component {
                 title={this.state.title}
                 rightIcon={this.state.rightButton}
                 leftIcon={this.state.showCancelButton}
-                onPressRight={() => this.onPressRight()}
+                onPressRight={(pressedIcon) => this.onPressRight(pressedIcon)}
                 onPressLeft={() => this.unSelect()}
                 onSearch={this.onSearch.bind(this)}
                 isSearching={this.state.isSearching}

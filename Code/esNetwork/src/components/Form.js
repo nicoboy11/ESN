@@ -38,13 +38,13 @@ class Form extends Component {
         }
     }
 
-    onRight() {
+    onRight(pressedIcon) {
         switch (this.props.rightIcon) {
             case 'menu':
                 this.toogle();
                 return; 
             default:
-                this.props.onPressRight();
+                this.props.onPressRight(pressedIcon);
                 return;
         }
     }

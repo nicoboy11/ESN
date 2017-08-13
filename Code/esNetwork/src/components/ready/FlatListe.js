@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, { PureComponent } from 'react';
 import { View, FlatList, StyleSheet, TouchableOpacity } from 'react-native';
 import { CheckListItem, ListItem, PersonListItem, Avatar, TaskCard3, Input, Label } from '../';
 import { Config } from '../../settings';
@@ -17,7 +17,16 @@ const { colors } = Config;
  *      chkListProcessing 
  *      onPress
  */
-class FlatListe extends Component {
+class FlatListe extends PureComponent {
+
+    shouldComponentUpdate(nextProps, nextState) {
+
+        if (this.props.data !== nextProps.data || nextState !== this.state ) {
+            return true;
+        }
+
+        return false;
+    }
 
     renderSeparator() {
         if (this.props.separator) {
@@ -104,8 +113,10 @@ class FlatListe extends Component {
                         title={item.name}
                         subtitle={item.projectName}
                         date={item.dueDate}
+                        selected={item.selected}
                         id={item.taskId}
                         onPress={(props) => { this.props.onPress(props); }}
+                        onLongPress={(props) => { this.props.onLongPress(props); }}
                         data={item}
                         updateFromChildren={(update) => this.props.updateFromChildren(update)}
                      />

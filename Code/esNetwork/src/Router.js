@@ -242,11 +242,9 @@ const styles = StyleSheet.create({
         color: colors.mainText
     },
     tabBarStyle: {
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: -5 },
-        shadowOpacity: 0.2,
-        elevation: 2,
-        paddingTop: 5
+        borderColor: '#EAEAEA',
+        borderWidth: 1,
+        paddingTop: -5
     }
 });
 

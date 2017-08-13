@@ -5,7 +5,7 @@ import { Config } from '../settings';
 
 const { colors } = Config;
 
-const NewCard = ({ placeholder, name, avatar, color, value, attachment, post, onChangeText, onSubmitEditing }) => {
+const NewCard = ({ placeholder, name, avatar, color, value, attachment, post, onChangeText, onSubmitEditing, onFocus, blur }) => {
     return (
         <View style={styles.containerStyle}>
             <Input 
@@ -15,8 +15,10 @@ const NewCard = ({ placeholder, name, avatar, color, value, attachment, post, on
                 returnKeyType='done' 
                 onChangeText={onChangeText}
                 onSubmitEditing={onSubmitEditing}
+                onFocus={onFocus}
                 value={value}      
                 editable={true}
+                blur={blur}
             /> 
             <View>
                 {(post) ? <LinkButton title='POST' style={{ position: 'absolute', right: -5, bottom: -5 }} /> : <View />}

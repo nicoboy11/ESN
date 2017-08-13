@@ -205,7 +205,7 @@ class EditTaskForm extends Component {
                 taskId: this.state.taskId
         };
 
-        Actions.pop({ refresh: { taskData: newState } });
+        Actions.pop({ refresh: { taskData: newState, updated: newState } });
     }
 
     saveTask(data) {
