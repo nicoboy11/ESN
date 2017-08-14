@@ -15,6 +15,7 @@ CALL CreateScopeType('All');
 CALL CreateScopeType('Team');
 CALL CreateScopeType('Project');
 CALL CreateScopeType('Users');
+CALL CreateScopeType('MFollowers');
 
 CALL CreateRoleType('Creator');
 CALL CreateRoleType('Leader');

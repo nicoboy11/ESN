@@ -1,0 +1,136 @@
+ul {
+    list-style: none;
+    width: 100%
+}
+
+#mainDiv {
+    display: flex;
+    flex-direction: row;
+    background-color: #F7F9FB;
+    margin-left: 10%;
+    margin-right: 10%;
+    margin-top: 1%;
+    margin-bottom: 1%;
+}
+
+#leftDiv {
+    display: flex;
+    justify-content: space-between;
+    flex: 1;
+    overflow-y: auto;
+    max-height: 95%;
+}
+
+#rightDiv {
+    display: flex;
+    flex: 1;
+}
+
+
+
+
+.avtStyle {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-width: 1px;
+    border-color: #7B8092;
+    background-color: 'transparent'
+}
+
+.avtContainerStyle {
+    display: flex;
+    align-items: center;
+    justify-content: 'center';
+}
+
+.abbrStyle {
+    color: #FFF
+}
+
+
+
+
+
+.containerStyle {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    border: 1px solid;
+    border-color: #CED3D9;                      /*lightText*/
+    background-color: #FFF;                     /*elementBackground*/
+    margin-bottom: 10;
+    margin-top: 5;
+    margin-right: 10;
+    margin-left: 10;
+    border-radius: 3px
+}
+
+.topContainerStyle {
+    display: flex;
+    flex-direction: row
+}
+
+.bottomContainerStyle {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    border-top: 1px solid;
+    border-top-color: #CED3D9;
+    background-color: #F7F9FB;
+}
+.checkImage {
+    width: 24;
+    height: 24;
+    /*tintColor: colors.main*/
+}
+.uncheckImage {
+    width: 24;
+    height: 24;
+    /*tintColor: colors.secondText*/
+}    
+.percentStyle {
+    display: flex;
+    border: 4px solid;
+    border-radius: 25px;
+    width: 50px;
+    height: 50px;
+    justify-content: center;
+    align-items: center;
+    margin: 10;
+    align-self: center;
+}
+.percentText {
+ /*   font-family: font.normal;*/
+    font-weight: '600'
+}
+.subTitleText {
+    /*fontFamily: font.light,*/
+    font-size: 14px;
+    color: #D4D4DB;                                      /*second text*/
+    flex: 1;     
+}
+
+.titleText {
+    /*fontFamily: font.normal,*/
+    font-size: 18;
+    color: #7B8092                                      /*mainDark*/
+}
+.smallContainers {
+    display: flex;
+    flex: 1;
+    align-items: 'center';
+    justify-content: 'center';
+    padding-top: 5;
+    padding-bottom: 5;
+    background-color: #F7F9FB                           /*background*/
+}
+.smallTitle {
+    color: #7B8092;
+    font-size: 12px;
+}
+
+.separator {
+    border-color: #CED3D9;
+    border-right-width: 1px
+}

@@ -71,5 +71,15 @@ END$$
 --------USERS
 	-	When someone becomes boss or employee of someone (x joined y team)
     -	When someone follows someone else
+    
 		
 */
+DROP TRIGGER IF EXISTS `tgEditedPerson`;
+DELIMITER $$
+CREATE TRIGGER `tgEditedPerson` AFTER UPDATE ON `person`
+ FOR EACH ROW BEGIN
+ 
+     
+    
+END$$
+
