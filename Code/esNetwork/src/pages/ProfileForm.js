@@ -215,7 +215,7 @@ class ProfileForm extends Component {
         } = styles;
 
         let indicator;
-
+/*
         if (this.state.editable) {
             indicator = (
                 <View
@@ -228,7 +228,7 @@ class ProfileForm extends Component {
                 </View>
             );
         }
-
+*/
         if (this.state.avatar !== null) {
             return (
                 <TouchableOpacity style={avatarContainer} onPress={this.imageAction.bind(this)} >
@@ -290,14 +290,14 @@ class ProfileForm extends Component {
                             }
                         </Text>                         
                         {this.renderAvatar()}
-                        <View style={contactContainerStyle}>
+                        {/* <View style={contactContainerStyle}>
                             <TouchableOpacity style={contactStyle} >  
                                 <Image style={contactImageStyle} source={require('../img/wphone.png')} />
                             </TouchableOpacity>
                             <TouchableOpacity style={contactStyle} >  
                                 <Image style={contactImageStyle} source={require('../img/wchat.png')} />
                             </TouchableOpacity>
-                        </View>
+                        </View> */}
                     </View>
                     <View />
                     <View style={mainViewStyle}>
@@ -306,7 +306,7 @@ class ProfileForm extends Component {
                             label={texts.dateOfBirth} 
                             onChangeDate={this.onChangeDate.bind(this)}
                             date={this.state.dateOfBirth}
-                            editable={this.state.editable}
+                            editable={false}
                         />
                         <MyPicker 
                             label='Gender'
@@ -322,7 +322,7 @@ class ProfileForm extends Component {
                             returnKeyType='next' 
                             onChangeText={(email) => this.setState({ email })}
                             value={this.state.email}
-                            editable={this.state.editable}
+                            editable={false}
                         />
                         <Input 
                             label={texts.phone} 
@@ -330,7 +330,7 @@ class ProfileForm extends Component {
                             returnKeyType='next' 
                             onChangeText={(phone) => this.setState({ phone })}
                             value={this.state.phone}      
-                            editable={this.state.editable}
+                            editable={false}
                         />     
                         <Input 
                             label={texts.ext} 
@@ -338,7 +338,7 @@ class ProfileForm extends Component {
                             returnKeyType='next' 
                             onChangeText={(ext) => this.setState({ ext })}
                             value={this.state.ext}      
-                            editable={this.state.editable}
+                            editable={false}
                         />                          
                         <Input 
                             label={texts.mobile} 
@@ -346,7 +346,7 @@ class ProfileForm extends Component {
                             returnKeyType='next' 
                             onChangeText={(mobile) => this.setState({ mobile })}
                             value={this.state.mobile}       
-                            editable={this.state.editable}
+                            editable={false}
                         />                      
                     </View>
 

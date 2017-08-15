@@ -165,7 +165,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         alignSelf: 'flex-start',
         paddingTop: (Platform.OS === 'ios') ? 20 : 0,
-        zIndex: 99
+        zIndex: 399
     },
     shadow: {
         shadowColor: '#000',
@@ -173,7 +173,7 @@ const styles = StyleSheet.create({
         shadowOpacity: 0.2,
         elevation: 2,
         position: 'relative',
-        zIndex: 99
+        zIndex: 399
     },
     imageStyle: {
         width: 23,

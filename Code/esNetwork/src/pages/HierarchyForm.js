@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { View, Text, Alert, ActivityIndicator, Modal } from 'react-native';
+import { View, Text, Alert, ActivityIndicator, Modal, BackHandler } from 'react-native';
 import { Actions } from 'react-native-router-flux';
 import { Form, FlatListe, Label } from '../components';
 import { EditHierarchyForm } from './';
@@ -12,6 +12,7 @@ let peopleNotSync = {};
 class HierarchyForm extends Component {
     state ={ network: [], visibleNetwork: [], isLoading: true, isEditPersonOpen: false }
     componentWillMount() {
+        BackHandler.addEventListener('hardwareBackPress', this.onPressBack.bind(this));
         session = Database.realm('Session', { }, 'select', '');
         people = Database.realm('Person', { }, 'select', '').sorted('levelKey');
         peopleNotSync = Database.realm('Person', { }, 'select', 'isSync=false');
@@ -38,6 +39,14 @@ class HierarchyForm extends Component {
             this.onEditedHierarchy(true);
         }
     }
+
+    componentWillUnmount() {
+        BackHandler.removeEventListener('hardwareBackPress', this.onPressBack.bind(this));        
+    }    
+
+    onPressBack() {
+        return false;        
+    }    
 
     onResponse(response) {
         console.log(response.status);

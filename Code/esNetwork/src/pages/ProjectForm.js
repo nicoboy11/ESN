@@ -11,7 +11,8 @@ import {
     Image, 
     TouchableHighlight,
     TouchableOpacity,
-    Vibration
+    Vibration,
+    BackHandler
 } from 'react-native';
 import { Actions } from 'react-native-router-flux';
 import { Form, Label, FlatListe, LinkButton } from '../components';
@@ -22,6 +23,8 @@ const { colors } = Config;
 class ProjectForm extends Component {
     state = { isLoading: true, selectedProjects: null, title: 'Projects', showCancelButton: 'menu', rightButton: 'search', visibleProjects: [] }
     componentWillMount() {
+        BackHandler.addEventListener('hardwareBackPress', this.onPressBack.bind(this));
+
         const data = Database.realm('Session', { }, 'select', '');
 
         if (data[0] === undefined) {
@@ -58,7 +61,7 @@ class ProjectForm extends Component {
         projects = JSON.parse(JSON.stringify(this.state.projects));
 
         if (newProps.updated) {
-            const { name, startDate, dueDate, projectId } = newProps.updated;
+            const { name, startDate, dueDate, projectId, activeTasks } = newProps.updated;
             
             for (let i = 0; i < projects.length; i++) {
                 if (projects[i].projectId === projectId) {
@@ -66,6 +69,7 @@ class ProjectForm extends Component {
                     projects[i].text = name;
                     projects[i].startDate = startDate;
                     projects[i].dueDate = dueDate;
+                    projects[i].activeTasks = activeTasks;
                 } 
             }
         } else if (newProps.newProject) {
@@ -85,6 +89,14 @@ class ProjectForm extends Component {
         this.setState({ projects, visibleProjects: projects });
     }
 
+    componentWillUnmount() {
+        BackHandler.removeEventListener('hardwareBackPress', this.onPressBack.bind(this));        
+    }    
+
+    onPressBack() {
+        return false;        
+    }    
+
     handleResponse(response) {
         console.log(response.status);
         this.setState({ status: response.status });
@@ -93,7 +105,7 @@ class ProjectForm extends Component {
     
     projectPressed(item) {
         if (this.state.selectedProjects === null) {
-            Actions.taskForm({ projectId: item.projectId, title: item.text, projectStateId: item.stateId });
+            Actions.taskForm({ currentProject: item });
         } else {
             if (item.projectId === this.state.selectedProjects.projectId) {
                 this.unSelect();

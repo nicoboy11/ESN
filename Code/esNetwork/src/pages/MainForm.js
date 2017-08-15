@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { ScrollView, Alert, ActivityIndicator, TouchableOpacity, Image, View, Text } from 'react-native';
+import { ScrollView, Alert, ActivityIndicator, BackHandler } from 'react-native';
 import { Actions } from 'react-native-router-flux';
 import { CardList, Menu, Header, Form, NewCard } from '../components';
 import { Database, Config } from '../settings';
@@ -12,6 +12,7 @@ class MainForm extends Component {
     state = { elements: [], isLoading: false, showMenu: false, offset: 0, personId: 0, isCheckedIn: false };
 
     componentWillMount() {
+        BackHandler.addEventListener('hardwareBackPress', this.onPressBack.bind(this));
         session = Database.realm('Session', { }, 'select', '');
         this.setState({ isLoading: true });
         //get current log in
@@ -29,6 +30,14 @@ class MainForm extends Component {
         );
     }
 
+    componentWillUnmount() {
+        BackHandler.removeEventListener('hardwareBackPress', this.onPressBack.bind(this));        
+    }    
+
+    onPressBack() {
+        return false;        
+    }    
+    
     onError(error) {
         Alert.alert('Error', error.message);
         this.refresh();
@@ -84,7 +93,7 @@ class MainForm extends Component {
             if (err) {
                 Alert.alert('Error', response.message);
             } else {
-                this.setState({ elements: [response[0], ...this.state.elements] });
+                this.setState({ elements: [response[0], ...this.state.elements], newPostText: '' });
             }
         });
     }    

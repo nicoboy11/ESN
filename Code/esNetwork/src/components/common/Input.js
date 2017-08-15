@@ -12,7 +12,7 @@ class Input extends Component {
               isFocused: false, 
               keyboardType: 'default', 
               secureTextEntry: false,
-              editable: true
+              editable: (this.props.editable !== undefined) ? this.props.editable : true
             };
 
     componentWillMount() {

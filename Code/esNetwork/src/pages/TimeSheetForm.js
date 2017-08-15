@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { View, StyleSheet, ScrollView, Alert, ActivityIndicator } from 'react-native';
+import { View, StyleSheet, ScrollView, Alert, ActivityIndicator, BackHandler } from 'react-native';
 import { Form, Button, FlatListe } from '../components';
 import { Config, Database, Helper } from '../settings';
 
@@ -10,6 +10,7 @@ class TimeSheetForm extends Component {
     state = { pageLoading: false, loading: 0, message: '' }
 
     componentWillMount() {
+        BackHandler.addEventListener('hardwareBackPress', this.onPressBack.bind(this));        
         session = Database.realm('Session', { }, 'select', '');
         this.setState({ pageLoading: true });
         Database.request2('GET', `locationCheck/${session[0].personId}`, {}, 2, (err, response) => {
@@ -21,6 +22,14 @@ class TimeSheetForm extends Component {
             }
         });
     }
+
+    componentWillUnmount() {
+        BackHandler.removeEventListener('hardwareBackPress', this.onPressBack.bind(this));        
+    }    
+
+    onPressBack() {
+        return false;        
+    }        
 
     onCheckPress() {
         this.setState({ loading: 1 });

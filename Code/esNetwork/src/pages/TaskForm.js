@@ -10,7 +10,7 @@ import {
     Vibration, 
     Text, 
     StyleSheet,
-    Image 
+    Image
 } from 'react-native';
 import OneSignal from 'react-native-onesignal';
 import { Actions } from 'react-native-router-flux';
@@ -33,6 +33,7 @@ class TaskForm extends Component {
         rightButton: 'search,more',
         deletingTask: false,
         isMenuVisible: false,
+        currentProject: this.props.currentProject,
         currentFilter: 1 /* 1: Active, 5: Completed, 0: All */
     };
 
@@ -40,7 +41,7 @@ class TaskForm extends Component {
         OneSignal.addEventListener('received', this.onReceived.bind(this));
 
         session = Database.realm('Session', { }, 'select', '');
-        this.setState({ title: this.props.title });
+        this.setState({ title: this.props.currentProject.text });
 
         if (session[0] === undefined) {
             Database.realm('Session', { }, 'delete', '');
@@ -48,7 +49,7 @@ class TaskForm extends Component {
         } else {
             this.setState({ isLoading: true, personId: session[0].personId });
             
-            let projectId = this.props.projectId;
+            let projectId = this.props.currentProject.projectId;
 
             if (projectId === undefined) {
                 projectId = 'NULL';
@@ -132,13 +133,15 @@ class TaskForm extends Component {
     onPressLeft() {
         switch (this.state.leftButton) {
             case 'cancel':
-                this.setState({ rightButton: 'search,more', leftButton: 'back', title: this.props.title, listStyle: {} });
+                this.setState({ rightButton: 'search,more', leftButton: 'back', title: this.props.currentProject.text, listStyle: {} });
                 this.listWrapper.disabled = false;
                 this.unSelect();
                 Keyboard.dismiss();
                 return;
             case 'back':
-                Actions.pop();
+                const currentProject = JSON.parse(JSON.stringify(this.state.currentProject));
+                currentProject.activeTasks = this.state.tasks.filter((task) => { return task.stateId === 1 }).length;            
+                Actions.pop({ refresh: { updated: currentProject } });
                 return;
             default:
                 return;
@@ -230,7 +233,7 @@ class TaskForm extends Component {
             selectedTasks: null, 
             rightButton: 'search,more', 
             leftButton: 'back', 
-            title: this.props.title, 
+            title: this.props.currentProject.text, 
             tasks,
             visibleTasks: tasks
         });
@@ -305,7 +308,7 @@ class TaskForm extends Component {
         this.setState({ 
             rightButton: 'search,more', 
             leftButton: 'back', 
-            title: this.props.title, 
+            title: this.props.currentProject.text, 
             listStyle: {},
             isLoadingTask: true 
         });
@@ -316,7 +319,7 @@ class TaskForm extends Component {
             {
                 name: this.state.newTaskText,
                 creatorId: this.state.personId,
-                projectId: this.props.projectId
+                projectId: this.props.currentProject.projectId
             }, 1, (error, response) => {
                 this.handleResponse(error, response);
             }
@@ -369,7 +372,7 @@ class TaskForm extends Component {
     }
 
     renderNewCard() {
-        if (this.props.projectStateId === 5) {
+        if (this.props.currentProject.stateId === 5) {
             return <View />;
         }
         

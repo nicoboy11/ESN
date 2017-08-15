@@ -22,7 +22,7 @@ class DatePicker extends Component {
         this.state = {
             date: null, 
             borderLine: 1,
-            editable: true,
+            editable: this.props.editable,
             showPickerIOS: false,
             newDate: null
         };
