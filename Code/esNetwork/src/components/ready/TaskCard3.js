@@ -172,7 +172,10 @@ class TaskCard3 extends Component {
                         </View>
                         <View style={{ flex: 1, justifyContent: 'space-around' }}>
                             <View style={[titlecontainer, { flex: 1 }]}>
-                                <Text style={titleText}>{title}</Text>
+                                <Text style={titleText}>
+                                    {title}
+                                    {(data.priority !== null) ? <Text style={{ fontSize: 14, color: colors.priority[data.priorityId] }}>  !{data.priority}</Text> : <Text></Text>}
+                                </Text>
                             </View>                                   
                             <View style={[subTitleContainer, { flex: 1, marginTop: 10 }]}>
                                 <Text style={subTitleText}>{subtitle}</Text>

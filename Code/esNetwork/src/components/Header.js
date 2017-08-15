@@ -157,7 +157,7 @@ class Header extends Component {
 const styles = StyleSheet.create({
 
     containerStyle: {
-        height: (Platform.OS === 'ios') ? 60 : 40,
+        height: (Platform.OS === 'ios') ? 70 : 50,
         backgroundColor: Config.colors.background,
         flexDirection: 'row',
         alignContent: 'center',

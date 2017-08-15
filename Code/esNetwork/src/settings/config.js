@@ -21,6 +21,14 @@ Config.colors = {
     background: '#F7F9FB',
     clickable: '#3498db',
     elementBackground: '#FFF',
+    priority: {
+            0:'#D4D4DB',
+            1:'#D4D4DB',
+            2:'#D4D4DB',
+            3:'yellow',
+            4:'orange',
+            5:'#e74c3c'
+    },
 
     lightText: '#CED3D9',
     //darkMain: '#3457C3',

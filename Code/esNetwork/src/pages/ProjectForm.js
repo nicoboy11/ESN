@@ -458,7 +458,7 @@ const styles = new StyleSheet.create({
     labelStyle: {
         color: colors.mainDark,
         fontSize: 18,
-        lineHeight: 20,
+        lineHeight: 23,
         fontWeight: '400'
     },
     labelDateStyle: {

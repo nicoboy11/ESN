@@ -49,7 +49,7 @@ const Avatar = ({ avatar, color, name, size, nameColor, flexDirection = 'row', t
                 (<View style={[styles.avtStyle, { backgroundColor: color }]}>
                     <Label style={styles.abbrStyle}>{avatar}</Label>
                 </View>) :
-                <Image style={styles.avtStyle} source={{ uri: network.server + 'thumbs/small/' + avatar }} />;
+                <Image style={[styles.avtStyle]} source={{ uri: network.server + 'thumbs/small/' + avatar }} />;
 
     return (
         <View style={styles.containerStyle}>
