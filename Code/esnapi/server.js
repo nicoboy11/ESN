@@ -556,7 +556,7 @@ var apiRoutes = express.Router();
             data.reqUpload(req,'postatt',req.params.taskId, function(fileName, params){
                 data.db("CALL EditTask(" + helper.fpInt(req.params.taskId) + "," + helper.fpVarchar(params.name) + "," + helper.fpVarchar(params.description) + "," + helper.fpDate(params.startDate) +
                                     "," + helper.fpDate(params.dueDate) + "," + helper.fpInt(params.projectId) + "," + helper.fpInt(params.stateId) + "," + helper.fpInt(params.progress) +
-                                    "," + helper.fpVarchar(params.calendarId) + "," + helper.fpInt(params.priorityId) + ");",
+                                    "," + helper.fpVarchar(params.calendarId) + "," + helper.fpInt(params.priorityId) + "," + helper.fpInt(req.decoded.personId) + ");",
                 conn, function(error, result){
                     if(data.handle(error,res,true)){
                         var message = JSON.stringify(result[0])

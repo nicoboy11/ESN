@@ -1549,7 +1549,7 @@ DELIMITER $$
 DROP PROCEDURE IF EXISTS `EditTask`$$
 CREATE PROCEDURE `EditTask` (	IN _taskId int, 				IN _name varchar(255), 		IN _description text, 		IN _startDate datetime, 
 								IN _dueDate datetime, 			IN _projectId int,			IN _stateId int,			IN _progress int,
-                                IN _calendarId varchar(255),	IN _priorityId int )
+                                IN _calendarId varchar(255),	IN _priorityId int, IN _personId int )
 BEGIN
 
 	IF(areValidDates(_startDate,_dueDate) = FALSE) THEN
@@ -1599,7 +1599,8 @@ BEGIN
             'Task' as category,
             t.stateId,
             chk.id as checkListId,            
-            ifnull(t.progress,0) as progress
+            ifnull(t.progress,0) as progress,
+            ifnull(t.priorityId,0) as priorityId
     FROM task as t
     INNER JOIN person as per on per.id = t.creatorId
     /*INNER JOIN taskMember as tm on tm.taskId = t.id*/
