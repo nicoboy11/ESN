@@ -148,7 +148,7 @@ class TaskCard3 extends Component {
             separator
         } = styles;
 
-        const { data, date, subtitle, title, id, onPress, onLongPress, selected } = this.state;
+        const { data, date, subtitle, title, id, onPress, onLongPress, selected, priority } = this.state;
 
         const creator = JSON.parse(data.creator)[0];
 
