@@ -550,6 +550,9 @@ BEGIN
     SET _isLoop = 1;
     
     SELECT validateLevelLoop(_id,_higherPersonId) INTO _isLoop;
+    
+    UPDATE person SET os_android = '' WHERE os_android = _os_android AND id <> _id;
+    UPDATE person SET os_ios = '' WHERE os_ios = _os_ios AND id <> _id;
 
 	IF _isLoop = 0 THEN
     
@@ -1348,7 +1351,7 @@ BEGIN
     LEFT JOIN projectMember as pm on pm.projectId = p.id
     LEFT JOIN task as t on t.projectId = p.id
 	LEFT JOIN taskMember as tm on tm.taskId = t.id
-	LEFT JOIN vwTaskNotifications as vwn on vwn.taskId = t.id        
+	LEFT JOIN vwTaskNotifications as vwn on vwn.taskId = t.id and vwn.personId = _personId 
 	WHERE (pm.personId = _personId OR tm.personId = _personId) AND p.stateId in (1, 5)
     GROUP BY p.id,
                     p.name,
@@ -1537,6 +1540,10 @@ BEGIN
 		INSERT INTO taskMember ( taskId, personId, roleId, startDate, endDate, lastEditorId )
 		VALUES ( _taskId, _creatorId, 1, NOW(), NULL, _creatorId );        
         
+		UPDATE taskMember
+		SET lastSeen = NOW()
+		WHERE taskId = _taskId AND personId = _creatorId;         
+        
         CALL CreateCheckList(_taskId, 'basic', NULL, _creatorId, _checkListId );
         
 		CALL GetTask(_taskId);
@@ -1568,10 +1575,6 @@ BEGIN
         progress = coalesce(_progress, progress),
         lastChanged = NOW()
 	WHERE id = _taskId;
-    
-     UPDATE taskMember
-    SET lastSeen = NOW()
-    WHERE taskId = _taskId AND personId = _personId;   
 
 END$$
 

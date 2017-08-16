@@ -5,7 +5,7 @@ class Config {}
 Config.regex = {
     email: /^[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$/i,
     textOnly: /[^a-zA-Z0-9áéíóúÁÉÍÓÚüÜñÑ\s]/g,
-    extendedText: /[^a-zA-Z0-9áéíóúÁÉÍÓÚüÜñÑ(){}\s]/g
+    extendedText: /[^a-zA-Z0-9áéíóúÁÉÍÓÚüÜñÑ(){}'`\s]/g
 };
 
 Config.font = {
@@ -22,12 +22,12 @@ Config.colors = {
     clickable: '#3498db',
     elementBackground: '#FFF',
     priority: {
-            0:'#D4D4DB',
-            1:'#D4D4DB',
-            2:'#D4D4DB',
-            3:'yellow',
-            4:'orange',
-            5:'#e74c3c'
+            0: '#D4D4DB',
+            1: '#D4D4DB',
+            2: '#D4D4DB',
+            3: 'yellow',
+            4: 'orange',
+            5: '#e74c3c'
     },
 
     lightText: '#CED3D9',
@@ -42,7 +42,10 @@ Config.colors = {
 
 Config.network = {
     server: 'http://ec2-34-211-203-109.us-west-2.compute.amazonaws.com:3001/',
-    wsServer: 'ws://ec2-34-211-203-109.us-west-2.compute.amazonaws.com:9998/task'
+    wsServer: 'ws://ec2-34-211-203-109.us-west-2.compute.amazonaws.com:9998/task',
+    blured: 'thumbs/blured/',
+    big: 'thumbs/big/',
+    small: 'thumbs/small/'
 };
 
 const lang = {

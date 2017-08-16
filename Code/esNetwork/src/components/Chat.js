@@ -153,9 +153,6 @@ class Chat extends Component {
     imageAction() {
         const options = {
             title: 'Select your profile photo',
-            customButtons: [
-                { name: 'fb', title: 'Photos from facebook' },
-            ],
             storageOptions: {
                 skipBackup: true,
                 path: 'images'
@@ -174,7 +171,8 @@ class Chat extends Component {
                 this.setState({
                     imgSource: source,
                     imgFileName: response.fileName,
-                    imgFileType: response.type
+                    imgFileType: response.type,
+                    loadedImage: true
                 });
             }
         });
@@ -211,7 +209,8 @@ class Chat extends Component {
         this.setState({ 
             visibleElements: [...this.state.visibleElements, newMessage], 
             elements: [...this.state.elements, newMessage], 
-            input: '' 
+            input: '',
+            loadedImage: false
         });
 
         setTimeout(() => { 
@@ -254,15 +253,16 @@ class Chat extends Component {
 
         return (
             <View>
+                {(item.key === 'loading') ? <ActivityIndicator /> : <View />}
                 <Image 
                     style={bubbleImgStyle} 
-                    source={{ uri: Config.network.server + 'thumbs/blured/' + item.attachment }} 
+                    source={{ uri: Config.network.server + Config.network.blured + item.attachment }} 
                 />
-                <View style={{ position: 'absolute', right: 5, top: 75 }}>
+                {/* <View style={{ position: 'absolute', right: 5, top: 75 }}>
                     <TouchableOpacity>
                         <Image source={{ uri: 'download' }} style={{ width: 30, height: 30, tintColor: 'black' }} />
                     </TouchableOpacity>
-                </View>
+                </View> */}
             </ View>
         );  
     }
@@ -380,7 +380,7 @@ class Chat extends Component {
                         <Image 
                             tintColor={colors.clickable} 
                             style={{ width: 24, height: 24, tintColor: colors.clickable }} 
-                            source={{ uri: 'attach' }} 
+                            source={{ uri: (this.state.loadedImage) ? this.state.imgSource.uri : 'attach' }} 
                         />
                     </TouchableOpacity>
                     <TouchableOpacity 

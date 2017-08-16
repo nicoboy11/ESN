@@ -133,14 +133,14 @@ class TaskForm extends Component {
     onPressLeft() {
         switch (this.state.leftButton) {
             case 'cancel':
-                this.setState({ rightButton: 'search,more', leftButton: 'back', title: this.props.currentProject.text, listStyle: {} });
+                this.setState({ rightButton: 'search,more', leftButton: 'back', title: this.props.currentProject.text, listStyle: {}, newTaskText: '' });
                 this.listWrapper.disabled = false;
                 this.unSelect();
                 Keyboard.dismiss();
                 return;
             case 'back':
                 const currentProject = JSON.parse(JSON.stringify(this.state.currentProject));
-                currentProject.activeTasks = this.state.tasks.filter((task) => { return task.stateId === 1 }).length;            
+                currentProject.activeTasks = this.state.tasks.filter((task) => { return task.stateId === 1; }).length;            
                 Actions.pop({ refresh: { updated: currentProject } });
                 return;
             default:

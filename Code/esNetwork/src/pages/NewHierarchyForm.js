@@ -12,7 +12,7 @@ class NewHierarchyForm extends Component {
     componentWillMount() {
         session = Database.realm('Session', { }, 'select', '');
         meData = Database.realm('Person', {}, 'select', `personId=${session[0].personId}`);        
-        const data = Database.realm('Person', {}, 'select', `personId!=${session[0].personId}`);
+        const data = Database.realm('Person', {}, 'select', `higherPersonId=0 AND personId!=${session[0].personId}`);
         const people = Database.realmToObject(data, 'Person');
         this.setState({
             people
@@ -63,7 +63,7 @@ class NewHierarchyForm extends Component {
                 `${texts.mark} ${item.person} ${texts.as}`,
                 '',
                 [
-                    { text: texts.myManager, onPress: () => this.addManager(item.personId) },
+                    //{ text: texts.myManager, onPress: () => this.addManager(item.personId) },
                     { text: texts.mySubordinate, onPress: () => this.addSubordinate(item.personId) },
                     { text: texts.cancel, onPress: () => console.log('cancel'), style: 'cancel' }                    
                 ]

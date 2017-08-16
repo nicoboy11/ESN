@@ -184,7 +184,7 @@ class RegisterForm extends Component {
                             autoCapitalize='sentences'
                             onSubmitEditing={() => this.inptSecLastName.focus()}  
                         />
-                        <Input 
+                        {/* <Input 
                             ref={(ref) => { this.inptSecLastName = ref; }}
                             label={texts.secondLastName} 
                             type='text' 
@@ -193,7 +193,7 @@ class RegisterForm extends Component {
                             value={this.state.secondLastName}
                             autoCapitalize='sentences'
                             onSubmitEditing={() => this.onPressRight()}  
-                        />
+                        /> */}
                         <KeyboardSpacer /> 
                     </ScrollView>
                 );
@@ -302,7 +302,6 @@ class RegisterForm extends Component {
                 onPressLeft={this.onPressLeft.bind(this)}
                 onPressRight={this.onPressRight.bind(this)}
                 background={colors.main}
-                titleStyle={{ color: colors.elementBackground }}
                 rightColor={colors.elementBackground}
                 leftColor={colors.elementBackground}
             >

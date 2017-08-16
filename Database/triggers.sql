@@ -63,6 +63,10 @@ CREATE TRIGGER `tgEditTask` AFTER UPDATE ON `task`
 		VALUES(NEW.id, NEW.creatorId, CONCAT(getFullName(NEW.id),' change task to ',_state), 2, NULL, NULL, NOW() );      
     END IF;      
 
+	UPDATE taskMember
+    SET lastSeen = NOW()
+    WHERE taskId = NEW.id AND personId = NEW.creatorId;   
+
 END$$
 
 

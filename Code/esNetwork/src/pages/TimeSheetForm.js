@@ -7,12 +7,24 @@ const { texts } = Config;
 let session = {};
 
 class TimeSheetForm extends Component {
-    state = { pageLoading: false, loading: 0, message: '' }
+    state = { pageLoading: false, loading: 0, message: '', location: {} }
 
     componentWillMount() {
         BackHandler.addEventListener('hardwareBackPress', this.onPressBack.bind(this));        
         session = Database.realm('Session', { }, 'select', '');
         this.setState({ pageLoading: true });
+
+        navigator.geolocation.getCurrentPosition(
+            (position) => {
+                const latitude = position.coords.latitude.toString();
+                const longitude = position.coords.longitude.toString();
+                this.setState({ location: { latitude, longitude } });          
+            },
+            (error) => {
+                Alert.alert('Error', `Could not obtain location: ${error.message}`);
+            }
+        );        
+
         Database.request2('GET', `locationCheck/${session[0].personId}`, {}, 2, (err, response) => {
             if (err) {
                 Alert.alert('Error', response.message);
@@ -33,6 +45,7 @@ class TimeSheetForm extends Component {
 
     onCheckPress() {
         this.setState({ loading: 1 });
+
         const data = {
             personId: session[0].personId,
             checkDate: Helper.getDateISOfromDate(new Date()),
@@ -88,7 +101,9 @@ class TimeSheetForm extends Component {
             >
                 <ScrollView>
                     <Button 
-                        title={texts.addCheck} 
+                        title={
+                            `${texts.addCheck} @${this.state.location.latitude}, ${this.state.location.longitude}`
+                        } 
                         animating={this.state.loading}
                         message={this.state.message}
                         onPress={this.onCheckPress.bind(this)} 
