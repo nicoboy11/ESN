@@ -5,7 +5,7 @@ class Config {}
 Config.regex = {
     email: /^[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$/i,
     textOnly: /[^a-zA-Z0-9áéíóúÁÉÍÓÚüÜñÑ\s]/g,
-    extendedText: /[^a-zA-Z0-9áéíóúÁÉÍÓÚüÜñÑ(){}'`\s]/g
+    extendedText: /[^a-zA-Z0-9áéíóúÁÉÍÓÚüÜñÑ(){}'`.\s]/g
 };
 
 Config.font = {

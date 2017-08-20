@@ -9,9 +9,9 @@ class Label extends Component {
         return (
         <Text 
             style={[
-                        this.props.style, 
-                        { fontFamily: (this.props.light) ? font.light : font.normal }
-                    ]}
+                this.props.style, 
+                { fontFamily: (this.props.light) ? font.light : font.normal }
+            ]}
         >
             {this.props.children}
         </Text>);
@@ -19,3 +19,4 @@ class Label extends Component {
 }
 
 export { Label };
+

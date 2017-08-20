@@ -146,9 +146,16 @@ var apiRoutes = express.Router();
                 if(data.handle(error,res,true)){
                     //Get token and send back to client
                     var token = jwt.sign(
-                                    {"email":req.body.email, "password":req.body.password, "personId": result[0][0]["personId"]}, 
-                                    config.auth.secret/*,
-                                    {expiresIn: 36000}*/
+                                    /*payload*/
+                                    {   
+                                        "email":req.body.email, 
+                                        "password":req.body.password, 
+                                        "personId": result[0][0]["personId"]
+                                    }, 
+                                    /*private key/secret*/
+                                    config.auth.secret
+                                    /*expiration*/
+                                    /*,{expiresIn: 36000}*/
                     );
 
                     result[0][0]["token"] = token;

@@ -1899,11 +1899,11 @@ BEGIN
             getAvatar(tmsg.personId) as avatar,
             getFullName(tmsg.personId) as person,
             getPersonAbbr(tmsg.personId) as abbr,
-            message,
-            messageTypeId,
-            attachment,
-			attachmentTypeId,
-            formatDate(messageDate) messageDate,
+            tmsg.message,
+            tmsg.messageTypeId,
+            tmsg.attachment,
+			tmsg.attachmentTypeId,
+            formatDate(tmsg.messageDate) messageDate,
             p.theme,
             getJsonMembers(t.id, NULL) as members
     FROM task as t
