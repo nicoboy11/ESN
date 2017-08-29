@@ -9,10 +9,16 @@ function avatar(_avatar, _name, _color, _size){
         huge: 120
     };
 
-    return '<DIV class="avtContainerStyle"> ' +
-                '<DIV class="avtStyle" style="background-color: ' + _color + '; width: ' + sizes[_size] + 'px; height:' + sizes[_size] + 'px; border-radius:' + sizes[_size] / 2 + 'px ">' +
-                '    <DIV class="abbrStyle">' + _avatar + '</DIV>' +
-                '</DIV>' +
+    var _avtDiv =   '<DIV class="avtStyle" style="background-color: ' + _color + '; width: ' + sizes[_size] + 'px; height:' + sizes[_size] + 'px; border-radius:' + sizes[_size] / 2 + 'px ">' +
+                        '<DIV class="abbrStyle">' + _avatar + '</DIV>' +
+                    '</DIV>';
+
+    if (_avatar.length > 3) {
+        _avtDiv = '<IMG style="background-color: ' + _color + '; width: ' + sizes[_size] + 'px; height:' + sizes[_size] + 'px; border-radius:' + sizes[_size] / 2 + 'px " class="avtStyle" src="../thumbs/small/' + _avatar + '" />';
+    }
+    
+    return  '<DIV class="avtContainerStyle"> ' +
+                _avtDiv +
                 '<DIV class="nameStyle textStyle" style="font-size: ' + ((sizes[_size] / 2) - 2) + '">' + _name + '</DIV>' +
             '</DIV>';
 
@@ -55,4 +61,20 @@ function task(_title, _subtitle, _avatar) {
 function personStat(_avatar, _totalTasks, _completedTasks) {
     return  '<DIV>' +
             '</DIV>'
+}
+
+function progressBar(_active, _completed, _total) {
+    var percentage = Math.round((_completed / _total) * 100);
+    var color = '#1abc9c';
+    if(percentage < 50) {
+        color = '#FF6D00';
+    } 
+    
+    if (percentage < 25) {
+        color = '#e74c3c';
+    }
+
+
+
+    return '<DIV style="width:' + percentage + '%; border-radius:3px;background-color: ' + color + '; text-align: left; font-size: 35px;padding-left: 5; color: #333">' + percentage + '%</DIV>';
 }
