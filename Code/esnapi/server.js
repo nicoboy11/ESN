@@ -12,7 +12,8 @@ var express = require('express'),
 app.use(bodyParser({limit: '50mb'}));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded());
-app.use(express.static('uploads'))
+app.use(express.static('uploads'));
+app.use(express.static('web'));
 
 var WebSocket = require('ws');
 var wss = new WebSocket.Server({ port: 9998, path:'/task' });
@@ -79,6 +80,13 @@ var apiRoutes = express.Router();
  */
     apiRoutes.use(function(req,res,next){
 
+        if(req.url == "/web") {
+            res.sendFile("index.html", {
+                root: __dirname + "/web"
+            });
+            return;
+        }
+
         var bearerHeader = req.headers["authorization"];
         if(bearerHeader !== undefined){
             var bearer = bearerHeader.split(" ");
@@ -104,7 +112,6 @@ var apiRoutes = express.Router();
 /** =================== PERSON ==================================
  * 
  */
-
     /** Register User
      * 
      */

@@ -4,13 +4,29 @@ $(document).ready(function(){
 
     function load(){
 
-        var tasks = '';
 
-        for(var i = 0; i < 10; i++){
-            tasks += '<li>' + task('new task', 'project', {avatar: 'ES', name:'Even Sosa', theme: '#4F5A23', size: 'medium'}) + '</li>';
-        }
 
-        $("#leftDiv").html('<ul>' + tasks + '</ul>');
+            $.ajax({    type:"GET",
+                        url:"localhost:3001/personTasks/1/1",
+                        beforeSend:function(){  },
+                        complete:function(){},
+                        data:{},
+                        dataType:"json",
+                        success:function(data)
+            {  
+                
+                var tasks = '';
+
+                for(var i = 0; i < data.length; i++){
+                    tasks += '<li>' + task('new task', 'project', {avatar: 'ES', name:'Even Sosa', theme: '#4F5A23', size: 'medium'}) + '</li>';
+                }
+
+                $("#leftDiv").html('<ul>' + tasks + '</ul>');                
+                
+            },error:function(jqXHR, textStatus, errorThrown){
+                console.log("Error, status = " + textStatus + ", " +
+                "error thrown: " + errorThrown);
+            }});
     }
 
 });

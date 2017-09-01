@@ -405,6 +405,19 @@ CREATE VIEW vwTaskNotifications AS
     WHERE tk.stateId in (1);$$
 
 
+DELIMITER $$
+DROP VIEW IF EXISTS vwPersonTaskProgress$$
+CREATE VIEW vwPersonTaskProgress AS
+
+	select 	tm.personId,
+			SUM(CASE WHEN t.stateId = 1 THEN 1 ELSE 0 END) ActiveTasks,
+			SUM(CASE WHEN t.stateId = 5 THEN 1 ELSE 0 END) Completed,
+			SUM(CASE WHEN t.stateId in (1,5) THEN 1 ELSE 0 END) TotalTasks
+	from task as t
+	INNER JOIN taskMember as tm on tm.taskId = t.id
+	INNER JOIN roleType as rt on rt.id = tm.roleId
+	GROUP BY tm.personId
+
 
 
 
