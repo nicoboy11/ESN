@@ -149,7 +149,7 @@ CALL CreateProject('New Credit App', 'NCA', '2017-01-01', 1, '2017-02-01', 'hrs.
 CALL CreateProject('Scholarship programm website', 'SPW', '2017-01-01', 1, '2017-02-01', 'ssp.png');
 CALL CreateProject('Finance System V2.0', 'FS2', '2017-01-01', 1, '2017-02-01', 'hrs.png');
 
-CALL EditProject(1,'Secretaría de Seguridad Pública', 'SSP', '2017-02-01', '2017-03-30', 'ssp.png');
+CALL EditProject(1,'Secretaría de Seguridad Pública', 'SSP', '2017-02-01', '2017-03-30', 'ssp.png', NULL);
 
 CALL CreateProjectTeam(1,1,'2016-01-01','2016-05-05');
 CALL CreateProjectTeam(1,2,'2016-05-05','2016-08-01');
@@ -194,8 +194,8 @@ CALL CreateTask('Create new method', 'create new method', '2016-12-21', '2017-06
 CALL CreateTask('Create new method 2', 'create new method 2' , '2016-12-21', '2017-06-21', 1, 1, NULL,5);
 
 
-CALL EditTask(1, 'Prepare Enterprise Social Network', 'Write requirements, design database and application', NULL, NULL, NULL, NULL, NULL, NULL,NULL);
-CALL EditTask(1, 'Prepare ESN App', 'Write requirements, design database and applicatio', '2017-01-01', '2017-09-15', 2, 1, NULL, NULL,NULL);
+CALL EditTask(1, 'Prepare Enterprise Social Network', 'Write requirements, design database and application', NULL, NULL, NULL, NULL, NULL, NULL,NULL,1);
+CALL EditTask(1, 'Prepare ESN App', 'Write requirements, design database and applicatio', '2017-01-01', '2017-09-15', 2, 1, NULL, NULL,NULL,1);
 /*
 DELETE FROM taskMessage WHERE taskId < 99;
 DELETE FROM taskMember WHERE taskId < 99;
@@ -255,5 +255,6 @@ UPDATE person SET theme = '#00BFA5' WHERE id = 23;
 UPDATE person SET theme = '#00C853' WHERE id = 24;
 UPDATE person SET theme = '#304FFE' WHERE id = 25;
 UPDATE person SET theme = '#FF6D00' WHERE id = 26;
+
 
 
