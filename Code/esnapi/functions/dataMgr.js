@@ -3,23 +3,30 @@ var config = require('../config.json');
 
 var self = module.exports = {
         
-    db: function(sql,conn,callback){
-        try{
-            conn.connect(function(err){
+    /** db - MySql query execution
+     * 
+     * @param {Query to be executed}    sql
+     * @param {MySql connection}        conn
+     * @param {Callback function}       callback
+     * 
+     */
+        db: function(sql,conn,callback){
+            try{
+                conn.connect(function(err){
 
-                if(err) console.log(err.message);
+                    if(err) console.log(err.message);
 
-                console.log("Executing: " + sql);
-                console.log("conected!");
+                    console.log("Executing: " + sql);
+                    console.log("conected!");
 
-                conn.query(sql,callback);
+                    conn.query(sql,callback);
 
-            });
-        }
-        catch(err){
-            console.log("sqlErr" + err.message);
-        }
-    },
+                });
+            }
+            catch(err){
+                console.log("sqlErr" + err.message);
+            }
+        },
 
     /** handle - Error Handling 
      * 
@@ -44,21 +51,21 @@ var self = module.exports = {
 
             return true;
         },
-    /** responseMsg -
+    /** responseMsg - convert message text to JSON style
      * 
      */
         responseMsg: function(mensaje){
             return JSON.stringify({"message":mensaje});
         },
 
-    /** handleResponse -
+    /** handleResponse - Create a JSON formatted (string) response
      * 
      */
         handleResponse: function(result,res,errorMessage){
-
+            
             if(errorMessage == undefined) errorMessage = "";
 
-            if(result != undefined && result[0] != undefined ){
+            if(result != undefined && result[0] != undefined ){//If the request has an object or message as a response
                 if(result[0].length == 0){
                     if(errorMessage == ""){
                         res.status(200).end( "[]" );
@@ -71,7 +78,7 @@ var self = module.exports = {
                     res.status(200).end( JSON.stringify(result[0]) );
                 }
             }
-            else{
+            else{//If the response is correct but has no specific object to return (e.g. successful insert, update, delete)
                 res.status(200).end( self.responseMsg("Ok") );
             }
         },
@@ -115,33 +122,33 @@ var self = module.exports = {
             form.on('field', function(name, value){
                 params[name] = value;
             }) 
-            .on('fileBegin',function(name, file){
+            .on('fileBegin',function(name, file){   //When file starts being read
                 fileName = config.prefixes[type]
                 fileName = fileName + (isNaN(field)?params[field]:field) + '_' + uniq + '.' + file.type.split('/')[1];
                 file.path = './uploads/' + fileName;
                 params['fileName'] = fileName;
                 console.log('file created!');
             })
-            .on('progress',function(bytesReceived, bytesExpected){
+            .on('progress',function(bytesReceived, bytesExpected){  //The progress of upload
                 console.log('progress: ' + bytesReceived + ' : ' + bytesExpected);
             })        
-            .on('end',function(){
+            .on('end',function(){   //When the file finished uploading
                 if(fileName === ''){
                     fileName = undefined;
                     callback(fileName, params);
                 } else {//If file exists - create a thumb copy
                     if(type=='avatar') {
                         console.log('started small thumb');
-                        self.resize(fileName, 'small', function(success) {
+                        self.resize(fileName, 'small', function(success) { //Create small version of the file
                             console.log('finished small thumb');
                         });
                         console.log('started big thumb');
-                        self.resize(fileName, 'big', function(success){
+                        self.resize(fileName, 'big', function(success){ //Create big version of the file (but smaller than original)
                             console.log('finished big thumb');
                             callback(fileName, params);
                         });
                     } else {
-                        self.dequalify(fileName,function(success) {
+                        self.dequalify(fileName,function(success) { //Create low quality version of the file
                             callback(fileName, params);
                         });
                     }
@@ -155,6 +162,13 @@ var self = module.exports = {
             })
         },
 
+    /** resize - Create different sizes for an image
+     * 
+     * @param {The name of the file to process}     filename
+     * @param {The desired size}                    size
+     * @param {Callback function}                   callback
+     * 
+     */
         resize: function (fileName, size, callback) {
             require('lwip').open('./uploads/' + fileName, function(err, image) {
                 if(err) {
@@ -187,6 +201,9 @@ var self = module.exports = {
             });           
         },
 
+    /** dequalify - Reduce quality of a file by blurring it
+     * 
+     */
        dequalify: function (fileName, callback) {
            console.log('opening: ' + fileName);
             require('lwip').open('./uploads/' + fileName, function(err, image) {

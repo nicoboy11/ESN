@@ -12,16 +12,20 @@ var express = require('express'),
 app.use(bodyParser({limit: '50mb'}));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded());
-app.use(express.static('uploads'));
-app.use(express.static('web'));
 
-var WebSocket = require('ws');
-var wss = new WebSocket.Server({ port: 9998, path:'/task' });
-var clients = [];
-
-/** WEB SOCKETS
- * tNull = typing is over
+/** Allow access to retrieve resources
+ * 
  */
+    app.use(express.static('uploads'));
+    app.use(express.static('web'));
+
+/** Web Sockets
+ * 
+ */
+    var WebSocket = require('ws');
+    var wss = new WebSocket.Server({ port: 9998, path:'/task' });
+    var clients = [];
+
     wss.on('connection', function connection(ws){
         console.log('connected ws');
         ws.on('message', function incoming(message){
@@ -64,29 +68,34 @@ var clients = [];
             }
         })
     });
-
-var conn = mysql.createConnection({
-    host: config.db.host,
-    port: config.db.port,
-    database: config.db.database,
-    user: config.db.user,
-    password: config.db.password
-});
-
-var apiRoutes = express.Router();
+/** MySql connection
+ * 
+ */
+    var conn = mysql.createConnection({
+        host: config.db.host,
+        port: config.db.port,
+        database: config.db.database,
+        user: config.db.user,
+        password: config.db.password
+    });
+/** apiRoutes - Routes that do not need authentication (e.g. Log in / Sign up requests)
+ * 
+ */
+    var apiRoutes = express.Router();
 
 /** VERIFY TOKEN
  * 
  */
     apiRoutes.use(function(req,res,next){
 
-        if(req.url == "/web") {
+        if(req.url == "/web") {//If the route is web (website) redirect to main file
             res.sendFile("index.html", {
                 root: __dirname + "/web"
             });
             return;
         }
 
+        //Retrieve token and verify
         var bearerHeader = req.headers["authorization"];
         if(bearerHeader !== undefined){
             var bearer = bearerHeader.split(" ");
@@ -127,6 +136,7 @@ var apiRoutes = express.Router();
                     res.status(200).end( JSON.stringify(result[0]) );
 
                     console.log(config.server.url + 'thumbs/big/' + resultObj.avatar);
+                    //Send notification to me to know when a tester signed up
                     var message = { 
                         app_id: "9b857769-1cfb-4dbf-9e00-8c7c22c1f24e",
                         contents: {"en": resultObj.names + " joined the network "},
@@ -151,7 +161,7 @@ var apiRoutes = express.Router();
             data.db("CALL GetLogin(" + helper.fpVarchar(req.body.email) + "," + helper.fpVarchar(req.body.password) + ")",conn,function(error,result){
                 //Check response from Database
                 if(data.handle(error,res,true)){
-                    //Get token and send back to client
+                    //Generate token and send back to client
                     var token = jwt.sign(
                                     /*payload*/
                                     {   
@@ -183,7 +193,7 @@ var apiRoutes = express.Router();
         });
 
     /** GET - NETWORK BY ID
-     *      Get all the people in your network meaning all your employees
+     *      Get all the people in my network meaning all your employees
      */
         apiRoutes.get('/network/:id',function(req,res){
             data.db("CALL GetNetwork(" + req.params.id + ");",conn,function(error,result){
@@ -194,7 +204,7 @@ var apiRoutes = express.Router();
         });
 
     /** GET - PEOPLE
-     *      Get all the people in your company
+     *      Get all the people in the company
      */
         apiRoutes.get('/network',function(req,res){
             data.db("CALL GetPeople();",conn,function(error,result){
@@ -205,7 +215,7 @@ var apiRoutes = express.Router();
         });        
 
     /** PUT - PERSON BY ID
-     *      Edit any person data ID in parameter and the rest in BODY
+     *      Edit any person by ID in parameter and the rest in BODY
      */
         apiRoutes.put('/person/:id',function(req,res){
             data.reqUpload(req,'avatar', helper.fpInt(req.params.id), function(fileName,params){
@@ -237,7 +247,7 @@ var apiRoutes = express.Router();
             });       
         });
     /** GET - FREE HIERARCHY BY ID
-     *      Get immediate employees
+     *      Get people without managers
      */
         apiRoutes.get('/freeHierarchy',function(req,res){
             data.db("CALL GetFreeHierarchy();",conn,function(error,result){
@@ -352,7 +362,7 @@ var apiRoutes = express.Router();
  * 
  */
     /** GET - PROJECTS BY ID
-     *      All projects relevant to a person
+     *      Retrieve all projects relevant to a person
      */
         apiRoutes.get('/personProjects/:personId',function(req,res){
             data.db("CALL GetPersonProjects(" + req.params.personId + ");",conn,function(error,result){
@@ -363,7 +373,7 @@ var apiRoutes = express.Router();
         });
 
     /** POST - PROJECT
-     * 
+     *      Create a new project
      */
         apiRoutes.post('/project',function(req,res){
             data.reqUpload(req,'projatt','id', function(fileName, params){
@@ -382,7 +392,7 @@ var apiRoutes = express.Router();
         });     
 
     /** PUT - PROJECT
-     * 
+     *      Edit project
      */    
         apiRoutes.put('/project/:projectId',function(req,res){    
             data.reqUpload(req,'projatt', helper.fpInt(req.params.projectId), function(fileName,params){
@@ -396,7 +406,7 @@ var apiRoutes = express.Router();
             });
         });    
     /** POST PROJECT MEMBER
-     * 
+     *      Add a new member to a project
      */        
         apiRoutes.post('/projectMember',function(req,res){
             data.reqUpload(req,'postatt','personId', function(fileName, params){
@@ -415,7 +425,7 @@ var apiRoutes = express.Router();
         });    
 
     /** PUT PROJECT MEMBER
-     * 
+     *      Edit project members
      */        
         apiRoutes.put('/projectMember',function(req,res){
             data.reqUpload(req,'postatt','personId', function(fileName, params){
@@ -435,7 +445,7 @@ var apiRoutes = express.Router();
         });       
 
     /** DELETE PROJECT MEMBER
-     * 
+     *      Remove project members
      */         
         apiRoutes.delete('/projectMember',function(req,res){
             data.db("CALL DeleteProjectMember(" + helper.fpInt(req.body.projectId) + "," + helper.fpInt(req.body.personId) + ");",
@@ -450,7 +460,7 @@ var apiRoutes = express.Router();
                 });
         });    
 /** =================== MISC ====================================
- * 
+ *      Misc tables calls
  */
     /** GET - StateType
      * 
@@ -584,7 +594,7 @@ var apiRoutes = express.Router();
         });
 
     /** GET - TASK MESSAGES
-     * 
+     *      Retrieve task messages by taskId (which task) and person id (what scope)
      */
         apiRoutes.get('/taskMessages/:taskId/:personId',function(req,res){
 
@@ -597,7 +607,7 @@ var apiRoutes = express.Router();
         });
 
     /** POST - TASK MESSAGES
-     * 
+     *      Create a new message in task
      */
         apiRoutes.post('/taskMessages',function(req,res){
             data.reqUpload(req,'postatt','personId', function(fileName, params){
@@ -650,7 +660,7 @@ var apiRoutes = express.Router();
         });
 
     /** GET - CHECKLIST ITEMS
-     * 
+     *      Obtain checklist items
      */
         apiRoutes.get('/checkListItem/:id',function(req,res){
 
@@ -700,7 +710,7 @@ var apiRoutes = express.Router();
         });        
 
     /** PUT - TASK LEADER
-     * 
+     *      Edit leader of the task
      */
         apiRoutes.put('/task/:taskId/leader/:leaderId',function(req,res){
             console.log(req.decoded.personId);
@@ -716,7 +726,7 @@ var apiRoutes = express.Router();
             });
         });
     /** POST - TASK MEMBER
-     * 
+     *      Create a new task member
      */
         apiRoutes.post('/taskMember',function(req,res){
             data.reqUpload(req,'postatt','personId', function(fileName, params){
@@ -735,7 +745,7 @@ var apiRoutes = express.Router();
         });
 
     /** DELETE - TASK MEMBER
-     * 
+     *      Remove a member
      */
         apiRoutes.delete('/taskMember',function(req,res){
             data.db("CALL DeleteTaskMember(" + helper.fpInt(req.body.taskId) + "," + helper.fpInt(req.body.personId) + "," + helper.fpInt(req.decoded.personId) + ");",
@@ -750,7 +760,7 @@ var apiRoutes = express.Router();
             });
         });
     /** PUT - TASK MEMBER
-     * 
+     *      Edit a task member
      */    
         apiRoutes.put('/taskMember',function(req,res){
             data.reqUpload(req,'postatt','personId', function(fileName, params){
@@ -781,11 +791,26 @@ var apiRoutes = express.Router();
                 }
             }); 
         });
+    /** POST - POST
+     *      Create a new post
+     */    
+        apiRoutes.post('/post/:id/message',function(req,res){
+            /*CALL CreatePostMessage(1,2,'cheers!',1,NULL,NULL);*/
+            res.send('Creates new message for post: ' + req.params.id);
+        });
+
+    /** DELETE - POST
+     *      Remove a post from feed
+     */
+        apiRoutes.delete('/post/:id/message/:id',function(req,res){
+            /*CALL DeletePostMessage(2)*/
+            res.send('Delete ' + req.params.id);
+        });        
 /** =================== Check in/out ====================================
  * 
  */
     /** POST - LocationCheck
-     * 
+     *      Create a timesheet item
      */
         apiRoutes.post('/locationCheck',function(req,res){
             data.reqUpload(req,'','', function(fileName, params){
@@ -804,7 +829,7 @@ var apiRoutes = express.Router();
         });   
 
     /** GET - LocationCheck
-     * 
+     *      Retrieve location checks
      */
         apiRoutes.get('/locationCheck/:personId',function(req,res){
             data.db("CALL GetLocationCheck(" + req.params.personId + ");",conn,function(error,result){
@@ -816,76 +841,10 @@ var apiRoutes = express.Router();
 
 
 
-/*
-
-    apiRoutes.put('/task',function(req,res){
-        data.db("CALL EditTask(" +   helper.fpInt(req.body.taskId) + "," + helper.fpInt(req.body.name) + "," + helper.fpInt(req.body.description) + "," + 
-                                helper.fpInt(req.body.startDate) + "," + helper.fpInt(req.body.dueDate) + "," + helper.fpInt(req.body.creationDate) + "," + 
-                                helper.fpInt(req.body.creatorId) + "," + helper.fpInt(req.body.projectId) + "," + helper.fpInt(req.body.stateId) + "," + 
-                                helper.fpInt(req.body.calendarId) + ")",conn,function(error,result){
-            if(data.handle(error,res,true)){
-                data.handleResponse(result,res);
-            }
-        });     
-    });
-    */
-    /*
-        apiRoutes.put('/team',function(req,res){
-            data.db("CALL EditTeam(" +   helper.fpInt(req.body.teamId) + "," + helper.fpInt(req.body.name) + "," + helper.fpInt(req.body.abbr) + "," + 
-                                    helper.fpInt(req.body.teamGoal) + "," + helper.fpInt(req.body.parentTeamId) + "," + helper.fpInt(req.body.email) + "," + 
-                                    helper.fpInt(req.body.address) + "," + helper.fpInt(req.body.postcode) + "," + helper.fpInt(req.body.cityId) + "," + 
-                                    helper.fpInt(req.body.phone1) + "," + helper.fpInt(req.body.ext1) + "," + helper.fpInt(req.body.phone2) + "," + 
-                                    helper.fpInt(req.body.ext2) + "," + helper.fpInt(req.body.latitude) + "," + helper.fpInt(req.body.longitude) + "," + 
-                                    helper.fpInt(req.body.logo) + "," + helper.fpInt(req.body.personId) + "," + helper.fpInt(req.body.stateTypeId) + ")",conn,function(error,result){
-                if(data.handle(error,res,true)){
-                    data.handleResponse(result,res);
-                }
-            });     
-        });
-    */
-    /**
-     * 
-     * 
-     * 
-     * 
-     * 
-     * 
-     * 
-     * 
-     * 
-     * 
-     * 
-     * 
-     * 
-     * 
-     */
-
-
-
-
-
-
-
-
-
-
-
-apiRoutes.post('/post/:id/message',function(req,res){
-    /*CALL CreatePostMessage(1,2,'cheers!',1,NULL,NULL);*/
-    res.send('Creates new message for post: ' + req.params.id);
-});
-
-apiRoutes.delete('/post/:id/message/:id',function(req,res){
-    /*CALL DeletePostMessage(2)*/
-    res.send('Delete ' + req.params.id);
-});
-
 /**
  * Faltan aqui los creates post Users
  * 
  * 
  */
-
-
 
 app.use('/',apiRoutes);
