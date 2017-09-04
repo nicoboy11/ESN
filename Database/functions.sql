@@ -419,7 +419,3 @@ CREATE VIEW vwPersonTaskProgress AS
 	GROUP BY tm.personId
 
 
-
-
-
-

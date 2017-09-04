@@ -7,7 +7,7 @@ $(document).ready(function(){
 
 
             $.ajax({    type:"GET",
-                        url:"localhost:3001/personTasks/1/1",
+                        url:"http://http://ec2-34-211-203-109.us-west-2.compute.amazonaws.com:3001/personTasks/1/1",
                         beforeSend:function(){  },
                         complete:function(){},
                         data:{},

@@ -65,6 +65,9 @@ function personStat(_avatar, _totalTasks, _completedTasks) {
 
 function progressBar(_active, _completed, _total) {
     var percentage = Math.round((_completed / _total) * 100);
+    if(_total === 0) {
+        percentage = 0;
+    }
     var color = '#1abc9c';
     if(percentage < 50) {
         color = '#FF6D00';

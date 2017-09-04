@@ -808,9 +808,13 @@ BEGIN
 			p.abbr,
             getLevelKey(p.id) as levelKey,
             ifnull(p.theme,'') as theme,
-            isParent(p.id) as isParent
+            isParent(p.id) as isParent,
+            ifnull(ActiveTasks,0) as ActiveTasks,
+            ifnull(Completed,0) as Completed,
+            ifnull(TotalTasks,0) as TotalTasks
     FROM person as p
     INNER JOIN gender as g on g.id = p.genderId
+    LEFT JOIN vwPersonTaskProgress as vp on vp.personId = p.id
 	WHERE getLevelKey(p.id) like concat('%',getLevelKey(_personId),'%') 
     ORDER BY levelKey,person;  
 
